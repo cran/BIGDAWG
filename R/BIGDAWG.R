@@ -1,0 +1,464 @@
+#' BIGDAWG wrapper function
+#'
+#' This is the main wrapper function for each analysis.
+#' @param Data Name of the genotype data file.
+#' @param HLA Logical indicating whether data is HLA class I/II genotyping data only.
+#' @param Run.Tests Specifics which tests to run.
+#' @param Loci.Set Input list defining which loci to use for analyses (combinations permitted). 
+#' @param All.Pairwise Logical indicating whether all pairwise.
+#' @param Trim Logical indicating if HLA alleles should be trimmed to a set resolution.
+#' @param Res Numeric setting what desired resolution to trim HLA alleles.
+#' @param EVS.rm Logical indicating if expression variant suffixes should be removed.
+#' @param Missing Numeric setting allowable missing data for running analysis (may use "ignore").
+#' @param Cores.Lim Interger setting the number of cores accessible to BIGDAWG (Windows, Cores = 1L).
+#' @param Results.Dir Optional, full directory name for BIGDAWG output.
+#' @param Output Logical indicating if data should be written to output directory (mainly used for testing).
+#' @examples
+#' ### The following examples use the synthetic data set bundled with BIGDAWG
+#' 
+#' # Haplotype analysis with no missing genotypes for two loci
+#' # Significant haplotypic association with phenotype 
+#' BIGDAWG(Data="HLA_data", Run.Tests="H", Missing=0, Loci.Set=list(c("DRB1","DQB1")))
+#' 
+#' # Hardy-Weinberg and Locus analysis ignoring missing data
+#' # Signifant associations with phenotype at all but DQB1
+#' BIGDAWG(Data="HLA_data", Run.Tests=c("HWE","L"), Missing="ignore")
+#' 
+#' # Hardy-Weinberg analysis trimming data to 2-Field resolution for one locus
+#' # Signficant deviation at DQB1
+#' BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2)
+BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Trim=FALSE, Res=2, EVS.rm=FALSE, Missing=0, Cores.Lim=1L, Results.Dir, Output=TRUE) {
+  
+  options(warn=-1)
+  
+  MainDir <- getwd()
+  on.exit(setwd(MainDir), add = TRUE)
+  
+  if(Sys.info()['sysname']=="Windows") {Cores=1L} else {Cores=parallel::detectCores()}
+  
+  #Check for updated ExonPtnList ... UpdatePtnList. Use if found.
+  UpdatePtnList <- NULL; rm(UpdatePtnList)
+  UPL <- paste(path.package('BIGDAWG'),"/data/UpdatePtnAlign.RData",sep="")
+  if( file.exists(UPL) ) { load(UPL) ; EPL <- UpdatePtnList ; rm(UpdatePtnList)
+    } else { EPL <- ExonPtnList }
+  
+  cat("\n>>>>>>>>>>>>>>>>>>>> Begin Analysis <<<<<<<<<<<<<<<<<<<<\n\n")
+  
+  ############################################################################################################################################  
+  ### Read in Data ###########################################################################################################################
+  
+  NAstrings=c("NA","","****","-","na","Na")
+  
+  if (Data=="HLA_data") {
+    Tab <- BIGDAWG::HLA_data
+    colnames(Tab) <- toupper(colnames(Tab))
+    All.ColNames <- gsub(".1","",colnames(Tab),fixed=T)
+    rownames(Tab) <- NULL
+    
+  } else {
+    # Read in data and Preprocess
+    if(!file.exists(Data)) { cat("BIGDAWG could not locate a file labeled:",Data,"in the specificied working directory.\n"); stop("Analysis stopped.",call.=F) }
+    Tab <- read.table(Data, header = T, sep="\t", stringsAsFactors = F, na.strings=NAstrings, fill=T, comment.char = "#", strip.white=T)
+    colnames(Tab) <- toupper(colnames(Tab))
+    All.ColNames <- gsub(".1","",colnames(Tab),fixed=T)
+    rownames(Tab) <- NULL
+    Tab <- rmABstrings(Tab)
+    
+  }
+  
+  #Define Output Directory
+  if (Output) {
+    if(missing(Results.Dir)) {
+      OutDir <- paste(MainDir,"/output ",format(Sys.time(), "%H%M%S %d%m%y"),sep="")
+      dir.create(OutDir)
+      setwd(OutDir)
+    } else {
+      OutDir <- Results.Dir
+      setwd(OutDir)  
+    }
+  }
+  
+
+  
+  ############################################################################################################################################    
+  ### Case-Control Pre-Check #################################################################################################################
+  
+  cat(">>>> CASE - CONTROL SUMMARY STATISTICS\n")
+  cat(paste(rep("_",50),collapse=""),"\n")
+  if (Trim) { rescall <- paste(Res,"-Field",sep="") } else { rescall <- "Not Defined" }
+  Check <- PreCheck(Tab,All.ColNames,rescall,HLA)
+  if(Output) { write.table(Check,file="PreCheck.txt",sep=": ",col.names=F,row.names=T,quote=F); rm(Check,rescall) }
+  
+  ############################################################################################################################################
+  ### Data Processing and Sanity Checks ######################################################################################################
+  
+  ## __________________ General processing and checks for any data
+  # Sanity check for Missing Data
+  if(Missing == "ignore") {
+    cat("Ignoring any missing data.\n")
+    cat("Consider setting a missing threshold or running without the haplotype ('H') analysis.\n")
+  } else if (Missing <= 2) {
+    geno.desc <- haplo.stats::summaryGeno(Tab[,3:ncol(Tab)], miss.val=NAstrings)
+    if(length(which(geno.desc[,3]>Missing))>0) { cat("Removing any missing data (will affect Hardy-Weingberg calculation).\n"); Tab <- Tab[-which(geno.desc[,3]>Missing),] }
+  } else if (Missing > 2) {
+    cat("The number of allowable missing may affect performance.\nConsider running with a smaller Missing or without the haplotype ('H') analysis.\ncontinuing......")
+    geno.desc <- haplo.stats::summaryGeno(Tab[,3:ncol(Tab)], miss.val=NAstrings)
+    if(length(which(geno.desc[,3]>Missing))>0) { cat("Removing missing data (will affect Hardy-Weingberg calculation).\n"); Tab <- Tab[-which(geno.desc[,3]>Missing),] }
+  }
+  
+  # Set definitions
+  if (missing(Loci.Set)) {
+    Set <- list(c(3:ncol(Tab)))
+  } else {
+    if(CheckLoci(unique(All.ColNames[3:ncol(Tab)]),Loci.Set)$Flag) {
+      cat("Your seemed to have specified a locus in the Loci.Set that is not present in your data file.\n")
+      stop("Analysis Stopped.",call. = F)
+    } else {
+      if(sum(grepl("All",Loci.Set))>0) { Loci.Set[[which(Loci.Set=="All")]] <- unique(All.ColNames[3:ncol(Tab)])  } 
+      Set <- lapply(Loci.Set,FUN=function(x)seq(1,ncol(Tab),1)[All.ColNames %in% x]) }
+  }
+  
+  # Mutlicore limitations
+  if (Cores.Lim!=1L) { 
+    if(Sys.info()['sysname']=="Windows" & as.numeric(Cores.Lim)>1) {
+      cat("You seem to be using Windows and specified a number of Cores > 1. Please see vignette.\n")
+      stop("Analysis Stopped.",call. = F)
+    } else {
+      Cores <- as.integer(Cores.Lim) 
+    }
+  } else {
+    Cores = as.integer(Cores.Lim)
+  }
+  
+  # Run Tests definitions
+  if (missing(Run.Tests)) { Run <- c("HWE","H","L","A") } else { Run <- Run.Tests }
+  
+  ## __________________ HLA specific checks
+  if(HLA) {
+    
+    # Sanity Check for Resoltion if Trim="T" and Trim Data
+    if(Trim & CheckHLA(Tab[,3:ncol(Tab)])) {
+      cat("Trimming Data.\n")
+      Tab.untrim <- Tab
+      Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),GetField,Res=Res)
+      rownames(Tab) <- NULL
+    } else if (Trim) {
+      cat("Your HLA data does not appear to be formatted properly for trimming. Please see vignette.\n")
+      stop("Analysis Stopped.",call. = F)
+    }
+    
+    # Sanity Check for Expresion Variant Suffix Stripping
+    if(EVS.rm & CheckHLA(Tab[,3:ncol(Tab)])) {
+      cat("Stripping Expression Variants Suffixes.\n")
+      Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),gsub,pattern="[[:alpha:]]",replacement="")
+      EVS.loci <- as.list(names(EPL))
+      EPL <- lapply(EVS.loci,EVSremoval,EPList=EPL)
+      names(EPL) <- EVS.loci ; rm(EVS.loci)
+    } else if (EVS.rm) {
+      cat("Your HLA data does not appear to be formatted properly. Please see vignette.\n")
+      stop("Analysis Stopped.",call. = F)
+    }
+    
+    # Sanity Check for Known HLA loci
+    test <- CheckLoci(names(EPL),unique(All.ColNames[3:ncol(Tab)]))
+    if( test$Flag ) {
+      cat("There may be a discrepancy with HLA loci names. Unique locus name(s) encountered.\n")
+      cat("Problem loci:",test$Loci,"\n")
+      stop("Analysis stopped.",call. = F)
+    }
+    
+    # Sanity Check for Known HLA alleles
+    test <- CheckAlleles(EPL, Tab[,3:ncol(Tab)],unique(All.ColNames[3:ncol(Tab)]),All.ColNames[3:ncol(Tab)])
+    if(sum(unlist(lapply(test,"[[",1)))>0) {
+      cat("There may be a discrepancy with allele names. Unique allele name(s) encountered.\n")
+      tmp <- as.character(unlist(lapply(test[which(lapply(test,"[[",1)==T)],"[",2)))
+      cat("Problem alleles:",tmp,"\n")
+      stop("Analysis stopped.",call. = F)
+    }
+    
+  } # End HLA if statement and HLA specific functionalities
+  
+  ############################################################################################################################################    
+  ### Hardy Weignberg Equilibrium ############################################################################################################
+  
+  if ("HWE" %in% Run) {
+    
+    cat("\n>>>> STARTING HARDY-WEINBERG ANALYSIS...\n")
+    cat("HWE performed at set resolution on controls.\n")
+    cat(paste(rep("_",50),collapse=""),"\n")
+    HWE <- HWEChiSq(Tab,All.ColNames)
+    if(Output) { write.table(HWE,file="HWE.txt",sep="\t",col.names=T,row.names=F,quote=F) }
+    
+    cat("\n> HARDY-WEINBERG ANALYSIS COMPLETED\n")
+    HWE <- as.data.frame(HWE)
+    print(HWE,row.names=F,quote=F)
+    cat("\n")
+    
+    rm(HWE)
+    
+  } #END HARDY-WEINBERG
+  
+  
+  ############################################################################################################################################
+  ## Set Loop Begin (loop through each defined set)
+  
+  if ( sum( c("H","L","A") %in% Run ) > 0 ) {
+  
+    cat(paste("Your analysis has ", length(Set), " set(s).", sep=""),"\n")
+    
+    for(k in 1:length(Set)) {
+      cat("\n")
+      cat(paste(rep(">",35),collapse=""),"Running Set",k,"\n")
+      
+      cols <- Set[[k]]
+      Tabsub <- Tab[,c(1,2,cols)]
+      
+      ############################################################################################################################################  
+      ### Per Set Global Variables ###################################################################################################################
+      
+      genos <- Tabsub[,3:ncol(Tabsub)] # genotypes
+      genos[genos==""] <- NA
+      grp <- Tabsub[, 2] # phenotype
+      nGrp0 <- length(which(grp==0))*2 #nalleles
+      nGrp1 <- length(which(grp==1))*2 #nalleles
+      loci <- unique(gsub(".1","",colnames(genos),fixed=T)) # name of loci
+      loci.ColNames <- gsub(".1","",colnames(genos),fixed=T) # column names
+      nloci <- as.numeric(length(loci)) # number of loci
+      
+      if(Output) {
+        
+        OutSetDir <- paste(OutDir,"/set",k,sep="")
+        dir.create(OutSetDir)
+        setwd(OutSetDir)
+        
+        Params <- list(Time = format(Sys.time(), "%a %b %d %X %Y"),
+                       BD.Version = packageVersion("BIGDAWG"),
+                       File = Data,
+                       HLA.Data = HLA,
+                       Tests = paste(Run,collapse=","),
+                       Set = paste("Set",k),
+                       Loci.Run = paste(loci,collapse=","),
+                       All.Pairwise = All.Pairwise,
+                       Trim = Trim,
+                       Resolution = Res,
+                       Suffix.Stripping = EVS.rm,
+                       Missing = Missing,
+                       Cores.Available = Cores)
+        
+        Params <- do.call(rbind,Params)
+        write.table(Params,file="Run Parameters.txt",sep=": ", row.names=T, col.names=F, quote=F)
+      }
+      
+      SAFE <- c(ls(),"SAFE")
+      
+      ############################################################################################################################################    
+      ### Haplotype Analysis #####################################################################################################################
+      
+      if ("H" %in% Run) {
+        
+        cat(">>>> STARTING HAPLOTYPE ANALYSIS...","\n")
+        cat(paste(rep("_",50),collapse=""),"\n")
+        
+        # Sanity check for set length and All.Pairwise=T
+        if (nloci<2) {
+          cat("You have opted to run the haplotype analysis with too few loci. Please check Set definitions.\n")
+          stop("Analysis Stopped.", call. = F)
+        } else if (All.Pairwise & nloci<=2)  {
+          cat("You have set All.Pairwise to 'True' but one or more your data sets contain too few loci. Please check Set definitions.\n")
+          stop("Analysis Stopped.", call. = F) }
+        
+        HAPsets <- list("All.Loci"=genos)
+        
+        # Define Pairwise Combinations to Run When Selected
+        if(All.Pairwise) {
+          
+          # Define Combinations
+          Combos <- t(combn(loci,2))
+          
+          cat("\nYou have opted to include all pairwise combinations for the haplotype analysis.\n")
+          cat("There are", nrow(Combos), "possible locus combinations to run.\n" )
+          
+          # Define Pairwise Sets
+          for(s in 1:nrow(Combos)) {
+            Set.H <- loci.ColNames %in% Combos[s,]
+            HAPsets[[paste(Combos[s,1],Combos[s,2],sep="_")]] <- genos[,c(Set.H)]
+          }; rm(s)
+          
+        }
+        
+        for(h in 1:length(HAPsets)) {
+          
+          # Get haplotype loci set for analysis
+          genos.sub <- HAPsets[[h]]
+          
+          # Run Analysis
+          H.list <- H(genos.sub,grp)
+          
+          if(Output) {
+            
+            # File names for output
+            name1 <- paste("haplotype_freqs.",names(HAPsets)[h],".txt",sep="")
+            name2 <- paste("haplotype_binned.",names(HAPsets)[h],".txt",sep="")
+            name3 <- paste("haplotype_OR.",names(HAPsets)[h],".txt",sep="")
+            name4 <- paste("haplotype_chisq.",names(HAPsets)[h],".txt",sep="")    
+            name5 <- paste("haplotype_table.",names(HAPsets)[h],".txt",sep="") 
+            
+            ## write to file
+            write.table(H.list[['freq']], name1, sep="\t", quote = F, row.names=F, col.names=T)
+            write.table(H.list[['binned']], name2, sep="\t", quote = F, row.names=F, col.names=T)
+            write.table(H.list[['OR']], name3, sep="\t", quote = F, row.names=F, col.names=T)
+            write.table(H.list[['chisq']], name4, sep="\t", row.names = F, quote = F)
+            write.table(H.list[['table']], name5, sep="\t", row.names = F, quote = F)
+          }
+          
+          cat("\n> HAPLOTYPE ANALYSIS COMPLETED:",names(HAPsets)[h],"\n")
+          overall.chisq <- H.list[['chisq']]
+          overall.chisq$X.square <- round(as.numeric(levels(overall.chisq$X.square)),digits=5)
+          print(overall.chisq, row.names=F)
+          cat("\n")
+          
+        }# END hapset Loop
+        
+        rm(list=ls()[!(ls() %in% SAFE)])
+        
+      } #END HAPLOTYPE
+      
+      ############################################################################################################################################  
+      ### Locus Level ############################################################################################################################
+      
+      if ("L" %in% Run) {
+        
+        cat("\n>>>> STARTING LOCUS LEVEL ANALYSIS...\n")
+        cat(paste(rep("_",50),collapse=""),"\n")
+        
+        Allele.binned <- list() # Alleles binned during chi-square test
+        Allele.freq <- list() # Alleles Frequencies
+        overall.chisq <- list() # Chi-Square Table
+        ORtable <- list() # Odds Ratio Table
+        Final_binned <- list() # Contingency Table
+        
+        for(j in 1:nloci) {
+          
+          # Get Locus
+          Locus <- loci[j]
+          
+          # Run Locus Level Analysis
+          L.list <- L(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1)
+          
+          # Build Output Lists
+          Allele.binned[[Locus]] <- L.list[['binned']]
+          Allele.freq[[Locus]] <- L.list[['freq']]
+          overall.chisq[[Locus]] <- L.list[['chisq']]
+          ORtable[[Locus]] <- L.list[['OR']]
+          Final_binned[[Locus]] <- L.list[['table']]
+          
+        }# END locus
+        
+        if(Output) {
+          ## write to file
+          write.table(do.call(rbind,Allele.freq), file = paste("Locus_freqs.txt",sep=""), sep="\t", row.names = F, col.names=T, quote = F)
+          write.table(do.call(rbind,Final_binned), file = paste("Locus_table.txt",sep=""), sep="\t", row.names = F, col.names=T, quote = F)
+          write.table(do.call(rbind,Allele.binned), file = paste("Locus_binned.txt",sep=""), sep="\t", row.names = F, col.names=T, quote = F)
+          write.table(do.call(rbind,ORtable), file = paste("Locus_OR.txt",sep=""), sep="\t", row.names = F, col.names=T, quote = F)
+          write.table(do.call(rbind,overall.chisq), file = paste("Locus_chisq.txt",sep=""), sep="\t", row.names = F, col.names=T, quote = F)  
+        }
+        
+        cat("\n> LOCUS LEVEL ANALYSIS COMPLETED","\n")
+        overall.chisq <- do.call(rbind,overall.chisq)
+        print(overall.chisq,row.names=F)
+        cat("\n")
+        
+        rm(list=ls()[!(ls() %in% SAFE)])
+        
+      } #END LOCUS
+      
+      ##########################################################################################################################################
+      ### Amino Acid Level #######################################################################################################################
+      
+      if(HLA) {
+        if ("A" %in% Run) {
+          
+          genos[genos=='^'] <- "00:00"
+          
+          cat("\n>>>> STARTING AMINO ACID LEVEL ANALYSIS...\n")
+          cat(paste(rep("_",50),collapse=""),"\n")
+          
+          if( file.exists(UPL) ) { cat("Applying user updated protein exon alignments.\n") }
+          
+          # Amino Acid Analysis Sanity Checks
+          if(Res<2 | !CheckHLA(genos))  {
+            cat("You have opted to run the amino acid analysis.\n")
+            cat("The resolution of your HLA data is less than 2 or does not appear to be formatted properly.\nPlease see vignette.\n")
+            stop("Analysis stopped.",call. = F)
+          }
+          
+          # Define Lists for Per Loci Running Tallies
+          AAlog <-  list()
+          AminoAcid.binned <- list()    
+          AminoAcid.freq <- list()    
+          overall.chisq <- list()    
+          ORtable <- list()    
+          Final_binned <- list()
+          
+          Release <- EPL[['Release']]
+          
+          # Loop Through Loci
+          for(x in 1:nloci){
+            
+            # Get Locus
+            Locus <- loci[x]
+            
+            # Read in Locus Alignment file for Locus specific exons
+            ExonAlign <- EPL[[Locus]]; rownames(ExonAlign) <- NULL
+            
+            # Run Amino Acid Analysis
+            A.list <- A(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1,ExonAlign,Cores)
+            
+            # Build Output Lists
+            AAlog[[Locus]] <- A.list[['log']]
+            AminoAcid.binned[[Locus]] <- A.list[['binned']]
+            overall.chisq[[Locus]] <- A.list[['chisq']]
+            ORtable[[Locus]] <- A.list[['OR']]
+            Final_binned[[Locus]] <- A.list[['binned']]
+            AminoAcid.freq[[Locus]] <- A.list[['freq']]
+            
+          }; rm(x) #locus loop
+          
+          if(Output) {
+            ## write to file
+            write.table(do.call(rbind,AAlog), file = "AA_log.txt", sep="\t", row.names = F, col.names=T, quote = F)
+            write.table(do.call(rbind,AminoAcid.freq), file = "AA_freqs.txt", sep="\t", row.names = F, col.names=T, quote = F)
+            write.table(do.call(rbind,AminoAcid.binned), file = "AA_binned.txt", sep="\t", row.names = F, col.names=T, quote = F)
+            write.table(do.call(rbind,ORtable), file = "AA_OR.txt", sep="\t", row.names = F, col.names=T, quote = F)
+            write.table(do.call(rbind,overall.chisq), file = "AA_chisq.txt", sep="\t", row.names = F, col.names=T, quote = F)
+            write.table(do.call(rbind,Final_binned), file = "AA_table.txt", sep="\t", row.names = F, col.names=T, quote = F)
+            write.table(Release, file = "Run Parameters.txt", sep="\t", row.names = F, col.names=F, quote = F, append=T)
+          }
+          
+          cat("\n> AMINO ACID ANALYSIS COMPLETED\n")
+          
+          cat("Significant Amino Acid Position(s):","\n")
+          tmp <- do.call(rbind,overall.chisq); rownames(tmp) <- NULL
+          tmp.sig <- tmp[which(tmp[,'sig']=="*"),]; rownames(tmp.sig) <- NULL
+          if(nrow(tmp.sig)>0) { print(tmp.sig,row.names=F,quote=F) }
+          
+          rm(list=ls()[!(ls() %in% SAFE)])
+          
+        } #END AMINO ACID
+      }
+      
+      ############################################################################################################################################  
+      ### End Analyses ###########################################################################################################################
+      
+    }; rm(k)
+    
+    ##  Set Loop End
+    ############################################################################################################################################  
+  
+  }# END SET LOOP IF
+  
+  cat("\n>>>>>>>>>>>>>>>>>>>>> End Analysis <<<<<<<<<<<<<<<<<<<<<\n")
+  
+  options(warn=0)
+  
+}# END FUNCTION

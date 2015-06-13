@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="author" content="Derek Pappas, Ph.D. (dpappas@chori.org)" />
+
+<meta name="date" content="2015-06-12" />
+
+<title>BIGDAWG</title>
+
+
+
+
+<link href="data:text/css,body%20%7B%0A%20%20background%2Dcolor%3A%20%23fff%3B%0A%20%20margin%3A%201em%20auto%3B%0A%20%20max%2Dwidth%3A%20700px%3B%0A%20%20overflow%3A%20visible%3B%0A%20%20padding%2Dleft%3A%202em%3B%0A%20%20padding%2Dright%3A%202em%3B%0A%20%20font%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0A%20%20font%2Dsize%3A%2014px%3B%0A%20%20line%2Dheight%3A%201%2E35%3B%0A%7D%0A%0A%23header%20%7B%0A%20%20text%2Dalign%3A%20center%3B%0A%7D%0A%0A%23TOC%20%7B%0A%20%20clear%3A%20both%3B%0A%20%20margin%3A%200%200%2010px%2010px%3B%0A%20%20padding%3A%204px%3B%0A%20%20width%3A%20400px%3B%0A%20%20border%3A%201px%20solid%20%23CCCCCC%3B%0A%20%20border%2Dradius%3A%205px%3B%0A%0A%20%20background%2Dcolor%3A%20%23f6f6f6%3B%0A%20%20font%2Dsize%3A%2013px%3B%0A%20%20line%2Dheight%3A%201%2E3%3B%0A%7D%0A%20%20%23TOC%20%2Etoctitle%20%7B%0A%20%20%20%20font%2Dweight%3A%20bold%3B%0A%20%20%20%20font%2Dsize%3A%2015px%3B%0A%20%20%20%20margin%2Dleft%3A%205px%3B%0A%20%20%7D%0A%0A%20%20%23TOC%20ul%20%7B%0A%20%20%20%20padding%2Dleft%3A%2040px%3B%0A%20%20%20%20margin%2Dleft%3A%20%2D1%2E5em%3B%0A%20%20%20%20margin%2Dtop%3A%205px%3B%0A%20%20%20%20margin%2Dbottom%3A%205px%3B%0A%20%20%7D%0A%20%20%23TOC%20ul%20ul%20%7B%0A%20%20%20%20margin%2Dleft%3A%20%2D2em%3B%0A%20%20%7D%0A%20%20%23TOC%20li%20%7B%0A%20%20%20%20line%2Dheight%3A%2016px%3B%0A%20%20%7D%0A%0Atable%20%7B%0A%20%20margin%3A%201em%20auto%3B%0A%20%20border%2Dwidth%3A%201px%3B%0A%20%20border%2Dcolor%3A%20%23DDDDDD%3B%0A%20%20border%2Dstyle%3A%20outset%3B%0A%20%20border%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0A%20%20border%2Dwidth%3A%202px%3B%0A%20%20padding%3A%205px%3B%0A%20%20border%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0A%20%20border%2Dwidth%3A%201px%3B%0A%20%20border%2Dstyle%3A%20inset%3B%0A%20%20line%2Dheight%3A%2018px%3B%0A%20%20padding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0A%20%20border%2Dleft%2Dstyle%3A%20none%3B%0A%20%20border%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0A%0Ap%20%7B%0A%20%20margin%3A%200%2E5em%200%3B%0A%7D%0A%0Ablockquote%20%7B%0A%20%20background%2Dcolor%3A%20%23f6f6f6%3B%0A%20%20padding%3A%200%2E25em%200%2E75em%3B%0A%7D%0A%0Ahr%20%7B%0A%20%20border%2Dstyle%3A%20solid%3B%0A%20%20border%3A%20none%3B%0A%20%20border%2Dtop%3A%201px%20solid%20%23777%3B%0A%20%20margin%3A%2028px%200%3B%0A%7D%0A%0Adl%20%7B%0A%20%20margin%2Dleft%3A%200%3B%0A%7D%0A%20%20dl%20dd%20%7B%0A%20%20%20%20margin%2Dbottom%3A%2013px%3B%0A%20%20%20%20margin%2Dleft%3A%2013px%3B%0A%20%20%7D%0A%20%20dl%20dt%20%7B%0A%20%20%20%20font%2Dweight%3A%20bold%3B%0A%20%20%7D%0A%0Aul%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%7D%0A%20%20ul%20li%20%7B%0A%20%20%20%20list%2Dstyle%3A%20circle%20outside%3B%0A%20%20%7D%0A%20%20ul%20ul%20%7B%0A%20%20%20%20margin%2Dbottom%3A%200%3B%0A%20%20%7D%0A%0Apre%2C%20code%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20color%3A%20%23333%3B%0A%7D%0Apre%20%7B%0A%20%20white%2Dspace%3A%20pre%2Dwrap%3B%20%20%20%20%2F%2A%20Wrap%20long%20lines%20%2A%2F%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20margin%3A%205px%200px%2010px%200px%3B%0A%20%20padding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0A%0Acode%20%7B%0A%20%20font%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0A%20%20font%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0A%20%20padding%3A%202px%200px%3B%0A%7D%0A%0Adiv%2Efigure%20%7B%0A%20%20text%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0A%20%20background%2Dcolor%3A%20%23FFFFFF%3B%0A%20%20padding%3A%202px%3B%0A%20%20border%3A%201px%20solid%20%23DDDDDD%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20border%3A%201px%20solid%20%23CCCCCC%3B%0A%20%20margin%3A%200%205px%3B%0A%7D%0A%0Ah1%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20font%2Dsize%3A%2035px%3B%0A%20%20line%2Dheight%3A%2040px%3B%0A%7D%0A%0Ah2%20%7B%0A%20%20border%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0A%20%20padding%2Dtop%3A%2010px%3B%0A%20%20padding%2Dbottom%3A%202px%3B%0A%20%20font%2Dsize%3A%20145%25%3B%0A%7D%0A%0Ah3%20%7B%0A%20%20border%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0A%20%20padding%2Dtop%3A%2010px%3B%0A%20%20font%2Dsize%3A%20120%25%3B%0A%7D%0A%0Ah4%20%7B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0A%20%20margin%2Dleft%3A%208px%3B%0A%20%20font%2Dsize%3A%20105%25%3B%0A%7D%0A%0Ah5%2C%20h6%20%7B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23ccc%3B%0A%20%20font%2Dsize%3A%20105%25%3B%0A%7D%0A%0Aa%20%7B%0A%20%20color%3A%20%230033dd%3B%0A%20%20text%2Ddecoration%3A%20none%3B%0A%7D%0A%20%20a%3Ahover%20%7B%0A%20%20%20%20color%3A%20%236666ff%3B%20%7D%0A%20%20a%3Avisited%20%7B%0A%20%20%20%20color%3A%20%23800080%3B%20%7D%0A%20%20a%3Avisited%3Ahover%20%7B%0A%20%20%20%20color%3A%20%23BB00BB%3B%20%7D%0A%20%20a%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0A%20%20%20%20text%2Ddecoration%3A%20underline%3B%20%7D%0A%20%20a%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0A%20%20%20%20text%2Ddecoration%3A%20underline%3B%20%7D%0A%0A%2F%2A%20Class%20described%20in%20https%3A%2F%2Fbenjeffrey%2Ecom%2Fposts%2Fpandoc%2Dsyntax%2Dhighlighting%2Dcss%0A%20%20%20Colours%20from%20https%3A%2F%2Fgist%2Egithub%2Ecom%2Frobsimmons%2F1172277%20%2A%2F%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20Keyword%20%2A%2F%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%2F%2A%20DataType%20%2A%2F%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%2F%2A%20DecVal%20%28decimal%20values%29%20%2A%2F%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20BaseN%20%2A%2F%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20Float%20%2A%2F%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20Char%20%2A%2F%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%2F%2A%20String%20%2A%2F%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%2F%2A%20Comment%20%2A%2F%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%2F%2A%20OtherToken%20%2A%2F%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20AlertToken%20%2A%2F%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%2F%2A%20Function%20calls%20%2A%2F%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%2F%2A%20ErrorTok%20%2A%2F%0A%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+<div id="header">
+<h1 class="title">BIGDAWG</h1>
+<h4 class="author"><em>Derek Pappas, Ph.D. (<a href="mailto:dpappas@chori.org">dpappas@chori.org</a>)</em></h4>
+<h4 class="date"><em>2015-06-12</em></h4>
+</div>
+
+
+<div id="bigdawg-v1.1" class="section level1">
+<h1>BIGDAWG v1.1</h1>
+<p>‘Bridging ImmunoGenomic Data-Analysis Workflow Gaps’ (‘BIGDAWG’) is an integrated analysis system that automates the manual data-manipulation and trafficking steps (the gaps in an analysis workflow) normally required for analyses of highly polymorphic genetic systems (e.g., the immunological human leukocyte antigen (HLA) and killer-cell Immunoglobulin-like receptor (KIR) genes) and their respective genomic data (immunogenomic). Starting with unambiguous genotype data for case-control groups, ‘BIGDAWG’ performs tests of Hardy-Weinberg equilibrium, and carries out case-control association analyses for haplotypes, individual loci, and HLA amino acid positions.</p>
+<div id="input-data" class="section level2">
+<h2>Input Data</h2>
+<p>Data for BIGDAWG should be in a tab delimited text format. The first row must be a header line and must include column names for genotype data. The first two columns must contain subject IDs and phenotypes (0 = control, 1 = case), respectively. Data for each genotype pair must be located in adjacent columns. Columns names for a given locus must have the same name; do not use ’_1’, ‘.1’, etc.</p>
+<p><strong>Missing Information</strong> When there is missing information ,either for lack of genotyping information or absence of genotyped loci, BIGDAWG allows for conventions to differentiate the type of data that is missing.</p>
+<p>Data missing due to lack of a molecular genotyping result is considered not available (NA). Acceptable NA strings include: NA, ****, -, na and Na. Empty data cells will be considered NA.</p>
+<p>Data missing due to genomic structural variation (i.e., no locus present) is considered absence. Acceptable absence strings include: Absent, absent, Abs, ABS, ab, Ab, AB, ^. The last symbol is the unicode caret symbol. For HLA data, BIGDAWG allows for a special allele name that indicates absence: 00, 00:00, 00:00:00 and 00:00:00:00 are all acceptable indicators of HLA locus absence. When choosing to use 0’s (zeros) to populate allele name fields, use similar or higher levels of resolution (<a href="http://hla.alleles.org/nomenclature/naming.html">http://hla.alleles.org/nomenclature/naming.html</a>). When using HLA data, the 00:00 naming convention is preferred and will allow for the amino acid analysis to test a phenotype association for locus absence (see below).</p>
+<p>Example of data set architecture and acceptable values:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">subjectID</th>
+<th align="center">Disease</th>
+<th align="center">A</th>
+<th align="center">A</th>
+<th align="center">B</th>
+<th align="center">B</th>
+<th align="center">DRB1</th>
+<th align="center">DRB1</th>
+<th align="center">DRB3</th>
+<th align="center">DRB3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">subject1</td>
+<td align="center">0</td>
+<td align="center">01:01</td>
+<td align="center">02:01</td>
+<td align="center">08:01</td>
+<td align="center">44:02</td>
+<td align="center">01:01</td>
+<td align="center">03:01</td>
+<td align="center">01:01</td>
+<td align="center">00:00</td>
+</tr>
+<tr class="even">
+<td align="left">subject2</td>
+<td align="center">1</td>
+<td align="center">02:01</td>
+<td align="center">24:02</td>
+<td align="center">51:01</td>
+<td align="center">51:01</td>
+<td align="center">11:01</td>
+<td align="center">14:01</td>
+<td align="center">02:02</td>
+<td align="center">02:11</td>
+</tr>
+<tr class="odd">
+<td align="left">subject3</td>
+<td align="center">0</td>
+<td align="center">03:01</td>
+<td align="center">26:02</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">13:01</td>
+<td align="center">15:01</td>
+<td align="center">00:00</td>
+<td align="center">00:00</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="data-output" class="section level2">
+<h2>Data Output</h2>
+<p>After the package is run, BIGDAWG will create a new folder entitled ‘output hhmmss ddmmyy’ in the working directory. Within the output folder will be a precheck file (‘PreCheck.txt’) detailing the summary statistics of the dataset and the results of the Hardy-Weinberg equilibrium test (‘HWE.txt’). If no locus subsets are specified (see parameters section), a single subfolder entitled ‘set1’ will contain the outputs of each association analysis optioned. If multiple locus subsets are optioned, multiple subfolders for each locus set will be written, each containing the analytic results for that subset. Within each set subfolder, a parameter file will detail the parameters that are relevant to that subset, as well as BIGDAWG version numbers, for user reference.</p>
+</div>
+<div id="parameters" class="section level2">
+<h2>Parameters</h2>
+<p><code>BIGDAWG(Data, HLA=T, Run.Tests, Loci.Set, All.Pairwise=F, Trim=F, Res=2, Missing=0, Cores.Lim=1L, Results.Dir)</code></p>
+<p><strong>Data</strong></p>
+<p>Class: String. No Default.</p>
+<p>e.g., <code>Data=&quot;HLA_data&quot;</code> or <code>Data=&quot;foo.txt&quot;</code></p>
+<p>Specifies genotype data file name. May use file name within working directory or full file name path to specify file location. See Data Input section for details about file formatting.</p>
+<p><strong>HLA</strong></p>
+<p>Class: logical. Default = T.</p>
+<p>Indicates whether or not your data is specific for HLA loci. If your data is not HLA, is a mix of HLA and data for other loci, or includes non-standard HLA allele names, you should set <code>HLA = F</code>. This will override the Trim and EVS.rm arguments, and will skip various tests and checks. Set <code>HLA = T</code> if and only if the dataset HLA alleles name are consistent with IMGT/HLA Database release 3.0.0 or later (<a href="https://www.ebi.ac.uk/ipd/imgt/hla">https://www.ebi.ac.uk/ipd/imgt/hla</a>).</p>
+<p><strong>Run.Tests</strong></p>
+<p>Class: String or Character vector. Default = Run all tests.</p>
+<p>e.g., <code>Run.Tests = c(&quot;L&quot;,&quot;A&quot;)</code></p>
+<p>Specifies which tests to run in analysis. “HWE” will call the Hardy Weinberg Equilibrium test, “H” will call the haplotype association test, “L” will call the locus association test, and “A” will call the amino acid test. Combinations of the test are permitted, e.g., <code>Run.Tests=&quot;HWE&quot;</code> or <code>Run.Tests=c(&quot;HWE&quot;,&quot;H&quot;,&quot;L&quot;)</code>.</p>
+<p>Currently, the amino acid analysis is limited to the HLA-A, -B, -C, -DRB1, -DQA1, -DQB1, -DPA1 and -DPB1 loci.</p>
+<p><strong>Loci.Set</strong></p>
+<p>Class: List. Default = Use all loci.</p>
+<p>e.g., <code>Loci.Set=list(c(&quot;DRB1&quot;,&quot;DQB1&quot;),c(&quot;A&quot;,&quot;DRB1&quot;,&quot;DPB1&quot;))</code></p>
+<p>Input list defining which loci to use for analyses. Combinations Permitted. The pair of alleles for a locus must be in adjacent columns in the analyzed data set. Running multiple sets is only relevant for the haplotype analysis. For all other analyses, loci are treated independently. Consider running haplotype analysis independently when optioning multi-locus sets to avoid redundancy of the other analyses. Each set output will be contained within a separate folder (see Data Output section).</p>
+<p><strong>All.Pairwise</strong></p>
+<p>Class: Logical. Default = F.</p>
+<p>Should pairwise combinations of loci be run in the haplotype analysis? Only relevant to haplotype analysis.</p>
+<p><strong>EVS.rm</strong></p>
+<p>Class: Logical. Default = F. (<code>HLA=T</code> specific).</p>
+<p>Flags whether or not to strip expression variant suffixes from HLA alleles. Example: A*01:11N will convert to A*01:11. Should not be optioned for data that does not conform to HLA naming conventions.</p>
+<p><strong>Trim</strong></p>
+<p>Class: Logical. Default = F. (<code>HLA=T</code> specific).</p>
+<p>Flags whether or not to Trim HLA alleles to a specified resolution. Should not be optioned for data that does not conform to HLA naming conventions.</p>
+<p><strong>Resolution</strong></p>
+<p>Class: Numeric. Default = 2. (<code>HLA=T</code> specific).</p>
+<p>Sets the desired resolution when trimming HLA alleles. Used only when <code>Trim = T</code>. Fields for HLA formatting must follow current colon-delimited nomenclature conventions. Currently, amino acid analysis will automatically truncate to 2-field resolution. Trimming is automatic and need not be optioned for amino acid analysis to run. Should not be optioned for data that does not conform to HLA naming conventions.</p>
+<p><strong>Missing</strong></p>
+<p>Class: String/Numeric. Default = 0.</p>
+<p>Sets the allowable per subject missing data for running haplotype analysis. Effects can be disastrous on processing time for large values of missing. Missing may be set as a number or as “ignore” to skip removal and retain all subjects.</p>
+<p><strong>Cores.Lim</strong></p>
+<p>Class: Integer. Default = 1 Core.</p>
+<p>Specifies the number of cores accessible by BIGDAWG in amino acid analysis. Not relevant to Windows operating systems which will use only a single core. More than 1 core is best when optioned in command line R. Not recommend for GUIs, e.g. RStudio.</p>
+<p><strong>Results.Dir</strong></p>
+<p>Class: String. Default = see Data Output section.</p>
+<p>String name of a folder for BIGDAWG output. Subfolder for each set will generated within any output folder specified.</p>
+</div>
+<div id="examples" class="section level2">
+<h2>Examples</h2>
+<p>These are examples only and need not be run as defined below.</p>
+<pre><code>#Run the full analysis using the example set bundled with BIGDAWG
+BIGDAWG(Data=&quot;HLA_data&quot;)
+
+#Run the haplotype analysis with all pairwise combinations on a file called 'data.txt'
+BIGDAWG(Data=&quot;data.txt&quot;, Run.Tests=&quot;H&quot;, All.Pairwise=T)
+
+#Run the Hardy-Weinberg and Locus analysis with non-HLA data while ignoring any missing data on a file called 'data.txt'
+BIGDAWG(Data=&quot;data.txt&quot;, HLA=F, Run.Tests=c(&quot;HWE&quot;,&quot;L&quot;), Missing=&quot;ignore&quot;)
+
+#Run the amino acid analysis trimming data to 2-Field resolution on a file called 'data.txt'
+BIGDAWG(Data=&quot;data.txt&quot;, Run.Tests=&quot;A&quot;, Trim=T, Res=2)
+
+#Run the haplotype analysis with subsets of loci on a file called 'data.txt'
+BIGDAWG(Data=&quot;data.txt&quot;, Run.Tests=&quot;H&quot;, Loci.Set=list(c(&quot;DRB1&quot;,&quot;DQB1&quot;,&quot;DPB1&quot;),c(&quot;DRB1&quot;,&quot;DQB1&quot;)))</code></pre>
+</div>
+<div id="updating-the-bundled-imgthla-protein-alignment" class="section level2">
+<h2>Updating the bundled IMGT/HLA protein alignment</h2>
+<p>The bundled HLA protein alignment used in the amino acid analysis can be updated to the most recent release (<a href="https://www.ebi.ac.uk/ipd/imgt/hla">https://www.ebi.ac.uk/ipd/imgt/hla</a>). ‘BIGDAWG v1.1’ was bundled using IMGT/HLA database release 3.20.0, 2015-04-17. Future databse updates do not guarantee compatability with the updating tool.</p>
+<pre><code># Update to the most recent IMGT/HLA database release
+UpdateRelease()
+
+# Force update
+UpdateRelease(Force=T)
+
+# Restore to original bundled update.
+UpdateRelease(Restore=T)</code></pre>
+<p><em>End of vignette.</em></p>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
