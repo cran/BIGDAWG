@@ -21,11 +21,11 @@
 #' BIGDAWG(Data="HLA_data", Run.Tests="H", Missing=0, Loci.Set=list(c("DRB1","DQB1")))
 #' 
 #' # Hardy-Weinberg and Locus analysis ignoring missing data
-#' # Signifant associations with phenotype at all but DQB1
+#' # Significant associations with phenotype at all but DQB1
 #' BIGDAWG(Data="HLA_data", Run.Tests=c("HWE","L"), Missing="ignore")
 #' 
-#' # Hardy-Weinberg analysis trimming data to 2-Field resolution for one locus
-#' # Signficant deviation at DQB1
+#' # Hardy-Weinberg analysis trimming data to 2-Field resolution
+#' # Significant deviation at DQB1
 #' BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2)
 BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Trim=FALSE, Res=2, EVS.rm=FALSE, Missing=0, Cores.Lim=1L, Results.Dir, Output=TRUE) {
   
@@ -39,8 +39,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   #Check for updated ExonPtnList ... UpdatePtnList. Use if found.
   UpdatePtnList <- NULL; rm(UpdatePtnList)
   UPL <- paste(path.package('BIGDAWG'),"/data/UpdatePtnAlign.RData",sep="")
-  if( file.exists(UPL) ) { load(UPL) ; EPL <- UpdatePtnList ; rm(UpdatePtnList)
-    } else { EPL <- ExonPtnList }
+  if( file.exists(UPL) ) { load(UPL) ; EPL <- UpdatePtnList ; rm(UPL,UpdatePtnList) } else { EPL <- ExonPtnList }
   
   cat("\n>>>>>>>>>>>>>>>>>>>> Begin Analysis <<<<<<<<<<<<<<<<<<<<\n\n")
   
@@ -63,6 +62,13 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     All.ColNames <- gsub(".1","",colnames(Tab),fixed=T)
     rownames(Tab) <- NULL
     Tab <- rmABstrings(Tab)
+    
+    # Separate locus and allele names if data is Loci*Allele
+    if(HLA==T) {
+      if(sum(regexpr("\\*",Tab[,3:ncol(Tab)]))>0) {
+        Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),FUN=function(x) unlist(lapply(strsplit(x,split="\\*"),"[",2)))
+      }
+    }
     
   }
   
@@ -93,7 +99,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   ### Data Processing and Sanity Checks ######################################################################################################
   
   ## __________________ General processing and checks for any data
-  # Sanity check for Missing Data
+  # Remove any missing data
   if(Missing == "ignore") {
     cat("Ignoring any missing data.\n")
     cat("Consider setting a missing threshold or running without the haplotype ('H') analysis.\n")

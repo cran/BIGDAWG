@@ -10,7 +10,7 @@
 
 <meta name="author" content="Derek Pappas, Ph.D. (dpappas@chori.org)" />
 
-<meta name="date" content="2015-06-12" />
+<meta name="date" content="2015-10-29" />
 
 <title>BIGDAWG</title>
 
@@ -28,7 +28,7 @@
 <div id="header">
 <h1 class="title">BIGDAWG</h1>
 <h4 class="author"><em>Derek Pappas, Ph.D. (<a href="mailto:dpappas@chori.org">dpappas@chori.org</a>)</em></h4>
-<h4 class="date"><em>2015-06-12</em></h4>
+<h4 class="date"><em>2015-10-29</em></h4>
 </div>
 
 
@@ -37,10 +37,10 @@
 <p>‘Bridging ImmunoGenomic Data-Analysis Workflow Gaps’ (‘BIGDAWG’) is an integrated analysis system that automates the manual data-manipulation and trafficking steps (the gaps in an analysis workflow) normally required for analyses of highly polymorphic genetic systems (e.g., the immunological human leukocyte antigen (HLA) and killer-cell Immunoglobulin-like receptor (KIR) genes) and their respective genomic data (immunogenomic). Starting with unambiguous genotype data for case-control groups, ‘BIGDAWG’ performs tests of Hardy-Weinberg equilibrium, and carries out case-control association analyses for haplotypes, individual loci, and HLA amino acid positions.</p>
 <div id="input-data" class="section level2">
 <h2>Input Data</h2>
-<p>Data for BIGDAWG should be in a tab delimited text format. The first row must be a header line and must include column names for genotype data. The first two columns must contain subject IDs and phenotypes (0 = control, 1 = case), respectively. Data for each genotype pair must be located in adjacent columns. Columns names for a given locus must have the same name; do not use ’_1’, ‘.1’, etc.</p>
+<p>Data for BIGDAWG should be in a tab delimited text format. The first row must be a header line and must include column names for genotype data. The first two columns must contain subject IDs and phenotypes (0 = control, 1 = case), respectively. Data for each genotype pair must be located in adjacent columns. Column names for a given locus must have the same name; do not use ’_1’, ‘.1’, etc. For HLA alleles, names (with or with a locus prefix) can include from a single field up to the full length name for a given allele.</p>
 <p><strong>Missing Information</strong> When there is missing information ,either for lack of genotyping information or absence of genotyped loci, BIGDAWG allows for conventions to differentiate the type of data that is missing.</p>
 <p>Data missing due to lack of a molecular genotyping result is considered not available (NA). Acceptable NA strings include: NA, ****, -, na and Na. Empty data cells will be considered NA.</p>
-<p>Data missing due to genomic structural variation (i.e., no locus present) is considered absence. Acceptable absence strings include: Absent, absent, Abs, ABS, ab, Ab, AB, ^. The last symbol is the unicode caret symbol. For HLA data, BIGDAWG allows for a special allele name that indicates absence: 00, 00:00, 00:00:00 and 00:00:00:00 are all acceptable indicators of HLA locus absence. When choosing to use 0’s (zeros) to populate allele name fields, use similar or higher levels of resolution (<a href="http://hla.alleles.org/nomenclature/naming.html">http://hla.alleles.org/nomenclature/naming.html</a>). When using HLA data, the 00:00 naming convention is preferred and will allow for the amino acid analysis to test a phenotype association for locus absence (see below).</p>
+<p>Data missing due to genomic structural variation (i.e., no locus present) is considered absence. Acceptable absence strings include: Absent, absent, Abs, ABS, ab, Ab, AB, ^. The last symbol is the unicode caret symbol. For HLA data, BIGDAWG allows for a special allele name that indicates absence: 00, 00:00, 00:00:00 and 00:00:00:00 are all acceptable indicators of HLA locus absence. When choosing to use 0’s (zeros) to populate allele name fields, use similar or higher levels of resolution (<a href="http://hla.alleles.org/nomenclature/naming.html" class="uri">http://hla.alleles.org/nomenclature/naming.html</a>). When using HLA data, the 00:00 naming convention is preferred and will allow for the amino acid analysis to test a phenotype association for locus absence (see below).</p>
 <p>Example of data set architecture and acceptable values:</p>
 <table>
 <thead>
@@ -99,7 +99,7 @@
 </div>
 <div id="data-output" class="section level2">
 <h2>Data Output</h2>
-<p>After the package is run, BIGDAWG will create a new folder entitled ‘output hhmmss ddmmyy’ in the working directory. Within the output folder will be a precheck file (‘PreCheck.txt’) detailing the summary statistics of the dataset and the results of the Hardy-Weinberg equilibrium test (‘HWE.txt’). If no locus subsets are specified (see parameters section), a single subfolder entitled ‘set1’ will contain the outputs of each association analysis optioned. If multiple locus subsets are optioned, multiple subfolders for each locus set will be written, each containing the analytic results for that subset. Within each set subfolder, a parameter file will detail the parameters that are relevant to that subset, as well as BIGDAWG version numbers, for user reference.</p>
+<p>After the package is run, BIGDAWG will create a new folder entitled ‘output hhmmss ddmmyy’ in the working directory (unless otherwise specified by Results.Dir parameter, see below). Within the output folder will be a precheck file (‘PreCheck.txt’) detailing the summary statistics of the dataset and the results of the Hardy-Weinberg equilibrium test (‘HWE.txt’). If no locus subsets are specified (see parameters section), a single subfolder entitled ‘set1’ will contain the outputs of each association analysis optioned. If multiple locus subsets are optioned, multiple subfolders for each locus set will be written, each containing the analytic results for that subset. Within each set subfolder, a parameter file will detail the parameters that are relevant to that subset, as well as BIGDAWG version numbers, for user reference.</p>
 </div>
 <div id="parameters" class="section level2">
 <h2>Parameters</h2>
@@ -110,7 +110,7 @@
 <p>Specifies genotype data file name. May use file name within working directory or full file name path to specify file location. See Data Input section for details about file formatting.</p>
 <p><strong>HLA</strong></p>
 <p>Class: logical. Default = T.</p>
-<p>Indicates whether or not your data is specific for HLA loci. If your data is not HLA, is a mix of HLA and data for other loci, or includes non-standard HLA allele names, you should set <code>HLA = F</code>. This will override the Trim and EVS.rm arguments, and will skip various tests and checks. Set <code>HLA = T</code> if and only if the dataset HLA alleles name are consistent with IMGT/HLA Database release 3.0.0 or later (<a href="https://www.ebi.ac.uk/ipd/imgt/hla">https://www.ebi.ac.uk/ipd/imgt/hla</a>).</p>
+<p>Indicates whether or not your data is specific for HLA loci. If your data is not HLA, is a mix of HLA and data for other loci, or includes non-standard HLA allele names, you should set <code>HLA = F</code>. This will override the Trim and EVS.rm arguments, and will skip various tests and checks. Set <code>HLA = T</code> if and only if the dataset HLA alleles name are consistent with IMGT/HLA Database release 3.0.0 or later (<a href="https://www.ebi.ac.uk/ipd/imgt/hla" class="uri">https://www.ebi.ac.uk/ipd/imgt/hla</a>).</p>
 <p><strong>Run.Tests</strong></p>
 <p>Class: String or Character vector. Default = Run all tests.</p>
 <p>e.g., <code>Run.Tests = c(&quot;L&quot;,&quot;A&quot;)</code></p>
@@ -162,7 +162,7 @@ BIGDAWG(Data=&quot;data.txt&quot;, Run.Tests=&quot;H&quot;, Loci.Set=list(c(&quo
 </div>
 <div id="updating-the-bundled-imgthla-protein-alignment" class="section level2">
 <h2>Updating the bundled IMGT/HLA protein alignment</h2>
-<p>The bundled HLA protein alignment used in the amino acid analysis can be updated to the most recent release (<a href="https://www.ebi.ac.uk/ipd/imgt/hla">https://www.ebi.ac.uk/ipd/imgt/hla</a>). ‘BIGDAWG v1.1’ was bundled using IMGT/HLA database release 3.20.0, 2015-04-17. Future databse updates do not guarantee compatability with the updating tool.</p>
+<p>The bundled HLA protein alignment used in the amino acid analysis can be updated to the most recent release (<a href="https://www.ebi.ac.uk/ipd/imgt/hla" class="uri">https://www.ebi.ac.uk/ipd/imgt/hla</a>). ‘BIGDAWG v1.1’ was bundled using IMGT/HLA database release 3.20.0, 2015-04-17. Future database updates do not guarantee compatability with the updating tool.</p>
 <pre><code># Update to the most recent IMGT/HLA database release
 UpdateRelease()
 

@@ -4,9 +4,6 @@
 #' @param Loci Character vector of loci that should be used to create new alignment object (default = HLA-A,B,C,DRB1/3/4/5,DQA1,DQB1,DPA1,DPB1).
 #' @param Restore Logical specifying if the original alignment file be restored.
 #' @param Force Logical specifiying if update should be forced.
-#' @examples
-#' # Update to the default loci to most recent IMGT/HLA database release
-#' UpdateRelease()
 #' @note This function was tested and works with IMGT/HLA database release 3.20.0, 2015-04-17.
 UpdateRelease <- function(Loci,Force=F,Restore=F) {
   
@@ -32,7 +29,7 @@ UpdateRelease <- function(Loci,Force=F,Restore=F) {
     #Run Update if Flag = T
     if(Flag) {
 
-      cat("\nYour database is up to date. Use Force = T to force the update.")
+      cat("\nYour database seems up to date. Use Force = T to force the update.")
       
     } else {
       
@@ -47,6 +44,8 @@ UpdateRelease <- function(Loci,Force=F,Restore=F) {
         # Loci
         if(missing(Loci)) {
           Loci <- c("A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5")
+        } else {
+          Loci <- unique(c(Loci,"A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5"))
         }
       
         # Map

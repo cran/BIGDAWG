@@ -16,7 +16,7 @@ vignette: >
 
 ## Input Data
 
-Data for BIGDAWG should be in a tab delimited text format. The first row must be a header line and must include column names for genotype data. The first two columns must contain subject IDs and phenotypes (0 = control, 1 = case), respectively. Data for each genotype pair must be located in adjacent columns. Columns names for a given locus must have the same name; do not use '_1', '.1', etc.
+Data for BIGDAWG should be in a tab delimited text format. The first row must be a header line and must include column names for genotype data. The first two columns must contain subject IDs and phenotypes (0 = control, 1 = case), respectively. Data for each genotype pair must be located in adjacent columns. Column names for a given locus must have the same name; do not use '_1', '.1', etc. For HLA alleles, names (with or with a locus prefix) can include from a single field up to the full length name for a given allele.
 
 **Missing Information**
 When there is missing information ,either for lack of genotyping information or absence of genotyped loci, BIGDAWG allows for conventions to differentiate the type of data that is missing.
@@ -36,7 +36,7 @@ Example of data set architecture and acceptable values:
 
 ## Data Output
 
-After the package is run, BIGDAWG will create a new folder entitled 'output hhmmss ddmmyy' in the working directory. Within the output folder will be a precheck file ('PreCheck.txt') detailing the summary statistics of the dataset and the results of the Hardy-Weinberg equilibrium test ('HWE.txt'). If no locus subsets are specified (see parameters section), a single subfolder entitled ‘set1’ will contain the outputs of each association analysis optioned. If multiple locus subsets are optioned, multiple subfolders for each locus set will be written, each containing the analytic results for that subset. Within each set subfolder, a parameter file will detail the parameters that are relevant to that subset, as well as BIGDAWG version numbers, for user reference.
+After the package is run, BIGDAWG will create a new folder entitled 'output hhmmss ddmmyy' in the working directory (unless otherwise specified by Results.Dir parameter, see below). Within the output folder will be a precheck file ('PreCheck.txt') detailing the summary statistics of the dataset and the results of the Hardy-Weinberg equilibrium test ('HWE.txt'). If no locus subsets are specified (see parameters section), a single subfolder entitled ‘set1’ will contain the outputs of each association analysis optioned. If multiple locus subsets are optioned, multiple subfolders for each locus set will be written, each containing the analytic results for that subset. Within each set subfolder, a parameter file will detail the parameters that are relevant to that subset, as well as BIGDAWG version numbers, for user reference.
 
 
 ## Parameters
@@ -141,7 +141,7 @@ BIGDAWG(Data="data.txt", Run.Tests="H", Loci.Set=list(c("DRB1","DQB1","DPB1"),c(
 
 ## Updating the bundled IMGT/HLA protein alignment
 
-The bundled HLA protein alignment used in the amino acid analysis can be updated to the most recent release (https://www.ebi.ac.uk/ipd/imgt/hla). 'BIGDAWG v1.1' was bundled using IMGT/HLA database release 3.20.0, 2015-04-17. Future databse updates do not guarantee compatability with the updating tool.
+The bundled HLA protein alignment used in the amino acid analysis can be updated to the most recent release (https://www.ebi.ac.uk/ipd/imgt/hla). 'BIGDAWG v1.1' was bundled using IMGT/HLA database release 3.20.0, 2015-04-17. Future database updates do not guarantee compatability with the updating tool.
 
 ```
 # Update to the most recent IMGT/HLA database release

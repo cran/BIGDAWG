@@ -89,7 +89,7 @@ ExonPtnAlign.Create <- function(Locus,RefTab) {
   AlignMatrix <- NULL; rm(AlignMatrix)
   
   #Read in P-Groups 
-  Pgrps <- read.table("hla_nom_p.txt",header=F,sep=";",stringsAsFactors=F,strip.white=T,colClasses="character")
+  Pgrps <- read.table("hla_nom_p.txt",fill=T,header=F,sep=";",stringsAsFactors=F,strip.white=T,colClasses="character")
   Pgrps <- PgrpFormat(Pgrps,Locus)
   
   #Read in Alignment

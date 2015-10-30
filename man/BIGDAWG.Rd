@@ -44,11 +44,11 @@ This is the main wrapper function for each analysis.
 BIGDAWG(Data="HLA_data", Run.Tests="H", Missing=0, Loci.Set=list(c("DRB1","DQB1")))
 
 # Hardy-Weinberg and Locus analysis ignoring missing data
-# Signifant associations with phenotype at all but DQB1
+# Significant associations with phenotype at all but DQB1
 BIGDAWG(Data="HLA_data", Run.Tests=c("HWE","L"), Missing="ignore")
 
-# Hardy-Weinberg analysis trimming data to 2-Field resolution for one locus
-# Signficant deviation at DQB1
+# Hardy-Weinberg analysis trimming data to 2-Field resolution
+# Significant deviation at DQB1
 BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2)
 }
 
