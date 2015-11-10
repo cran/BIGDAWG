@@ -63,10 +63,14 @@ HWEChiSq <- function(Tab,All.ColNames) {
   
   Test.out[,'X.square'] <- sapply(as.numeric(Test.out[,'X.square']),FUN=round,digits=4)
   Test.out[,'p.value'] <- sapply(as.numeric(Test.out[,'p.value']),FUN=function(x) format.pval(x))
-  
+
+  #Flag for invalid degrees of freedom
+  flagLoci <- which(as.numeric(Test.out[,'df'])<1)
+    
   #Flag for invalid chi square matrices
   Freq.Flag <- lapply(loci,FUN=function(x) ifelse(nrow(Freq.Final[[x]])>2,0,1))
-  flagLoci <- which(Freq.Flag==1)
+  flagLoci <- unique(c(flagLoci,which(Freq.Flag==1)))
+  
   if(length(flagLoci)>0){
     Test.out[Test.out[,'Locus'] %in% unlist(loci[flagLoci]),2:ncol(Test.out)] <- "NCalc"
   }  

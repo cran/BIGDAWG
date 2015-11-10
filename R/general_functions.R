@@ -24,6 +24,9 @@ EVSremoval <- function(Locus,EPList) {
   if(Locus=='Release') { 
     tmp <- EPList[[Locus]]
     return(tmp)
+  } else if(Locus=='RefExons') {
+    tmp <- EPList[[Locus]]
+    return(tmp)
   } else {
     tmp <- EPList[[Locus]]
     tmp[,'Trimmed'] <- sapply(tmp[,'Trimmed'],gsub,pattern="[[:alpha:]]",replacement="")

@@ -1,7 +1,7 @@
 ---
 title: "BIGDAWG"
 author: "Derek Pappas, Ph.D. (dpappas@chori.org)"
-date: "`r Sys.Date()`"
+date: "2015-11-09"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using BIGDAWG}
@@ -9,7 +9,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-# BIGDAWG v1.1
+# BIGDAWG v1.2.1
 
 'Bridging ImmunoGenomic Data-Analysis Workflow Gaps' ('BIGDAWG') is an integrated analysis system that automates the manual data-manipulation and trafficking steps (the gaps in an analysis workflow) normally required for analyses of highly polymorphic genetic systems (e.g., the immunological human leukocyte antigen (HLA) and killer-cell Immunoglobulin-like receptor (KIR) genes) and their respective genomic data (immunogenomic). Starting with unambiguous genotype data for case-control groups, 'BIGDAWG' performs tests of Hardy-Weinberg equilibrium, and carries out case-control association analyses for haplotypes, individual loci, and HLA amino acid positions.
 
@@ -141,7 +141,7 @@ BIGDAWG(Data="data.txt", Run.Tests="H", Loci.Set=list(c("DRB1","DQB1","DPB1"),c(
 
 ## Updating the bundled IMGT/HLA protein alignment
 
-The bundled HLA protein alignment used in the amino acid analysis can be updated to the most recent release (https://www.ebi.ac.uk/ipd/imgt/hla). 'BIGDAWG v1.1' was bundled using IMGT/HLA database release 3.20.0, 2015-04-17. Future database updates do not guarantee compatability with the updating tool.
+The bundled HLA protein alignment used in the amino acid analysis can be updated to the most recent release (https://www.ebi.ac.uk/ipd/imgt/hla). 'BIGDAWG v 1.2.1' was bundled using IMGT/HLA database release 3.22.0, 2015-10-10. Future database updates do not guarantee compatability with the updating tool.
 
 ```
 # Update to the most recent IMGT/HLA database release

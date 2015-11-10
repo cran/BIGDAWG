@@ -79,7 +79,7 @@ CheckAlleles <- function(x,y,z1,z2) {
     x.alleles <- unique(x.locus[,'Allele'])
     
     #format according to minimum resolution
-    if (Res==2) {
+    if (Res>=2) {
       y.alleles <- unique(sapply(y.alleles,GetField,Res=2))
       x.alleles <- unique(x.locus[,'Trimmed'])
     } else if (Res==1) {

@@ -41,7 +41,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   UPL <- paste(path.package('BIGDAWG'),"/data/UpdatePtnAlign.RData",sep="")
   if( file.exists(UPL) ) { load(UPL) ; EPL <- UpdatePtnList ; rm(UPL,UpdatePtnList) } else { EPL <- ExonPtnList }
   
-  cat("\n>>>>>>>>>>>>>>>>>>>> Begin Analysis <<<<<<<<<<<<<<<<<<<<\n\n")
+  cat("\n>>>>>>>>>>>>>>>>>>>> BIGDAWG Analysis <<<<<<<<<<<<<<<<<<<<\n\n")
   
   ############################################################################################################################################  
   ### Read in Data ###########################################################################################################################
@@ -85,7 +85,6 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   }
   
 
-  
   ############################################################################################################################################    
   ### Case-Control Pre-Check #################################################################################################################
   
@@ -93,10 +92,13 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   cat(paste(rep("_",50),collapse=""),"\n")
   if (Trim) { rescall <- paste(Res,"-Field",sep="") } else { rescall <- "Not Defined" }
   Check <- PreCheck(Tab,All.ColNames,rescall,HLA)
-  if(Output) { write.table(Check,file="PreCheck.txt",sep=": ",col.names=F,row.names=T,quote=F); rm(Check,rescall) }
+  if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.names=T,quote=F); rm(Check,rescall) }
   
   ############################################################################################################################################
   ### Data Processing and Sanity Checks ######################################################################################################
+  
+  cat(">>>> DATA PROCESSING AND CHECKS.\n")
+  cat(paste(rep("_",50),collapse=""),"\n")
   
   ## __________________ General processing and checks for any data
   # Remove any missing data
@@ -142,9 +144,11 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   ## __________________ HLA specific checks
   if(HLA) {
     
+    if(Trim | EVS.rm | "A" %in% Run ) { cat("Running HLA specific functions...\n") }
+    
     # Sanity Check for Resoltion if Trim="T" and Trim Data
     if(Trim & CheckHLA(Tab[,3:ncol(Tab)])) {
-      cat("Trimming Data.\n")
+      cat("--Trimming Data.\n")
       Tab.untrim <- Tab
       Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),GetField,Res=Res)
       rownames(Tab) <- NULL
@@ -155,7 +159,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     
     # Sanity Check for Expresion Variant Suffix Stripping
     if(EVS.rm & CheckHLA(Tab[,3:ncol(Tab)])) {
-      cat("Stripping Expression Variants Suffixes.\n")
+      cat("--Stripping Expression Variants Suffixes.\n")
       Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),gsub,pattern="[[:alpha:]]",replacement="")
       EVS.loci <- as.list(names(EPL))
       EPL <- lapply(EVS.loci,EVSremoval,EPList=EPL)
@@ -165,24 +169,52 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       stop("Analysis Stopped.",call. = F)
     }
     
-    # Sanity Check for Known HLA loci
-    test <- CheckLoci(names(EPL),unique(All.ColNames[3:ncol(Tab)]))
-    if( test$Flag ) {
-      cat("There may be a discrepancy with HLA loci names. Unique locus name(s) encountered.\n")
-      cat("Problem loci:",test$Loci,"\n")
-      stop("Analysis stopped.",call. = F)
-    }
-    
-    # Sanity Check for Known HLA alleles
-    test <- CheckAlleles(EPL, Tab[,3:ncol(Tab)],unique(All.ColNames[3:ncol(Tab)]),All.ColNames[3:ncol(Tab)])
-    if(sum(unlist(lapply(test,"[[",1)))>0) {
-      cat("There may be a discrepancy with allele names. Unique allele name(s) encountered.\n")
-      tmp <- as.character(unlist(lapply(test[which(lapply(test,"[[",1)==T)],"[",2)))
-      cat("Problem alleles:",tmp,"\n")
-      stop("Analysis stopped.",call. = F)
+    if ("A" %in% Run) {
+      
+      Release <- as.character(unlist(EPL[['Release']]))
+      
+      # Sanity Check for Known HLA loci
+      cat(paste("--Checking loci against",Release,".\n",sep=""))
+      test <- CheckLoci(names(EPL),unique(All.ColNames[3:ncol(Tab)]))
+      if( test$Flag ) {
+        cat("There may be a discrepancy with HLA loci names. Unrecognized locus name(s) encountered.\n")
+        cat("Problem loci:",test$Loci,"\n")
+        stop("Analysis stopped.",call. = F)
+      }
+      
+      # Sanity Check for Known HLA alleles
+      cat(paste("--Checking alleles against",Release,".\n",sep=""))
+      test <- CheckAlleles(EPL, Tab[,3:ncol(Tab)],unique(All.ColNames[3:ncol(Tab)]),All.ColNames[3:ncol(Tab)])
+      if(sum(unlist(lapply(test,"[[",1)))>0) {
+        cat("There may be a discrepancy with allele names. Unrecognized allele name(s) encountered.\n")
+        tmp <- as.character(unlist(lapply(test[which(lapply(test,"[[",1)==T)],"[",2)))
+        cat("Problem alleles:",tmp,"\n")
+        stop("Analysis stopped.",call. = F)
+      }
     }
     
   } # End HLA if statement and HLA specific functionalities
+  
+  ############################################################################################################################################    
+  ### Write to Parameter File ################################################################################################################
+  
+  if(Output) {
+    
+    Params.Run <- list(Time = format(Sys.time(), "%a %b %d %X %Y"),
+                       BD.Version = as.character(packageVersion("BIGDAWG")),
+                       File = Data,
+                       HLA.Data = HLA,
+                       Tests = paste(Run,collapse=","),
+                       All.Pairwise = All.Pairwise,
+                       Trim = Trim,
+                       Resolution = ifelse(Trim,Res,NA),
+                       Suffix.Stripping = EVS.rm,
+                       Missing = Missing,
+                       Cores.Available = Cores)
+    
+    Params.Run <- do.call(rbind,Params.Run)
+    write.table(Params.Run,file="Run_Parameters.txt",sep=": ", row.names=T, col.names=F, quote=F)
+  }
   
   ############################################################################################################################################    
   ### Hardy Weignberg Equilibrium ############################################################################################################
@@ -190,8 +222,8 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   if ("HWE" %in% Run) {
     
     cat("\n>>>> STARTING HARDY-WEINBERG ANALYSIS...\n")
-    cat("HWE performed at set resolution on controls.\n")
     cat(paste(rep("_",50),collapse=""),"\n")
+    cat("HWE performed at set resolution on controls.\n")
     HWE <- HWEChiSq(Tab,All.ColNames)
     if(Output) { write.table(HWE,file="HWE.txt",sep="\t",col.names=T,row.names=F,quote=F) }
     
@@ -204,12 +236,12 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     
   } #END HARDY-WEINBERG
   
-  
   ############################################################################################################################################
   ## Set Loop Begin (loop through each defined set)
   
   if ( sum( c("H","L","A") %in% Run ) > 0 ) {
   
+    cat("\n>>>>>>>>>>>>>>>>>>>> Begin Locus Sets <<<<<<<<<<<<<<<<<<<<\n\n")
     cat(paste("Your analysis has ", length(Set), " set(s).", sep=""),"\n")
     
     for(k in 1:length(Set)) {
@@ -237,22 +269,11 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
         dir.create(OutSetDir)
         setwd(OutSetDir)
         
-        Params <- list(Time = format(Sys.time(), "%a %b %d %X %Y"),
-                       BD.Version = packageVersion("BIGDAWG"),
-                       File = Data,
-                       HLA.Data = HLA,
-                       Tests = paste(Run,collapse=","),
-                       Set = paste("Set",k),
-                       Loci.Run = paste(loci,collapse=","),
-                       All.Pairwise = All.Pairwise,
-                       Trim = Trim,
-                       Resolution = Res,
-                       Suffix.Stripping = EVS.rm,
-                       Missing = Missing,
-                       Cores.Available = Cores)
+        Params.set <- list(Set = paste("Set",k),
+                       Loci.Run = paste(loci,collapse=","))
         
-        Params <- do.call(rbind,Params)
-        write.table(Params,file="Run Parameters.txt",sep=": ", row.names=T, col.names=F, quote=F)
+        Params.set <- do.call(rbind,Params.set)
+        write.table(Params.set,file="Set_Parameters.txt",sep=": ", row.names=T, col.names=F, quote=F)
       }
       
       SAFE <- c(ls(),"SAFE")
@@ -406,8 +427,6 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
           ORtable <- list()    
           Final_binned <- list()
           
-          Release <- EPL[['Release']]
-          
           # Loop Through Loci
           for(x in 1:nloci){
             
@@ -438,7 +457,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
             write.table(do.call(rbind,ORtable), file = "AA_OR.txt", sep="\t", row.names = F, col.names=T, quote = F)
             write.table(do.call(rbind,overall.chisq), file = "AA_chisq.txt", sep="\t", row.names = F, col.names=T, quote = F)
             write.table(do.call(rbind,Final_binned), file = "AA_table.txt", sep="\t", row.names = F, col.names=T, quote = F)
-            write.table(Release, file = "Run Parameters.txt", sep="\t", row.names = F, col.names=F, quote = F, append=T)
+            write.table(Release, file = "Set_Parameters.txt", sep="\t", row.names = F, col.names=F, quote = F, append=T)
           }
           
           cat("\n> AMINO ACID ANALYSIS COMPLETED\n")

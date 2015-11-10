@@ -1,0 +1,13 @@
+BIGDAWG v1.2.1 (Release date: 2015-11-09) Derek Pappas <dpappas@chori.org>
+====================================================================================
+
+Changes:
+* Added NEWS file to document BIGDAWG releases.
+* Bug fix when EVS.rm was set to TRUE.
+* Precheck.txt renamed to Data_Summary.txt.
+* Distinction between Run parameters and Set parameters.
+* Run Parameters generated and written to file earlier in script.
+* Added section delimiter for 'Data Processing And Checks' in console output.
+* Changes in wording for select BIGDAWG error messages.
+* Update to Hardy-Weinberg test.
+* Update bundled IMGT/HLA amino acid exon alignment to latest release (3.22.0)
