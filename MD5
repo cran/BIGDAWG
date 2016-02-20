@@ -1,10 +1,10 @@
-6b35b605f9c2b7c8bf2c896c5e8095b7 *DESCRIPTION
+d67f7904dc49b02f177d376124db3e99 *DESCRIPTION
 6dc6a1276bb905a76fe89523b1480d07 *NAMESPACE
-8bcd7732ed3dfc276f8a88842b1f69df *NEWS
+864e2fb9f805de5cd4d009903f02be9b *NEWS
 52855fc084edaf87e0d49b0745f07eca *R/A.R
 b8aa0943d1f90e364d2c5306299e07f2 *R/A_ExonPtnAlign_functions.R
 beb1461aa7ca09a2105bf221fd7e6294 *R/A_support_functions.R
-e35b99e989a944bfa25b8bf108a57fa9 *R/BIGDAWG.R
+edf0297a8dfd6b904774c6f47cf6cfc6 *R/BIGDAWG.R
 7cec7183ca63b4f16bd0ee7f2676dea8 *R/H.R
 ec837ea08f47e8da87a53dbdd023f4c6 *R/HWE.R
 2461893fc68260688259c7d04fd34867 *R/HWE_support_functions.R
@@ -13,12 +13,12 @@ ec837ea08f47e8da87a53dbdd023f4c6 *R/HWE.R
 36b67589fbb7e512d586e25f81a18e4f *R/data.R
 294ddb11c4799269f0f73102d647ea13 *R/epicalc.R
 ab2d6ce54117370543e1fd450ccbcc74 *R/general_functions.R
-b8bac99d04f5cba20794890db4e5d3fe *R/sysdata.rda
+f228a46a605f225bd3aac5d43620354e *R/sysdata.rda
 137092e8929dbed4674acfd3d8c6373d *R/update_wrapper.R
-166122cb3e364179cb7f8708809ffb9f *build/vignette.rds
+c4fe27caa46a2099c6ce373b6cff20c2 *build/vignette.rds
 dc5461a2fef8aff5997971178e343d98 *data/HLA_sample.RData
-11389a27c5f286fc44b37b478705abb0 *inst/doc/BIGDAWG.Rmd
-ca53055a80eaa5f1c89f70ec01c7e942 *inst/doc/BIGDAWG.html
+80f3bc69967d166964b57f6d2643ef38 *inst/doc/BIGDAWG.Rmd
+49e7c0664b1dbc0baffd110446434449 *inst/doc/BIGDAWG.html
 03db22c6829d245b917ebc70c8eb2341 *man/A.Rd
 05b0656a905ab126364faa4a2c5e1d13 *man/AA.df.check.Rd
 7e538b27378c9f777a73fc56fbd8224b *man/AAtable.builder.Rd
@@ -52,4 +52,4 @@ cf31e4d622a6b264369ee667cf82c8ea *man/cci.pval.Rd
 97f0f2d47f187cd54d8b3f3cb2188e0e *man/make2x2.Rd
 28ce9d78f2f5656bd8e1229edeefdfc9 *man/makeComb.Rd
 162eae9869a3969828fb0a966bd9922c *man/rmABstrings.Rd
-11389a27c5f286fc44b37b478705abb0 *vignettes/BIGDAWG.Rmd
+80f3bc69967d166964b57f6d2643ef38 *vignettes/BIGDAWG.Rmd

@@ -1,7 +1,7 @@
 ---
 title: "BIGDAWG"
 author: "Derek Pappas, Ph.D. (dpappas@chori.org)"
-date: "2015-11-09"
+date: "2016-02-18"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using BIGDAWG}
@@ -9,9 +9,12 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-# BIGDAWG v1.2.1
+* Package Version: 1.2.6
+* HLA/IMGT Database Release: 3.23.0, 2016-01-19
 
-'Bridging ImmunoGenomic Data-Analysis Workflow Gaps' ('BIGDAWG') is an integrated analysis system that automates the manual data-manipulation and trafficking steps (the gaps in an analysis workflow) normally required for analyses of highly polymorphic genetic systems (e.g., the immunological human leukocyte antigen (HLA) and killer-cell Immunoglobulin-like receptor (KIR) genes) and their respective genomic data (immunogenomic). Starting with unambiguous genotype data for case-control groups, 'BIGDAWG' performs tests of Hardy-Weinberg equilibrium, and carries out case-control association analyses for haplotypes, individual loci, and HLA amino acid positions.
+## Overview
+
+'Bridging ImmunoGenomic Data-Analysis Workflow Gaps' ('BIGDAWG') is an integrated analysis system that automates the manual data-manipulation and trafficking steps (the gaps in an analysis workflow) normally required for analyses of highly polymorphic genetic systems (e.g., the immunological human leukocyte antigen (HLA) and killer-cell Immunoglobulin-like receptor (KIR) genes) and their respective genomic data (immunogenomic) (Pappas DJ, Marin W, Hollenbach JA, Mack SJ. 2016. 'Bridging ImmunoGenomic Data Analysis Workflow Gaps (BIGDAWG): An integrated case-control analysis pipeline.' Human Immunology. Article in press). Starting with unambiguous genotype data for case-control groups, 'BIGDAWG' performs tests of Hardy-Weinberg equilibrium, and carries out case-control association analyses for haplotypes, individual loci, and HLA amino acid positions.
 
 
 ## Input Data
@@ -29,7 +32,7 @@ Example of data set architecture and acceptable values:
 
 |subjectID |Disease |   A   |   A   |   B   |   B   | DRB1  | DRB1  | DRB3  | DRB3  |
 |----------|:------:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-|subject1  |0       |01:01  |02:01  |08:01  |44:02  |01:01  |03:01  |01:01  |00:00  |
+|subject1  |0       |01:01  |02:01  |08:01  |44:02  |01:01  |03:01  |Abs    |Abs    |
 |subject2  |1       |02:01  |24:02  |51:01  |51:01  |11:01  |14:01  |02:02  |02:11  |
 |subject3  |0       |03:01  |26:02  |NA     |NA     |13:01  |15:01  |00:00  |00:00  |
 
@@ -55,7 +58,7 @@ Specifies genotype data file name. May use file name within working directory or
 
 Class: logical. Default = T.
   
-Indicates whether or not your data is specific for HLA loci. If your data is not HLA, is a mix of HLA and data for other loci, or includes non-standard HLA allele names, you should set `HLA = F`. This will override the Trim and EVS.rm arguments, and will skip various tests and checks. Set `HLA = T` if and only if the dataset HLA alleles name are consistent with IMGT/HLA Database release 3.0.0 or later (https://www.ebi.ac.uk/ipd/imgt/hla).
+Indicates whether or not your data is specific for HLA loci. If your data is not HLA, is a mix of HLA and data for other loci, or includes non-standard HLA allele names, you should set `HLA = F`. This will override the Trim and EVS.rm arguments, and will skip various tests and checks. Set `HLA = T` if and only if the dataset HLA alleles name are consistent with the most recent IMGT/HLA Database release (https://www.ebi.ac.uk/ipd/imgt/hla).
 
 **Run.Tests**
 
@@ -103,7 +106,7 @@ Sets the desired resolution when trimming HLA alleles. Used only when `Trim = T`
 
 Class: String/Numeric. Default = 0.
 
-Sets the allowable per subject missing data for running haplotype analysis. Effects can be disastrous on processing time for large values of missing. Missing may be set as a number or as "ignore" to skip removal and retain all subjects.
+Sets the allowable threshold for subjects missing one or both alleles for a given locus. Relevant to running the haplotype analysis. Effects can be disastrous on processing time for large values of missing. Missing may be set as a number or as "ignore" to skip removal and retain all subjects.
 
 **Cores.Lim**
 
@@ -141,7 +144,7 @@ BIGDAWG(Data="data.txt", Run.Tests="H", Loci.Set=list(c("DRB1","DQB1","DPB1"),c(
 
 ## Updating the bundled IMGT/HLA protein alignment
 
-The bundled HLA protein alignment used in the amino acid analysis can be updated to the most recent release (https://www.ebi.ac.uk/ipd/imgt/hla). 'BIGDAWG v 1.2.1' was bundled using IMGT/HLA database release 3.22.0, 2015-10-10. Future database updates do not guarantee compatability with the updating tool.
+The bundled HLA protein alignment used in the amino acid analysis can be updated to the most recent release (https://www.ebi.ac.uk/ipd/imgt/hla). This version of BIGDAWG was bundled using the indicated release (see above). Future database updates do not guarantee compatability with the updating tool.
 
 ```
 # Update to the most recent IMGT/HLA database release

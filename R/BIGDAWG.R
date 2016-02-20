@@ -39,7 +39,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   #Check for updated ExonPtnList ... UpdatePtnList. Use if found.
   UpdatePtnList <- NULL; rm(UpdatePtnList)
   UPL <- paste(path.package('BIGDAWG'),"/data/UpdatePtnAlign.RData",sep="")
-  if( file.exists(UPL) ) { load(UPL) ; EPL <- UpdatePtnList ; rm(UPL,UpdatePtnList) } else { EPL <- ExonPtnList }
+  if( file.exists(UPL) ) { load(UPL) ; EPL <- UpdatePtnList ; rm(UpdatePtnList); UPL.flag=T } else { EPL <- ExonPtnList ; UPL.flag=F}
   
   cat("\n>>>>>>>>>>>>>>>>>>>> BIGDAWG Analysis <<<<<<<<<<<<<<<<<<<<\n\n")
   
@@ -107,11 +107,17 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     cat("Consider setting a missing threshold or running without the haplotype ('H') analysis.\n")
   } else if (Missing <= 2) {
     geno.desc <- haplo.stats::summaryGeno(Tab[,3:ncol(Tab)], miss.val=NAstrings)
-    if(length(which(geno.desc[,3]>Missing))>0) { cat("Removing any missing data (will affect Hardy-Weingberg calculation).\n"); Tab <- Tab[-which(geno.desc[,3]>Missing),] }
+    test <- rowSums(geno.desc[,2:3])
+      if(length(which(test > Missing)) >0 ) { 
+        cat("Removing any missing data (will affect Hardy-Weingberg calculation).\n")
+        Tab <- Tab[-which(test > Missing),] }
   } else if (Missing > 2) {
     cat("The number of allowable missing may affect performance.\nConsider running with a smaller Missing or without the haplotype ('H') analysis.\ncontinuing......")
     geno.desc <- haplo.stats::summaryGeno(Tab[,3:ncol(Tab)], miss.val=NAstrings)
-    if(length(which(geno.desc[,3]>Missing))>0) { cat("Removing missing data (will affect Hardy-Weingberg calculation).\n"); Tab <- Tab[-which(geno.desc[,3]>Missing),] }
+    test <- rowSums(geno.desc[,2:3])
+      if(length(which(test > Missing)) >0 ) {
+        cat("Removing missing data (will affect Hardy-Weingberg calculation).\n")
+        Tab <- Tab[-which(test>Missing),] }
   }
   
   # Set definitions
@@ -142,6 +148,9 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   if (missing(Run.Tests)) { Run <- c("HWE","H","L","A") } else { Run <- Run.Tests }
   
   ## __________________ HLA specific checks
+  if(Trim & !HLA) { cat("Trimming only relevant to HLA data, no trimming performed.\n") }
+  if(EVS.rm & !HLA) { cat("Expression variant suffix stripping only relevant to HLA data, no stripping performed.\n") }
+  
   if(HLA) {
     
     if(Trim | EVS.rm | "A" %in% Run ) { cat("Running HLA specific functions...\n") }
@@ -174,7 +183,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       Release <- as.character(unlist(EPL[['Release']]))
       
       # Sanity Check for Known HLA loci
-      cat(paste("--Checking loci against",Release,".\n",sep=""))
+      cat(paste("--Checking loci against ",Release,".\n",sep=""))
       test <- CheckLoci(names(EPL),unique(All.ColNames[3:ncol(Tab)]))
       if( test$Flag ) {
         cat("There may be a discrepancy with HLA loci names. Unrecognized locus name(s) encountered.\n")
@@ -183,7 +192,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       }
       
       # Sanity Check for Known HLA alleles
-      cat(paste("--Checking alleles against",Release,".\n",sep=""))
+      cat(paste("--Checking alleles against ",Release,".\n",sep=""))
       test <- CheckAlleles(EPL, Tab[,3:ncol(Tab)],unique(All.ColNames[3:ncol(Tab)]),All.ColNames[3:ncol(Tab)])
       if(sum(unlist(lapply(test,"[[",1)))>0) {
         cat("There may be a discrepancy with allele names. Unrecognized allele name(s) encountered.\n")
@@ -223,7 +232,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     
     cat("\n>>>> STARTING HARDY-WEINBERG ANALYSIS...\n")
     cat(paste(rep("_",50),collapse=""),"\n")
-    cat("HWE performed at set resolution on controls.\n")
+    if(Trim) { cat("HWE performed at user resolution on controls.\n") }
     HWE <- HWEChiSq(Tab,All.ColNames)
     if(Output) { write.table(HWE,file="HWE.txt",sep="\t",col.names=T,row.names=F,quote=F) }
     
@@ -410,7 +419,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
           cat("\n>>>> STARTING AMINO ACID LEVEL ANALYSIS...\n")
           cat(paste(rep("_",50),collapse=""),"\n")
           
-          if( file.exists(UPL) ) { cat("Applying user updated protein exon alignments.\n") }
+          if( UPL.flag ) { cat("Using updated protein exon alignments.\n") }
           
           # Amino Acid Analysis Sanity Checks
           if(Res<2 | !CheckHLA(genos))  {

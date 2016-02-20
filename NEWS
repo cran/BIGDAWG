@@ -1,6 +1,13 @@
+BIGDAWG v1.2.6 (Release date: 2016-02-19) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Bug fix when removing missing data as set by 'Missing' parameter.
+* Added reference to BIGDAWG publication in DESCRIPTION and vignette.
+* Update bundled IMGT/HLA amino acid exon alignment to latest release (3.23.0)
+
+
 BIGDAWG v1.2.1 (Release date: 2015-11-09) Derek Pappas <dpappas@chori.org>
 ====================================================================================
-
 Changes:
 * Added NEWS file to document BIGDAWG releases.
 * Bug fix when EVS.rm was set to TRUE.
