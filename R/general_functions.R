@@ -65,50 +65,71 @@ RunChiSq <- function(x) {
   ## pull out cells that don't need binning, bin remaining
   #unbinned
   OK.rows <- as.numeric(which(apply(ExpCnts,min,MARGIN=1)>=5))
-  if(length(OK.rows)>=2) {
-    unbinned <- x[OK.rows,]
+  if(length(OK.rows)>0) {
+    if(length(OK.rows)>=2) {
+      unbinned <- x[OK.rows,]
+    } else {
+      unbinned <- do.call(cbind,as.list(x[OK.rows,]))
+      rownames(unbinned) <- rownames(x)[OK.rows]
+    }
   } else {
-    unbinned <- do.call(cbind,as.list(x[OK.rows,]))
-    rownames(unbinned) <- rownames(x)[OK.rows]
+    unbinned <- NULL
   }
+  
   #binned
   Rare.rows <- as.numeric(which(apply(ExpCnts,min,MARGIN=1)<5))
   if(length(Rare.rows)>=2) {
     binned <- x[Rare.rows,]
     New.df <- rbind(unbinned,colSums(x[Rare.rows,]))
-    rownames(New.df)[length(OK.rows)+1] <- "binned"
+    rownames(New.df)[nrow(New.df)] <- "binned"
   } else {
     binned <- c(NA,NA)
     New.df <- x
   }
+
+  if(nrow(New.df)>1) {
   
-  # flag if final matrix fails Cochran's rule of thumb (more than 20% of exp cells are less than 5)
-  ExpCnts <- chisq.test(New.df)$expected
-  if(sum(ExpCnts<5)==0){
-    flag <- "Ok"
-  } else if(sum(ExpCnts<5)/sum(ExpCnts>=1)>=0.2){
-    flag <- "Ok"
+    # flag if final matrix fails Cochran's rule of thumb (more than 20% of exp cells are less than 5)
+    # True = OK ; False = Not good for Chi Square
+    ExpCnts <- chisq.test(New.df)$expected
+    if(sum(ExpCnts<5)==0){
+      flag <- FALSE
+    } else if( sum(ExpCnts<5)/sum(ExpCnts>=0)<=0.2 && sum(ExpCnts>=1)>length(ExpCnts) ){
+      flag <- FALSE
+    } else {
+      flag <- TRUE
+    }
+    
+    ## chi square test on binned data
+    df.chisq <- chisq.test(New.df)
+    Sig <- if(df.chisq$p.value > 0.05) { "NS" } else { "*" }
+    
+    
+    ## show results of overall chi-square analysis
+    tmp.chisq <- data.frame(cbind(round(df.chisq$statistic,digits=4),
+                                  df.chisq$parameter,
+                                  format.pval(df.chisq$p.value),
+                                  Sig))
+    colnames(tmp.chisq) <- c("X.square", "df", "p.value", "sig")
+    
+    chisq.out <- list(Matrix = New.df,
+                      Binned = binned,
+                      Test = tmp.chisq,
+                      Flag = flag)
+    
+    return(chisq.out)
+    
   } else {
-    flag <- "Check"
+    
+    flag <- TRUE
+    tmp.chisq <- data.frame(rbind(rep("NCalc",4)))
+    colnames(tmp.chisq) <- c("X.square", "df", "p.value", "sig")
+    chisq.out <- list(Matrix = New.df,
+                      Binned = binned,
+                      Test = tmp.chisq,
+                      Flag = flag)
+    
   }
-  
-  ## chi square test on binned data
-  df.chisq <- chisq.test(New.df)
-  Sig <- if(df.chisq$p.value > 0.05) { "NS" } else { "*" }
-  
-  ## show results of overall chi-square analysis
-  tmp.chisq <- data.frame(cbind(round(df.chisq$statistic,digits=4),
-                                df.chisq$parameter,
-                                format.pval(df.chisq$p.value),
-                                Sig))
-  colnames(tmp.chisq) <- c("X.square", "df", "p.value", "sig")
-  
-  chisq.out <- list(Matrix = New.df,
-                    Binned = binned,
-                    Test = tmp.chisq,
-                    Flag = flag)
-  
-  return(chisq.out)
   
 }
 

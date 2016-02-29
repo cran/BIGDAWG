@@ -1,6 +1,17 @@
+BIGDAWG v1.2.8 (Release date: 2016-02-28) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Bug fix.
+
+BIGDAWG v1.2.7 (Release date: 2016-02-27) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Bug fix for chi square output using some data sets.
+
 BIGDAWG v1.2.6 (Release date: 2016-02-19) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 Changes:
+* BIDAWGs v1.2.1 - v1.2.5 unreleased internal versions.
 * Bug fix when removing missing data as set by 'Missing' parameter.
 * Added reference to BIGDAWG publication in DESCRIPTION and vignette.
 * Update bundled IMGT/HLA amino acid exon alignment to latest release (3.23.0)

@@ -1,7 +1,7 @@
 ---
 title: "BIGDAWG"
 author: "Derek Pappas, Ph.D. (dpappas@chori.org)"
-date: "2016-02-18"
+date: "2016-02-28"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using BIGDAWG}
@@ -9,7 +9,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-* Package Version: 1.2.6
+* Package Version: 1.2.8
 * HLA/IMGT Database Release: 3.23.0, 2016-01-19
 
 ## Overview
