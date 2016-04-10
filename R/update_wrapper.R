@@ -4,7 +4,7 @@
 #' @param Loci Character vector of loci that should be used to create new alignment object (default = HLA-A,B,C,DRB1/3/4/5,DQA1,DQB1,DPA1,DPB1).
 #' @param Restore Logical specifying if the original alignment file be restored.
 #' @param Force Logical specifiying if update should be forced.
-#' @note This function was tested and works with IMGT/HLA database release 3.20.0, 2015-04-17.
+#' @note This function was tested and works with IMGT/HLA database release 3.23.0, 2016-01-19.
 UpdateRelease <- function(Loci,Force=F,Restore=F) {
   
   MainDir <- getwd()

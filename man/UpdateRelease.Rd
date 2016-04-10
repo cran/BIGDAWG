@@ -17,6 +17,6 @@ UpdateRelease(Loci, Force = F, Restore = F)
 This updates the protein aligment used in checking HLA loci and alleles as well as in the amino acid analysis.
 }
 \note{
-This function was tested and works with IMGT/HLA database release 3.20.0, 2015-04-17.
+This function was tested and works with IMGT/HLA database release 3.23.0, 2016-01-19.
 }
 

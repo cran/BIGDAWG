@@ -7,7 +7,7 @@
 getCS.Mat(Locus, genos.sub, Allele.Freq, Allele.Combn)
 }
 \arguments{
-\item{Locus}{Number of alleles.}
+\item{Locus}{Locus of interest.}
 
 \item{genos.sub}{Genotypes for locus of interest.}
 

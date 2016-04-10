@@ -50,7 +50,7 @@ CheckLoci <- function(x,y) {
 #' @param z2 Genotype column names
 #' @note This function is for internal BIGDAWG use only.
 CheckAlleles <- function(x,y,z1,z2) {
-  #Returns TRUE if absent allele(s) encountered
+  #Returns TRUE if unknown allele(s) encountered
   #Checks at 3 levels of resolution: Full, 2-Field, and 1-Field
   #x=ExonPtnList
   #y=genos
@@ -69,6 +69,10 @@ CheckAlleles <- function(x,y,z1,z2) {
     y.locus <- y[which(z2==Locus.tmp)]
     y.locus <- matrix(c(unlist(y.locus[,1]),y.locus[,2]),ncol=1)
     y.locus <- na.omit(y.locus)
+    
+    # Remove Absent Allele Calls
+    Allele.rm <- which(y.locus=="^")
+    if(length(Allele.rm)>0) { y.locus <- y.locus[-Allele.rm] }
     
     #identify minimum resolution
     tmp <- sapply(y.locus,FUN=strsplit,split=":")
@@ -89,6 +93,10 @@ CheckAlleles <- function(x,y,z1,z2) {
     
     Output[[Locus.tmp]] <- list(Flag=ifelse(!sum(y.alleles %in% x.alleles)==length(y.alleles),T,F),
                                 Allele=paste(Locus.tmp,paste(y.alleles[!y.alleles %in% x.alleles],collapse=","),sep="*"))
+    
+    i = i + 1
+    Output
+    
   }
   return(Output)
 }
@@ -109,7 +117,7 @@ PreCheck <- function(Tab,All.ColNames,rescall,HLA) {
   nGrp1 <- length(Tab[Grp1,2])
   
   if(min(nGrp0,nGrp1)==0) {
-    cat("Your data does not appear to contain both cases and controls. Please see vignette.\n")
+    Err.Log("Case.Con")
     stop("Analysis Stopped.",call. = F)
   }
   
@@ -143,7 +151,7 @@ PreCheck <- function(Tab,All.ColNames,rescall,HLA) {
     Grp1res <- max(unlist(lapply(Loci,function(x) max(unlist(lapply(strsplit(unlist(GTYPE[Grp1,which(colnames(GTYPE)==x)]),split=":"),length))))))
     
     if(max(Grp0res,Grp1res)>4) {
-      cat("Your HLA does not appear to be formatted properly, >4 fields detected. Please see vignette.\n")
+      Err.Log("High.Res")
       stop("Analysis Stopped.",call. = F)
     }
     

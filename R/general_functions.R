@@ -1,3 +1,33 @@
+#' Error Code Display and Logging
+#'
+#' Displays error codes attributable to data formatting and Locus/Allele naming. Writes to log file.
+#' @param x Log Code.
+#' @param y Misc information relevant to error.
+#' @note This function is for internal BIGDAWG use only.
+Err.Log <- function (x, y=NULL) {
+  
+  switch(x,
+         #Formatting
+         Bad.DRB345.format =  { Error <- "You have included DRB3/4/5 columns, but the alleles calls are not formatted as Locus*Allele. Please see vignette." },
+         Bad.DRB345.hap =  { Error <- "We have encountered unanticipated DR haplotypes. Please see the 'Flagged_DRB345_Haplotypes.txt' output file." },
+         Bad.Format.HLA = { Error <- "Your HLA data includes Locus*Allele genotype formatting. Please ensure all known genotypes (including absent calls) follow this format." },
+         Bad.Format.Trim = { Error <- "Your HLA data does not appear to be formatted properly for trimming. Please see vignette." },
+         Bad.Format.EVS = { Error <- "Your HLA data does not appear to be formatted properly for EVS stripping. Please see vignette." },
+         Case.Con = { Error <- "Your data does not appear to contain both cases and controls. Please see vignette." },
+         Loci.No = { Error <- "You have opted to run the haplotype analysis with too few loci. Please check Set definitions." },
+         Loci.No.AP = { Error <- "You have set All.Pairwise to 'True' but one or more your defined locus sets contain too few loci. Please check Set definitions." },
+         Low.Res = { Error <- "The resolution of your HLA data is less than 2 or does not appear to be formatted properly. Please see vignette." },
+         High.Res = { Error <- "Your HLA does not appear to be formatted properly, >4 fields detected. Please see vignette" },
+         #Names
+         Bad.Filename = {  Error <- paste("BIGDAWG could not locate a file labeled: ",y," in the specificied working directory.",sep="") },
+         Bad.Locus.NA = { Error <- "Your seemed to have specified a locus in the Loci.Set that is not present in your data file." },
+         Bad.Locus.HLA = { Error <- "There may be a discrepancy with HLA loci names. Unrecognized locus name(s) encountered." },
+         Bad.Allele.HLA = { Error <- "There may be a discrepancy with allele names. Unrecognized allele name(s) encountered." }
+  )
+  cat(Error,"\n")
+  write.table(Error,file="Error_Log.txt",sep="\t",quote=F,col.names=F,row.names=F,append=T)
+}
+
 #' Replace absent allele strings
 #'
 #' Replaces allowable absent allele strings with ^ symbol.
@@ -11,6 +41,7 @@ rmABstrings <- function(df) {
   df[df=="ab"] <- "^"
   df[df=="Ab"] <- "^"
   df[df=="AB"] <- "^"
+  df[df=="00:00"] <- "^"
   return(df)
 }
 
@@ -32,6 +63,141 @@ EVSremoval <- function(Locus,EPList) {
     tmp[,'Trimmed'] <- sapply(tmp[,'Trimmed'],gsub,pattern="[[:alpha:]]",replacement="")
     return(tmp)
   }
+}
+
+#' DRB345 Column Processing
+#'
+#' Separates DRB345 column pair into separate columns for each locus
+#' @param Tab Data frame of sampleIDs, phenotypes, and genotypes
+#' @note This function is for internal BIGDAWG use only.
+DRB345.parser <- function(Tab) {
+  #Tab Dataset Data-frame
+
+  getCol <- grep("DRB345",colnames(Tab))
+  df <- matrix(data="^",nrow=nrow(Tab),ncol=6)
+  colnames(df) <- c("DRB3","DRB3.1","DRB4","DRB4.1","DRB5","DRB5.1")
+  tmp.1 <- sapply(Tab[,getCol[1]],FUN=GetField,Res=1) ; tmp.2 <- sapply(Tab[,getCol[2]],FUN=GetField,Res=1)
+  
+  tmp <- list()
+  # DRB3
+  tmp[[1]] <- unlist(grep("DRB3",Tab[,getCol[1]])) ; tmp[[2]] <- unlist(grep("DRB3",Tab[,getCol[2]]))
+  df[tmp[[1]],1] <- Tab[tmp[[1]],getCol[1]] ; df[tmp[[2]],2] <- Tab[tmp[[2]],getCol[2]]
+  df[setdiff(1:nrow(df),tmp[[1]]),1] <- "DRB3*^" ; df[setdiff(1:nrow(df),tmp[[2]]),2] <- "DRB3*^"
+  df[which(tmp.1=="00"),1] <- paste("DRB3*",Tab[which(tmp.1=="00"),getCol[1]],sep="")
+  df[which(tmp.2=="00"),2] <- paste("DRB3*",Tab[which(tmp.2=="00"),getCol[2]],sep="")
+
+  tmp <- list()
+  # DRB4
+  tmp[[1]] <- unlist(grep("DRB4",Tab[,getCol[1]])) ; tmp[[2]] <- unlist(grep("DRB4",Tab[,getCol[2]]))
+  df[tmp[[1]],3] <- Tab[tmp[[1]],getCol[1]] ; df[tmp[[2]],4] <- Tab[tmp[[2]],getCol[2]]
+  df[setdiff(1:nrow(df),tmp[[1]]),3] <- "DRB4*^" ; df[setdiff(1:nrow(df),tmp[[2]]),4] <- "DRB4*^"
+  df[which(tmp.1=="00"),3] <- paste("DRB4*",Tab[which(tmp.1=="00"),getCol[1]],sep="")
+  df[which(tmp.2=="00"),4] <- paste("DRB4*",Tab[which(tmp.2=="00"),getCol[2]],sep="")
+
+  tmp <- list()
+  # DRB5
+  tmp[[1]] <- unlist(grep("DRB5",Tab[,getCol[1]])) ; tmp[[2]] <- unlist(grep("DRB5",Tab[,getCol[2]]))
+  df[tmp[[1]],5] <- Tab[tmp[[1]],getCol[1]] ; df[tmp[[2]],6] <- Tab[tmp[[2]],getCol[2]]
+  df[setdiff(1:nrow(df),tmp[[1]]),5] <- "DRB5*^" ; df[setdiff(1:nrow(df),tmp[[2]]),6] <- "DRB5*^"
+  df[which(tmp.1=="00"),5] <- paste("DRB5*",Tab[which(tmp.1=="00"),getCol[1]],sep="")
+  df[which(tmp.2=="00"),6] <- paste("DRB5*",Tab[which(tmp.2=="00"),getCol[2]],sep="")
+  
+  # NA's
+  df[is.na(Tab[,getCol[1]]),] <- NA ; df[is.na(Tab[,getCol[2]]),] <- NA
+  
+  Tab.sub <- Tab[,-getCol]
+  Tab <- cbind(Tab.sub,df)
+  
+  return(Tab)
+  
+}
+
+#' DRB345 haplotype zygosity checker
+#'
+#' Checks DR haplotypes for correct zygosity and flags unanticipated haplotypes
+#' @param x Row of data set data frame following DRB345 parsing
+#' @note This function is for internal BIGDAWG use only.
+DRB345.zygosity <- function(x) {
+  #what about NA or Novels?
+  
+  Rules <- list("DRB1*01"="^","DRB1*10"="^","DRB1*08"="^",
+                "DRB1*03"="DRB3","DRB1*11"="DRB3","DRB1*12"="DRB3","DRB1*13"="DRB3","DRB1*14"="DRB3",
+                "DRB1*04"="DRB4","DRB1*07"="DRB4","DRB1*09"="DRB4",
+                "DRB1*15"="DRB5","DRB1*16"="DRB5")
+  
+  
+  x <- as.data.frame(x,row.names=rownames(x))
+  x.out <- x
+  
+  x.1F <- apply(x,MARGIN=c(1,2),FUN=GetField,Res=1) # get 1 Field Resolution
+  x.1F <- gsub("00","^",x.1F) # substitute "00" with "^"
+  
+  #DRB1 - get expected DRB3/4/5 genotypes
+  DRB1.col <- grep("DRB1",colnames(x.1F))
+  
+  DRB1.1 <- x.1F[,DRB1.col][1]
+  DR.Gtype <- as.character(Rules[DRB1.1])
+  
+  DRB1.2 <- x.1F[,DRB1.col][2]
+  DR.Gtype <- c(DR.Gtype,as.character(Rules[DRB1.2]))
+  
+  #DRB3 Check
+  DRB3.col <- grep("DRB3",colnames(x.1F))
+  if( sum(is.na(x.1F[,DRB3.col]))==0 ) {
+    
+    DRB3.obs <- as.numeric(2 - sum(grepl("\\^",x.1F[,DRB3.col])))
+    DRB3.exp <- as.numeric(sum(grepl("DRB3",DR.Gtype)))
+    
+    A1 <- as.character(x[,DRB3.col[1]]) ; A2 <- as.character(x[,DRB3.col[2]])
+    
+    if(DRB3.obs!=DRB3.exp) { 
+      if(DRB3.obs==2 & DRB3.exp==1 & A1==A2 ) { x.out[,DRB3.col] <- rbind(c("DRB3*^",x[,DRB3.col][1])) ; DR3.flag <- F
+      } else { DR3.flag <- T }
+    } else { DR3.flag <- F }
+    
+  } else { DR3.flag <- NA }
+  
+  #DRB4 Check
+  DRB4.col <- grep("DRB4",colnames(x.1F))
+  if( sum(is.na(x.1F[,DRB4.col]))==0 ) {
+    
+    DRB4.obs <- as.numeric(2 - sum(grepl("\\^",x.1F[,DRB4.col])))
+    DRB4.exp <- as.numeric(sum(grepl("DRB4",DR.Gtype)))
+    
+    A1 <- as.character(x[,DRB4.col[1]]) ; A2 <- as.character(x[,DRB4.col[2]])
+    
+    if(DRB4.obs!=DRB4.exp) { 
+      if(DRB4.obs==2 & DRB4.exp==1 & A1==A2 ) { x.out[,DRB4.col] <- rbind(c("DRB4*^",x[,DRB4.col][1])) ; DR4.flag <- F
+      } else { DR4.flag <- T }
+    } else { DR4.flag <- F }
+    
+  } else { DR4.flag <- NA }
+  
+  #DRB5 Check
+  DRB5.col <- grep("DRB5",colnames(x.1F))
+  if( sum(is.na(x.1F[,DRB5.col]))==0 ) {
+    
+    DRB5.obs <- as.numeric(2 - sum(grepl("\\^",x.1F[,DRB5.col])))
+    DRB5.exp <- as.numeric(sum(grepl("DRB5",DR.Gtype)))
+    
+    A1 <- as.character(x[,DRB5.col[1]]) ; A2 <- as.character(x[,DRB5.col[2]])
+    
+    if(DRB5.obs!=DRB5.exp) { 
+      if(DRB5.obs==2 & DRB5.exp==1 & A1==A2 ) { x.out[,DRB5.col] <- rbind(c("DRB5*^",x[,DRB5.col][1])) ; DR5.flag <- F
+      } else { DR5.flag <- T }
+    } else { DR5.flag <- F }
+    
+  } else { DR5.flag <- NA }
+  
+  colnames(x.out) <- colnames(x)
+  rownames(x.out) <- rownames(x)
+  Out.list <- list()
+  Out.list[['GTYPE']] <- x.out
+  Out.list[['Flag3']] <- DR3.flag
+  Out.list[['Flag4']] <- DR4.flag
+  Out.list[['Flag5']] <- DR5.flag
+  return(Out.list)
+  
 }
 
 #' HLA trimming function

@@ -12,54 +12,62 @@ AlignmentFilter <- function(Align, Alleles, Locus) {
   Align.sub <- unique(Align[,getCols])
   Align.sub <- Align.sub[Align.sub[,'Trimmed'] %in% Alleles,]
   
-  Alleles.S <- names(which(table(Align.sub[,'Trimmed'])==1))
-  Alleles.M <- names(which(table(Align.sub[,'Trimmed'])>1))
+  if(!is.null(nrow(Align.sub))) {
   
-  if(length(Alleles.M>0)) {
-    # Removing Duplicates at 2-Field Level
-    Align.tmp <- list()
+    Alleles.S <- names(which(table(Align.sub[,'Trimmed'])==1))
+    Alleles.M <- names(which(table(Align.sub[,'Trimmed'])>1))
     
-    for(m in 1:length(Alleles.M)) {
-      Allele <- Alleles.M[m]
-      Alignsub.Grp <- Align.sub[which(Align.sub[,"Trimmed"]==Allele),]
+    if(length(Alleles.M>0)) {
+      # Removing Duplicates at 2-Field Level
+      Align.tmp <- list()
       
-      #for multiple matches, check first for P Group match
-      PgroupAlleles <- grep("P",Alignsub.Grp[,'P group'],fixed=T)
-      
-      if(length(PgroupAlleles)==0){
-        #if multiple matches exist, use the match with the least unknowns in sequence
-        Unknowns.Grp <- which(Alignsub.Grp[,'Unknowns']==min(Alignsub.Grp[,'Unknowns']))
-        if(length(Unknowns.Grp)>1) {Unknowns.Grp <- Unknowns.Grp[1]}
-        Align.tmp[[Allele]] <- Alignsub.Grp[Unknowns.Grp,]
+      for(m in 1:length(Alleles.M)) {
+        Allele <- Alleles.M[m]
+        Alignsub.Grp <- Align.sub[which(Align.sub[,"Trimmed"]==Allele),]
         
-      } else if(length(PgroupAlleles)==1){
-        Align.tmp[[Allele]] <- Alignsub.Grp[PgroupAlleles,]
+        #for multiple matches, check first for P Group match
+        PgroupAlleles <- grep("P",Alignsub.Grp[,'P group'],fixed=T)
         
-      } else if(length(PgroupAlleles)>1) {
-        #if multiple matches exist, use the match with the least unknowns in sequence
-        Alignsub.Grp <- Alignsub.Grp[PgroupAlleles,] 
-        Unknowns.Grp <- which(Alignsub.Grp[,'Unknowns']==min(Alignsub.Grp[,'Unknowns']))
-        if(length(Unknowns.Grp)>1) {Unknowns.Grp <- Unknowns.Grp[1]}
-        Align.tmp[[Allele]] <- Alignsub.Grp[Unknowns.Grp,]
-      }
+        if(length(PgroupAlleles)==0){
+          #if multiple matches exist, use the match with the least unknowns in sequence
+          Unknowns.Grp <- which(Alignsub.Grp[,'Unknowns']==min(Alignsub.Grp[,'Unknowns']))
+          if(length(Unknowns.Grp)>1) {Unknowns.Grp <- Unknowns.Grp[1]}
+          Align.tmp[[Allele]] <- Alignsub.Grp[Unknowns.Grp,]
+          
+        } else if(length(PgroupAlleles)==1){
+          Align.tmp[[Allele]] <- Alignsub.Grp[PgroupAlleles,]
+          
+        } else if(length(PgroupAlleles)>1) {
+          #if multiple matches exist, use the match with the least unknowns in sequence
+          Alignsub.Grp <- Alignsub.Grp[PgroupAlleles,] 
+          Unknowns.Grp <- which(Alignsub.Grp[,'Unknowns']==min(Alignsub.Grp[,'Unknowns']))
+          if(length(Unknowns.Grp)>1) {Unknowns.Grp <- Unknowns.Grp[1]}
+          Align.tmp[[Allele]] <- Alignsub.Grp[Unknowns.Grp,]
+        }
+        
+      }; rm(m)
       
-    }; rm(m)
+      Align.tmp <- do.call(rbind,Align.tmp)
+      AlignMatrix <- rbind(Align.tmp,Align.sub[Align.sub[,'Trimmed'] %in% Alleles.S,])
+      
+    } else {
+      
+      AlignMatrix <- Align.sub[Align.sub[,'Trimmed'] %in% Alleles.S,]
+      
+    }
     
-    Align.tmp <- do.call(rbind,Align.tmp)
-    AlignMatrix <- rbind(Align.tmp,Align.sub[Align.sub[,'Trimmed'] %in% Alleles.S,])
-    
+    AlignMatrix <- cbind(rep(Locus,nrow(AlignMatrix)),AlignMatrix)
+    rownames(AlignMatrix) <- NULL
+    colnames(AlignMatrix)[1] <- "Locus"
+    colnames(AlignMatrix)[which(colnames(AlignMatrix)=="Trimmed")] <- "Allele.2D"  
+    AlignMatrix <- AlignMatrix[order(AlignMatrix[,'Allele.2D']),]
+  
   } else {
     
-    AlignMatrix <- Align.sub[Align.sub[,'Trimmed'] %in% Alleles.S,]
+    AlignMatrix <- Align.sub
     
   }
-  
-  AlignMatrix <- cbind(rep(Locus,nrow(AlignMatrix)),AlignMatrix)
-  rownames(AlignMatrix) <- NULL
-  colnames(AlignMatrix)[1] <- "Locus"
-  colnames(AlignMatrix)[which(colnames(AlignMatrix)=="Trimmed")] <- "Allele.2D"  
-  AlignMatrix <- AlignMatrix[order(AlignMatrix[,'Allele.2D']),]
-  
+    
   return(AlignMatrix)
 }
 

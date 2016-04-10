@@ -19,9 +19,9 @@ HWEChiSq <- function(Tab,All.ColNames) {
   rm(df.1,df.2)
   
   #Allele info
-  Alleles <- lapply(loci,FUN=function(x) sort(unique(df[,x]))); names(Alleles) <- loci
-  nAlleles <- lapply(loci,FUN=function(x) length(na.omit(unique(df[,x])))); names(nAlleles) <- loci
-  nAlleles.tot <- lapply(loci,FUN=function(x) length(df[,x])); names(nAlleles.tot) <- loci
+  Alleles <- lapply(loci,FUN=function(x) sort(unique(df[,x]))); names(Alleles) <- loci # unique allele names
+  nAlleles <- lapply(loci,FUN=function(x) length(na.omit(unique(df[,x])))); names(nAlleles) <- loci # no. unique alleles
+  nAlleles.tot <- lapply(loci,FUN=function(x) length(df[,x])); names(nAlleles.tot) <- loci # total no. alleles
   
   #Possible Genotypes
   Allele.Combn <- lapply(nAlleles,makeComb); names(Allele.Combn) <- loci
@@ -35,18 +35,23 @@ HWEChiSq <- function(Tab,All.ColNames) {
   names(Freq.Final) <- loci
   
   #Calculate Chi Square Statistic for each Locus
-  Freq.chisq <- lapply(loci,FUN=function(x) sum(as.numeric(Freq.Final[[x]][,'O-E2|E']))); names(Freq.chisq) <- loci
+  Freq.chisq <- lapply(loci,FUN=getCS.stat,Freq.Final=Freq.Final)
+  names(Freq.chisq) <- loci
   
   #Recompute number of alleles and genotypes at each locus from binned contigency matrices (Freq.Final)
-  nAlleles.bin <- lapply(Freq.Final,FUN=function(x) length(unique(c(x[,'Allele.1'],x[,'Allele.2']))) ); names(nAlleles.bin) <- loci
-  nGenotypes.bin <- lapply(Freq.Final,nrow); names(nGenotypes.bin) <- loci
+  nAlleles.bin <- lapply(Freq.Final,FUN=getAllele.Count)
+    names(nAlleles.bin) <- loci
+  nGenotypes.bin <- lapply(Freq.Final,nrow)
+    names(nGenotypes.bin) <- loci
+    nGenotypes.bin[which(as.numeric(lapply(nGenotypes.bin,FUN=is.null))==1)] <- NA
   
   #Get degrees of freedom for each locus
   #Alleles = a ; possible genotypes =g ; df = g - (a - 1)
   Allele.dof <- lapply(loci,FUN=function(x) nGenotypes.bin[[x]] - (nAlleles.bin[[x]] - 1) ); names(Allele.dof) <- loci
   
   #Get P.values from Chi Square distribution
-  Freq.pvals <- lapply(loci,FUN=function(x) 1-pchisq(as.numeric(Freq.chisq[[x]]), as.numeric(Allele.dof[[x]]))) ; names(Freq.pvals) <- loci
+  Freq.pvals <- lapply(loci,FUN=function(x) 1-pchisq(as.numeric(Freq.chisq[[x]]), as.numeric(Allele.dof[[x]])))
+  names(Freq.pvals) <- loci
   
   #Format Output
   Test.out <- cbind(loci,
@@ -70,6 +75,9 @@ HWEChiSq <- function(Tab,All.ColNames) {
   #Flag for invalid chi square matrices
   Freq.Flag <- lapply(loci,FUN=function(x) ifelse(nrow(Freq.Final[[x]])>2,0,1))
   flagLoci <- unique(c(flagLoci,which(Freq.Flag==1)))
+  
+  #Flag for invalid chi square matrices
+  flagLoci <- unique(c(flagLoci,which(is.na(Test.out[,'X.square']))))
   
   if(length(flagLoci)>0){
     Test.out[Test.out[,'Locus'] %in% unlist(loci[flagLoci]),2:ncol(Test.out)] <- "NCalc"

@@ -27,11 +27,22 @@
 #' # Hardy-Weinberg analysis trimming data to 2-Field resolution
 #' # Significant deviation at DQB1
 #' BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2)
-BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Trim=FALSE, Res=2, EVS.rm=FALSE, Missing=0, Cores.Lim=1L, Results.Dir, Output=TRUE) {
+BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Trim=FALSE, Res=2, EVS.rm=FALSE, Missing=2, Cores.Lim=1L, Results.Dir, Output=TRUE) {
   
   options(warn=-1)
   
   MainDir <- getwd()
+  
+  #Define Output Directory
+  if (Output) {
+    if(missing(Results.Dir)) {
+      OutDir <- paste(MainDir,"/output ",format(Sys.time(), "%d%m%y %H%M%S"),sep="")
+      dir.create(OutDir)
+    } else {
+      OutDir <- Results.Dir
+    }
+  }
+  
   on.exit(setwd(MainDir), add = TRUE)
   
   if(Sys.info()['sysname']=="Windows") {Cores=1L} else {Cores=parallel::detectCores()}
@@ -41,10 +52,10 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   UPL <- paste(path.package('BIGDAWG'),"/data/UpdatePtnAlign.RData",sep="")
   if( file.exists(UPL) ) { load(UPL) ; EPL <- UpdatePtnList ; rm(UpdatePtnList); UPL.flag=T } else { EPL <- ExonPtnList ; UPL.flag=F}
   
-  cat("\n>>>>>>>>>>>>>>>>>>>> BIGDAWG Analysis <<<<<<<<<<<<<<<<<<<<\n\n")
+  cat("\n>>>>>>>>>>>>>>>>>>>>>>>>> BIGDAWG Analysis <<<<<<<<<<<<<<<<<<<<<<<<<\n\n")
   
-  ############################################################################################################################################  
-  ### Read in Data ###########################################################################################################################
+############################################################################################################################################  
+### Read in Data ###########################################################################################################################
   
   NAstrings=c("NA","","****","-","na","Na")
   
@@ -53,17 +64,79 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     colnames(Tab) <- toupper(colnames(Tab))
     All.ColNames <- gsub(".1","",colnames(Tab),fixed=T)
     rownames(Tab) <- NULL
+    setwd(OutDir)
+    DRBFLAG <- NULL
     
   } else {
-    # Read in data and Preprocess
-    if(!file.exists(Data)) { cat("BIGDAWG could not locate a file labeled:",Data,"in the specificied working directory.\n"); stop("Analysis stopped.",call.=F) }
+    
+    # Read in data and Pre-process
+    if(!file.exists(Data)) {
+      Err.Log("Bad.Filename",Data)
+      stop("Analysis stopped.",call.=F) }
     Tab <- read.table(Data, header = T, sep="\t", stringsAsFactors = F, na.strings=NAstrings, fill=T, comment.char = "#", strip.white=T)
+    if(HLA==T) { if(sum(grepl("DRB3.4.5",colnames(Tab)))>0) { colnames(Tab) <- gsub("DRB3.4.5","DRB345",colnames(Tab))  } }
     colnames(Tab) <- toupper(colnames(Tab))
     All.ColNames <- gsub(".1","",colnames(Tab),fixed=T)
     rownames(Tab) <- NULL
     Tab <- rmABstrings(Tab)
+    setwd(OutDir)
     
-    # Separate locus and allele names if data is Loci*Allele
+    # Separate DRB345 if exists as single column pair and check zygosity
+    if(HLA==T) {
+      if(sum(grepl("DRB345",colnames(Tab)))>0) {
+        
+        cat("Processing DRB3/4/5 column data.\n")
+        
+        DRBFLAG <- T
+        getCol <- grep("DRB345",colnames(Tab))
+        
+        # Stop if not Locus*Allele formatting
+        if( sum(grepl("\\*",Tab[,getCol]))==0 ) {
+          Err.Log("Bad.DRB345.format")
+          stop("Analysis Stopped.",call. = F)
+        }
+        
+        # Expand DRB3/4/5 to separate column pairs
+        Tab <- DRB345.parser(Tab)
+        
+        # Check for locus hemizygosity by DR haplotype
+        Tab.list <- lapply(seq_len(nrow(Tab)),FUN=function(z) Tab[z,])
+        tmp <- lapply(Tab.list,FUN=DRB345.zygosity)
+        tmp.df <- lapply(tmp,"[[",1)
+        Tab <- as.data.frame(do.call(rbind,tmp.df))
+        All.ColNames <- gsub(".1","",colnames(Tab),fixed=T)
+        
+        #Identify DR345 flagged haplotypes
+        DR.Flags <- list()
+        
+        tmp.DR3 <- do.call(rbind,lapply(tmp,"[[",2))
+          if(length(which(tmp.DR3==T)>0)) {
+            DR.Flags[['DRB3']] <- c("DRB3",paste(Tab[which(tmp.DR3==T),1],collapse=","))
+          } else { DR.Flags[['DRB3']] <- NULL }
+        
+        tmp.DR4 <- do.call(rbind,lapply(tmp,"[[",3))
+          if(length(which(tmp.DR4==T)>0)) { 
+            DR.Flags[['DRB4']] <- c("DRB4",paste(Tab[which(tmp.DR4==T),1],collapse=",")) 
+          } else { DR.Flags[['DRB4']] <- NULL }
+        
+        tmp.DR5 <- do.call(rbind,lapply(tmp,"[[",4))
+          if(length(which(tmp.DR5==T)>0)) { 
+            DR.Flags[['DRB5']] <- c("DRB5",paste(Tab[which(tmp.DR5==T),1],collapse=","))
+          } else { DR.Flags[['DRB5']] <- NULL }
+        
+        DR.Flags <- do.call(rbind,DR.Flags)
+        if(Output) {
+          if(!is.null(DR.Flags)) {
+            colnames(DR.Flags) <- c("Flagged.Locus","Sample.ID") ; rownames(DR.Flags) <- NULL
+            Err.Log("Bad.DRB345.hap") ; cat("\n")
+            write.table(DR.Flags,file="Flagged_DRB345_Haplotypes.txt",sep="\t",quote=F,row.names=F,col.names=T)
+          }
+        }
+        cat("\n")
+      } else { DRBFLAG <- F }
+    } else { DRBFLAG <- NULL }
+    
+    # Separate locus and allele names if data is formatted as Loci*Allele
     if(HLA==T) {
       if(sum(regexpr("\\*",Tab[,3:ncol(Tab)]))>0) {
         Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),FUN=function(x) unlist(lapply(strsplit(x,split="\\*"),"[",2)))
@@ -71,80 +144,68 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     }
     
   }
-  
-  #Define Output Directory
-  if (Output) {
-    if(missing(Results.Dir)) {
-      OutDir <- paste(MainDir,"/output ",format(Sys.time(), "%H%M%S %d%m%y"),sep="")
-      dir.create(OutDir)
-      setwd(OutDir)
-    } else {
-      OutDir <- Results.Dir
-      setwd(OutDir)  
-    }
-  }
-  
 
-  ############################################################################################################################################    
-  ### Case-Control Pre-Check #################################################################################################################
+############################################################################################################################################    
+### Case-Control Pre-Check #################################################################################################################
   
   cat(">>>> CASE - CONTROL SUMMARY STATISTICS\n")
   cat(paste(rep("_",50),collapse=""),"\n")
   if (Trim) { rescall <- paste(Res,"-Field",sep="") } else { rescall <- "Not Defined" }
   Check <- PreCheck(Tab,All.ColNames,rescall,HLA)
   if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.names=T,quote=F); rm(Check,rescall) }
-  
-  ############################################################################################################################################
-  ### Data Processing and Sanity Checks ######################################################################################################
+
+############################################################################################################################################
+### Data Processing and Sanity Checks ######################################################################################################
   
   cat(">>>> DATA PROCESSING AND CHECKS.\n")
   cat(paste(rep("_",50),collapse=""),"\n")
   
   ## __________________ General processing and checks for any data
-  # Remove any missing data
+  
+  # MISSING DATA
   if(Missing == "ignore") {
     cat("Ignoring any missing data.\n")
     cat("Consider setting a missing threshold or running without the haplotype ('H') analysis.\n")
-  } else if (Missing <= 2) {
+    rows.rm <- NULL
+  } else {
+    if (Missing > 2) {
+      cat("The number of allowable missing may affect performance.\nConsider running with a smaller 'Missing' value or without the haplotype ('H') analysis.\ncontinuing......")
+    }
+    cat("Removing any missing data. This will affect Hardy-Weinberg Equilibrium test.\n")
     geno.desc <- haplo.stats::summaryGeno(Tab[,3:ncol(Tab)], miss.val=NAstrings)
-    test <- rowSums(geno.desc[,2:3])
-      if(length(which(test > Missing)) >0 ) { 
-        cat("Removing any missing data (will affect Hardy-Weingberg calculation).\n")
-        Tab <- Tab[-which(test > Missing),] }
-  } else if (Missing > 2) {
-    cat("The number of allowable missing may affect performance.\nConsider running with a smaller Missing or without the haplotype ('H') analysis.\ncontinuing......")
-    geno.desc <- haplo.stats::summaryGeno(Tab[,3:ncol(Tab)], miss.val=NAstrings)
-    test <- rowSums(geno.desc[,2:3])
-      if(length(which(test > Missing)) >0 ) {
-        cat("Removing missing data (will affect Hardy-Weingberg calculation).\n")
-        Tab <- Tab[-which(test>Missing),] }
+    test <- geno.desc[,2] + 2*geno.desc[,3]
+    rows.rm <- which(test > Missing)
+    if( length(rows.rm) > 0 ) {
+      rows.rm <- which(test > Missing)
+      ID.rm <- Tab[rows.rm,1]
+      Tab <- Tab[-rows.rm,]
+      write.table(ID.rm, file="Removed_SampleIDs.txt", sep="\t", row.names=F, col.names=F, quote=F)
+    }
+    rm(geno.desc,test,ID.rm)
+    if(nrow(Tab)==0) { Err.Log("Bad.Format.HLA") ; stop("Analysis Stopped.",call. = F) }
   }
+
   
-  # Set definitions
+  # LOCI SET DEFINITIONS
   if (missing(Loci.Set)) {
     Set <- list(c(3:ncol(Tab)))
   } else {
     if(CheckLoci(unique(All.ColNames[3:ncol(Tab)]),Loci.Set)$Flag) {
-      cat("Your seemed to have specified a locus in the Loci.Set that is not present in your data file.\n")
+      Err.Log("Bad.Locus.NA")
       stop("Analysis Stopped.",call. = F)
     } else {
       if(sum(grepl("All",Loci.Set))>0) { Loci.Set[[which(Loci.Set=="All")]] <- unique(All.ColNames[3:ncol(Tab)])  } 
       Set <- lapply(Loci.Set,FUN=function(x)seq(1,ncol(Tab),1)[All.ColNames %in% x]) }
   }
   
-  # Mutlicore limitations
+  # MULTICORE LIMITATIONS
   if (Cores.Lim!=1L) { 
     if(Sys.info()['sysname']=="Windows" & as.numeric(Cores.Lim)>1) {
-      cat("You seem to be using Windows and specified a number of Cores > 1. Please see vignette.\n")
-      stop("Analysis Stopped.",call. = F)
-    } else {
-      Cores <- as.integer(Cores.Lim) 
-    }
-  } else {
+      cat("You seem to be using Windows and specified a number of Cores > 1. Please see vignette.\n") }
     Cores = as.integer(Cores.Lim)
   }
   
-  # Run Tests definitions
+  # RUN TESTS DEFINITIONS
   if (missing(Run.Tests)) { Run <- c("HWE","H","L","A") } else { Run <- Run.Tests }
   
   ## __________________ HLA specific checks
@@ -162,7 +223,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),GetField,Res=Res)
       rownames(Tab) <- NULL
     } else if (Trim) {
-      cat("Your HLA data does not appear to be formatted properly for trimming. Please see vignette.\n")
+      Err.Log("Bad.Format.Trim")
       stop("Analysis Stopped.",call. = F)
     }
     
@@ -174,7 +235,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       EPL <- lapply(EVS.loci,EVSremoval,EPList=EPL)
       names(EPL) <- EVS.loci ; rm(EVS.loci)
     } else if (EVS.rm) {
-      cat("Your HLA data does not appear to be formatted properly. Please see vignette.\n")
+      Err.Log("Bad.Format.EVS")
       stop("Analysis Stopped.",call. = F)
     }
     
@@ -186,16 +247,16 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       cat(paste("--Checking loci against ",Release,".\n",sep=""))
       test <- CheckLoci(names(EPL),unique(All.ColNames[3:ncol(Tab)]))
       if( test$Flag ) {
-        cat("There may be a discrepancy with HLA loci names. Unrecognized locus name(s) encountered.\n")
+        Err.Log("Bad.Locus.HLA")
         cat("Problem loci:",test$Loci,"\n")
         stop("Analysis stopped.",call. = F)
       }
       
       # Sanity Check for Known HLA alleles
       cat(paste("--Checking alleles against ",Release,".\n",sep=""))
-      test <- CheckAlleles(EPL, Tab[,3:ncol(Tab)],unique(All.ColNames[3:ncol(Tab)]),All.ColNames[3:ncol(Tab)])
+      test <- CheckAlleles(EPL, Tab[,3:ncol(Tab)], unique(All.ColNames[3:ncol(Tab)]), All.ColNames[3:ncol(Tab)])
       if(sum(unlist(lapply(test,"[[",1)))>0) {
-        cat("There may be a discrepancy with allele names. Unrecognized allele name(s) encountered.\n")
+        Err.Log("Bad.Allele.HLA")
         tmp <- as.character(unlist(lapply(test[which(lapply(test,"[[",1)==T)],"[",2)))
         cat("Problem alleles:",tmp,"\n")
         stop("Analysis stopped.",call. = F)
@@ -203,36 +264,38 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     }
     
   } # End HLA if statement and HLA specific functionalities
-  
-  ############################################################################################################################################    
-  ### Write to Parameter File ################################################################################################################
+
+############################################################################################################################################    
+### Write to Parameter File ################################################################################################################
   
   if(Output) {
     
     Params.Run <- list(Time = format(Sys.time(), "%a %b %d %X %Y"),
                        BD.Version = as.character(packageVersion("BIGDAWG")),
+                       Cores.Available = Cores,
                        File = Data,
                        HLA.Data = HLA,
+                       DRB345.Parsed = DRBFLAG,
                        Tests = paste(Run,collapse=","),
                        All.Pairwise = All.Pairwise,
                        Trim = Trim,
                        Resolution = ifelse(Trim,Res,NA),
                        Suffix.Stripping = EVS.rm,
                        Missing = Missing,
-                       Cores.Available = Cores)
+                       Samples.Removed = length(rows.rm))
     
     Params.Run <- do.call(rbind,Params.Run)
     write.table(Params.Run,file="Run_Parameters.txt",sep=": ", row.names=T, col.names=F, quote=F)
   }
-  
-  ############################################################################################################################################    
-  ### Hardy Weignberg Equilibrium ############################################################################################################
+
+############################################################################################################################################    
+### Hardy Weignberg Equilibrium ############################################################################################################
   
   if ("HWE" %in% Run) {
     
     cat("\n>>>> STARTING HARDY-WEINBERG ANALYSIS...\n")
     cat(paste(rep("_",50),collapse=""),"\n")
-    if(Trim) { cat("HWE performed at user resolution on controls.\n") }
+    if(Trim) { cat("HWE performed at user resolution on controls.\n") } else { cat("HWE performed on controls.\n") }
     HWE <- HWEChiSq(Tab,All.ColNames)
     if(Output) { write.table(HWE,file="HWE.txt",sep="\t",col.names=T,row.names=F,quote=F) }
     
@@ -244,13 +307,13 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     rm(HWE)
     
   } #END HARDY-WEINBERG
-  
-  ############################################################################################################################################
-  ## Set Loop Begin (loop through each defined set)
+
+############################################################################################################################################
+####Set Loop Begin (loop through each defined locus/loci set) ##############################################################################
   
   if ( sum( c("H","L","A") %in% Run ) > 0 ) {
   
-    cat("\n>>>>>>>>>>>>>>>>>>>> Begin Locus Sets <<<<<<<<<<<<<<<<<<<<\n\n")
+    cat("\n>>>>>>>>>>>>>>>>>>>>>>>>> Begin Locus Sets <<<<<<<<<<<<<<<<<<<<<<<<<\n\n")
     cat(paste("Your analysis has ", length(Set), " set(s).", sep=""),"\n")
     
     for(k in 1:length(Set)) {
@@ -259,10 +322,11 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       
       cols <- Set[[k]]
       Tabsub <- Tab[,c(1,2,cols)]
+
+############################################################################################################################################  
+### Per Set Global Variables ###############################################################################################################
       
-      ############################################################################################################################################  
-      ### Per Set Global Variables ###################################################################################################################
-      
+      SID <- Tabsub[,1] # sample IDs
       genos <- Tabsub[,3:ncol(Tabsub)] # genotypes
       genos[genos==""] <- NA
       grp <- Tabsub[, 2] # phenotype
@@ -286,9 +350,9 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       }
       
       SAFE <- c(ls(),"SAFE")
-      
-      ############################################################################################################################################    
-      ### Haplotype Analysis #####################################################################################################################
+
+############################################################################################################################################    
+### Haplotype Analysis #####################################################################################################################
       
       if ("H" %in% Run) {
         
@@ -297,13 +361,13 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
         
         # Sanity check for set length and All.Pairwise=T
         if (nloci<2) {
-          cat("You have opted to run the haplotype analysis with too few loci. Please check Set definitions.\n")
+          Err.Log("Loci.No")
           stop("Analysis Stopped.", call. = F)
         } else if (All.Pairwise & nloci<=2)  {
-          cat("You have set All.Pairwise to 'True' but one or more your data sets contain too few loci. Please check Set definitions.\n")
+          Err.Log("Loci.No.AP")
           stop("Analysis Stopped.", call. = F) }
         
-        HAPsets <- list("All.Loci"=genos)
+        HAPsets <- list() ; HAPsets[['Set.AllLoci']] <- genos
         
         # Define Pairwise Combinations to Run When Selected
         if(All.Pairwise) {
@@ -338,6 +402,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
             name3 <- paste("haplotype_OR.",names(HAPsets)[h],".txt",sep="")
             name4 <- paste("haplotype_chisq.",names(HAPsets)[h],".txt",sep="")    
             name5 <- paste("haplotype_table.",names(HAPsets)[h],".txt",sep="") 
+            name6 <- paste("haplotype_bySubject.",names(HAPsets)[h],".txt",sep="") 
             
             ## write to file
             write.table(H.list[['freq']], name1, sep="\t", quote = F, row.names=F, col.names=T)
@@ -345,6 +410,11 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
             write.table(H.list[['OR']], name3, sep="\t", quote = F, row.names=F, col.names=T)
             write.table(H.list[['chisq']], name4, sep="\t", row.names = F, quote = F)
             write.table(H.list[['table']], name5, sep="\t", row.names = F, quote = F)
+            
+            Haplotypes <- cbind(SID,H.list[['Haplotypes']])
+            colnames(Haplotypes)[1] <- colnames(Tabsub)[1]
+            write.table(Haplotypes, name6, sep="\t", row.names = F, quote = F)
+            
           }
           
           cat("\n> HAPLOTYPE ANALYSIS COMPLETED:",names(HAPsets)[h],"\n")
@@ -358,9 +428,9 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
         rm(list=ls()[!(ls() %in% SAFE)])
         
       } #END HAPLOTYPE
-      
-      ############################################################################################################################################  
-      ### Locus Level ############################################################################################################################
+
+############################################################################################################################################  
+### Locus Level ############################################################################################################################
       
       if ("L" %in% Run) {
         
@@ -407,9 +477,9 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
         rm(list=ls()[!(ls() %in% SAFE)])
         
       } #END LOCUS
-      
-      ##########################################################################################################################################
-      ### Amino Acid Level #######################################################################################################################
+
+##########################################################################################################################################
+### Amino Acid Level #######################################################################################################################
       
       if(HLA) {
         if ("A" %in% Run) {
@@ -424,7 +494,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
           # Amino Acid Analysis Sanity Checks
           if(Res<2 | !CheckHLA(genos))  {
             cat("You have opted to run the amino acid analysis.\n")
-            cat("The resolution of your HLA data is less than 2 or does not appear to be formatted properly.\nPlease see vignette.\n")
+            Err.Log("Low.Res")
             stop("Analysis stopped.",call. = F)
           }
           
@@ -453,7 +523,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
             AminoAcid.binned[[Locus]] <- A.list[['binned']]
             overall.chisq[[Locus]] <- A.list[['chisq']]
             ORtable[[Locus]] <- A.list[['OR']]
-            Final_binned[[Locus]] <- A.list[['binned']]
+            Final_binned[[Locus]] <- A.list[['table']]
             AminoAcid.freq[[Locus]] <- A.list[['freq']]
             
           }; rm(x) #locus loop
@@ -480,18 +550,18 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
           
         } #END AMINO ACID
       }
-      
-      ############################################################################################################################################  
-      ### End Analyses ###########################################################################################################################
+
+############################################################################################################################################  
+### End Analyses ###########################################################################################################################
       
     }; rm(k)
     
-    ##  Set Loop End
-    ############################################################################################################################################  
+##  Set Loop End
+############################################################################################################################################  
   
   }# END SET LOOP IF
   
-  cat("\n>>>>>>>>>>>>>>>>>>>>> End Analysis <<<<<<<<<<<<<<<<<<<<<\n")
+  cat("\n>>>>>>>>>>>>>>>>>>>>>>>>>> End Analysis <<<<<<<<<<<<<<<<<<<<<<<<<<\n")
   
   options(warn=0)
   

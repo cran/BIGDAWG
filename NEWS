@@ -1,18 +1,41 @@
+BIGDAWG v1.3.4 (Release date: 2016-04-08) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:.
+* Added output of subject haplotypes to file when running haplotype analysis.
+* Bug fix in haplotype generation and outputs.
+* Bug fix in when locus has only a single allele. Thanks go to Antoine Lizee.
+* Other minor improvements to enhance data processing.
+* Minor wording change to vignette to enhance clarity.
+* Updated Human Immunology paper to BIGDAWG.
+
+BIGDAWG v1.3.1 - v1.3.3 (Internal Releases) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Added ability to read in HLA data when DRB3, DRB4, and DRB5 are collapsed to a
+  single column. DR haplotypes are parsed accordingly. See vignette for details.
+* Added output of Sample IDs removed due to missing alleles exceeding set threshold.
+* Adjusted Missing default to 2.
+* When running multiple locus sets the for haplotype analysis, now displays which 
+  haplotype is being run.
+
+
 BIGDAWG v1.2.8 (Release date: 2016-02-28) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 Changes:
 * Bug fix.
+
 
 BIGDAWG v1.2.7 (Release date: 2016-02-27) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 Changes:
 * Bug fix for chi square output using some data sets.
 
+
 BIGDAWG v1.2.6 (Release date: 2016-02-19) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 Changes:
-* BIDAWGs v1.2.1 - v1.2.5 unreleased internal versions.
-* Bug fix when removing missing data as set by 'Missing' parameter.
+* BIDAWG v1.2.1 - v1.2.5 unreleased internal versions.
+* Bug fix when removing missing data as set by 'Missing' parameter. Thanks go to Arun Khattri.
 * Added reference to BIGDAWG publication in DESCRIPTION and vignette.
 * Update bundled IMGT/HLA amino acid exon alignment to latest release (3.23.0)
 

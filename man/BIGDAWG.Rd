@@ -5,7 +5,7 @@
 \title{BIGDAWG wrapper function}
 \usage{
 BIGDAWG(Data, HLA = TRUE, Run.Tests, Loci.Set, All.Pairwise = FALSE,
-  Trim = FALSE, Res = 2, EVS.rm = FALSE, Missing = 0, Cores.Lim = 1L,
+  Trim = FALSE, Res = 2, EVS.rm = FALSE, Missing = 2, Cores.Lim = 1L,
   Results.Dir, Output = TRUE)
 }
 \arguments{
