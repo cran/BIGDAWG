@@ -60,18 +60,19 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   NAstrings=c("NA","","****","-","na","Na")
   
   if (Data=="HLA_data") {
+    
     Tab <- BIGDAWG::HLA_data
     colnames(Tab) <- toupper(colnames(Tab))
     All.ColNames <- gsub(".1","",colnames(Tab),fixed=T)
     rownames(Tab) <- NULL
-    setwd(OutDir)
     DRBFLAG <- NULL
+    if(Output) { setwd(OutDir) }
     
   } else {
     
     # Read in data and Pre-process
     if(!file.exists(Data)) {
-      Err.Log("Bad.Filename",Data)
+      Err.Log(Output,"Bad.Filename", Data)
       stop("Analysis stopped.",call.=F) }
     Tab <- read.table(Data, header = T, sep="\t", stringsAsFactors = F, na.strings=NAstrings, fill=T, comment.char = "#", strip.white=T)
     if(HLA==T) { if(sum(grepl("DRB3.4.5",colnames(Tab)))>0) { colnames(Tab) <- gsub("DRB3.4.5","DRB345",colnames(Tab))  } }
@@ -79,7 +80,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     All.ColNames <- gsub(".1","",colnames(Tab),fixed=T)
     rownames(Tab) <- NULL
     Tab <- rmABstrings(Tab)
-    setwd(OutDir)
+    if(Output) { setwd(OutDir) }
     
     # Separate DRB345 if exists as single column pair and check zygosity
     if(HLA==T) {
@@ -92,7 +93,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
         
         # Stop if not Locus*Allele formatting
         if( sum(grepl("\\*",Tab[,getCol]))==0 ) {
-          Err.Log("Bad.DRB345.format")
+          Err.Log(Output,"Bad.DRB345.format")
           stop("Analysis Stopped.",call. = F)
         }
         
@@ -128,7 +129,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
         if(Output) {
           if(!is.null(DR.Flags)) {
             colnames(DR.Flags) <- c("Flagged.Locus","Sample.ID") ; rownames(DR.Flags) <- NULL
-            Err.Log("Bad.DRB345.hap") ; cat("\n")
+            Err.Log(Output,"Bad.DRB345.hap") ; cat("\n")
             write.table(DR.Flags,file="Flagged_DRB345_Haplotypes.txt",sep="\t",quote=F,row.names=F,col.names=T)
           }
         }
@@ -138,7 +139,11 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     
     # Separate locus and allele names if data is formatted as Loci*Allele
     if(HLA==T) {
-      if(sum(regexpr("\\*",Tab[,3:ncol(Tab)]))>0) {
+      if(sum(grepl("\\*",Tab[,3:ncol(Tab)]))>0) {
+        if(!sum(grepl("\\*",Tab[,3:ncol(Tab)]))==ncol(Tab[,3:ncol(Tab)])) {
+          Err.Log(Output,"Uneven.Prefix")
+          stop("Analysis Stopped.",call. = F)
+        }
         Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),FUN=function(x) unlist(lapply(strsplit(x,split="\\*"),"[",2)))
       }
     }
@@ -182,7 +187,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       write.table(ID.rm, file="Removed_SampleIDs.txt", sep="\t", row.names=F, col.names=F, quote=F)
     }
     rm(geno.desc,test,ID.rm)
-    if(nrow(Tab)==0) { Err.Log("Bad.Format.HLA") ; stop("Analysis Stopped.",call. = F) }
+    if(nrow(Tab)==0) { Err.Log(Output,"Bad.Format.HLA") ; stop("Analysis Stopped.",call. = F) }
   }
 
   
@@ -191,7 +196,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     Set <- list(c(3:ncol(Tab)))
   } else {
     if(CheckLoci(unique(All.ColNames[3:ncol(Tab)]),Loci.Set)$Flag) {
-      Err.Log("Bad.Locus.NA")
+      Err.Log(Output,"Bad.Locus.NA")
       stop("Analysis Stopped.",call. = F)
     } else {
       if(sum(grepl("All",Loci.Set))>0) { Loci.Set[[which(Loci.Set=="All")]] <- unique(All.ColNames[3:ncol(Tab)])  } 
@@ -223,7 +228,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),GetField,Res=Res)
       rownames(Tab) <- NULL
     } else if (Trim) {
-      Err.Log("Bad.Format.Trim")
+      Err.Log(Output,"Bad.Format.Trim")
       stop("Analysis Stopped.",call. = F)
     }
     
@@ -235,7 +240,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       EPL <- lapply(EVS.loci,EVSremoval,EPList=EPL)
       names(EPL) <- EVS.loci ; rm(EVS.loci)
     } else if (EVS.rm) {
-      Err.Log("Bad.Format.EVS")
+      Err.Log(Output,"Bad.Format.EVS")
       stop("Analysis Stopped.",call. = F)
     }
     
@@ -247,7 +252,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       cat(paste("--Checking loci against ",Release,".\n",sep=""))
       test <- CheckLoci(names(EPL),unique(All.ColNames[3:ncol(Tab)]))
       if( test$Flag ) {
-        Err.Log("Bad.Locus.HLA")
+        Err.Log(Output,"Bad.Locus.HLA")
         cat("Problem loci:",test$Loci,"\n")
         stop("Analysis stopped.",call. = F)
       }
@@ -256,7 +261,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       cat(paste("--Checking alleles against ",Release,".\n",sep=""))
       test <- CheckAlleles(EPL, Tab[,3:ncol(Tab)], unique(All.ColNames[3:ncol(Tab)]), All.ColNames[3:ncol(Tab)])
       if(sum(unlist(lapply(test,"[[",1)))>0) {
-        Err.Log("Bad.Allele.HLA")
+        Err.Log(Output,"Bad.Allele.HLA")
         tmp <- as.character(unlist(lapply(test[which(lapply(test,"[[",1)==T)],"[",2)))
         cat("Problem alleles:",tmp,"\n")
         stop("Analysis stopped.",call. = F)
@@ -295,13 +300,21 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     
     cat("\n>>>> STARTING HARDY-WEINBERG ANALYSIS...\n")
     cat(paste(rep("_",50),collapse=""),"\n")
-    if(Trim) { cat("HWE performed at user resolution on controls.\n") } else { cat("HWE performed on controls.\n") }
-    HWE <- HWEChiSq(Tab,All.ColNames)
-    if(Output) { write.table(HWE,file="HWE.txt",sep="\t",col.names=T,row.names=F,quote=F) }
+    if(Trim) { cat("HWE performed at user defined resolution.\n") } else { cat("HWE performed at maximum available resolution.\n") }
+    HWE <- HWE.wrapper(Tab,All.ColNames)
+    if(Output) {
+      sink("HWE.txt")
+      print(HWE,quote=F)
+      sink()
+    }
     
     cat("\n> HARDY-WEINBERG ANALYSIS COMPLETED\n")
-    HWE <- as.data.frame(HWE)
-    print(HWE,row.names=F,quote=F)
+    cat("\nControls (Group 0):\n")
+      HWE.con <- as.data.frame(HWE[['controls']])
+      print(HWE.con,row.names=F,quote=F)
+    cat("\nCases (Group 1):\n")
+      HWE.cas <- as.data.frame(HWE[['cases']])
+      print(HWE.cas,row.names=F,quote=F)
     cat("\n")
     
     rm(HWE)
@@ -336,6 +349,8 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       loci.ColNames <- gsub(".1","",colnames(genos),fixed=T) # column names
       nloci <- as.numeric(length(loci)) # number of loci
       
+      if(HLA==T) { genos[genos=='^'] <- "00:00" }
+      
       if(Output) {
         
         OutSetDir <- paste(OutDir,"/set",k,sep="")
@@ -361,10 +376,10 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
         
         # Sanity check for set length and All.Pairwise=T
         if (nloci<2) {
-          Err.Log("Loci.No")
+          Err.Log(Output,"Loci.No")
           stop("Analysis Stopped.", call. = F)
         } else if (All.Pairwise & nloci<=2)  {
-          Err.Log("Loci.No.AP")
+          Err.Log(Output,"Loci.No.AP")
           stop("Analysis Stopped.", call. = F) }
         
         HAPsets <- list() ; HAPsets[['Set.AllLoci']] <- genos
@@ -484,8 +499,6 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       if(HLA) {
         if ("A" %in% Run) {
           
-          genos[genos=='^'] <- "00:00"
-          
           cat("\n>>>> STARTING AMINO ACID LEVEL ANALYSIS...\n")
           cat(paste(rep("_",50),collapse=""),"\n")
           
@@ -494,7 +507,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
           # Amino Acid Analysis Sanity Checks
           if(Res<2 | !CheckHLA(genos))  {
             cat("You have opted to run the amino acid analysis.\n")
-            Err.Log("Low.Res")
+            Err.Log(Output,"Low.Res")
             stop("Analysis stopped.",call. = F)
           }
           

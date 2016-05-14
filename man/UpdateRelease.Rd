@@ -4,7 +4,7 @@
 \alias{UpdateRelease}
 \title{Update function for protein aligment upon new IMGT HLA data release}
 \usage{
-UpdateRelease(Loci, Force = F, Restore = F)
+UpdateRelease(Loci = NULL, Force = F, Restore = F, Output = F)
 }
 \arguments{
 \item{Loci}{Character vector of loci that should be used to create new alignment object (default = HLA-A,B,C,DRB1/3/4/5,DQA1,DQB1,DPA1,DPB1).}
@@ -12,11 +12,10 @@ UpdateRelease(Loci, Force = F, Restore = F)
 \item{Force}{Logical specifiying if update should be forced.}
 
 \item{Restore}{Logical specifying if the original alignment file be restored.}
+
+\item{Output}{Logical indicating if error reporting should be written to file.}
 }
 \description{
 This updates the protein aligment used in checking HLA loci and alleles as well as in the amino acid analysis.
-}
-\note{
-This function was tested and works with IMGT/HLA database release 3.23.0, 2016-01-19.
 }
 

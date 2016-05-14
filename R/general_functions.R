@@ -1,15 +1,17 @@
 #' Error Code Display and Logging
 #'
 #' Displays error codes attributable to data formatting and Locus/Allele naming. Writes to log file.
+#' @param Output Logical indicating if Error logging should be written to a file.
 #' @param x Log Code.
 #' @param y Misc information relevant to error.
 #' @note This function is for internal BIGDAWG use only.
-Err.Log <- function (x, y=NULL) {
+Err.Log <- function (Output, x, y=NULL) {
   
   switch(x,
          #Formatting
          Bad.DRB345.format =  { Error <- "You have included DRB3/4/5 columns, but the alleles calls are not formatted as Locus*Allele. Please see vignette." },
          Bad.DRB345.hap =  { Error <- "We have encountered unanticipated DR haplotypes. Please see the 'Flagged_DRB345_Haplotypes.txt' output file." },
+         Uneven.Prefix =  { Error <- "It seems some (not all) of your loci are formatted as Locus*Allele. Please ensure all loci share a similar format." },
          Bad.Format.HLA = { Error <- "Your HLA data includes Locus*Allele genotype formatting. Please ensure all known genotypes (including absent calls) follow this format." },
          Bad.Format.Trim = { Error <- "Your HLA data does not appear to be formatted properly for trimming. Please see vignette." },
          Bad.Format.EVS = { Error <- "Your HLA data does not appear to be formatted properly for EVS stripping. Please see vignette." },
@@ -22,10 +24,12 @@ Err.Log <- function (x, y=NULL) {
          Bad.Filename = {  Error <- paste("BIGDAWG could not locate a file labeled: ",y," in the specificied working directory.",sep="") },
          Bad.Locus.NA = { Error <- "Your seemed to have specified a locus in the Loci.Set that is not present in your data file." },
          Bad.Locus.HLA = { Error <- "There may be a discrepancy with HLA loci names. Unrecognized locus name(s) encountered." },
-         Bad.Allele.HLA = { Error <- "There may be a discrepancy with allele names. Unrecognized allele name(s) encountered." }
+         Bad.Allele.HLA = { Error <- "There may be a discrepancy with allele names. Unrecognized allele name(s) encountered." },
+         #Other
+         No.Internet = { Error <- "You do not seem to be connected to the internet. CheckRelease() or UpdateRelease() cannot proceed." }
   )
   cat(Error,"\n")
-  write.table(Error,file="Error_Log.txt",sep="\t",quote=F,col.names=F,row.names=F,append=T)
+  if(Output) { write.table(Error,file="Error_Log.txt",sep="\t",quote=F,col.names=F,row.names=F,append=T) }
 }
 
 #' Replace absent allele strings
@@ -34,15 +38,10 @@ Err.Log <- function (x, y=NULL) {
 #' @param df Genotypes dataframe.
 #' @note This function is for internal BIGDAWG use only.
 rmABstrings <- function(df) {
-  df[df=="Absent"] <- "^"
-  df[df=="absent"] <- "^"
-  df[df=="Abs"] <- "^"
-  df[df=="ABS"] <- "^"
-  df[df=="ab"] <- "^"
-  df[df=="Ab"] <- "^"
-  df[df=="AB"] <- "^"
-  df[df=="00:00"] <- "^"
+  
+  df[,3:ncol(df)] <- apply(df[,3:ncol(df)], MARGIN=c(1,2), FUN=function(x) gsub("ABSENT|Absent|absent|Abs|ABS|ab|Ab|AB|00|00:00|00:00:00|00:00:00:00","^",x) )
   return(df)
+  
 }
 
 #' Expression Variant Suffix Removal

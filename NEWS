@@ -1,6 +1,46 @@
+BIGDAWG v1.4.0 (Release date: 2016-05-12) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Version change, submission to CRAN.
+
+BIGDAWG v1.3.9 (Release date: 2016-05-11) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Vignette link modifications.
+* Bug fix for UpdateRelease() when there is no internet connection.
+
+BIGDAWG v1.3.8 (Release date: 2016-05-04) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Error message for allele formatting imbalance across loci when HLA=T.
+
+BIGDAWG v1.3.7 (Release date: 2016-04-29) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Bug fix for CheckRelease() when there is no internet connection.
+* Bug fix when setting Output=F, for testing only.
+* Bug fix HWE displaying control analysis twice.
+* Minor changes to vignette.
+* Adjust Errors to only print out when Output=T.
+
+BIGDAWG v1.3.6 (Release date: 2016-04-26) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Added function to check BIGDAWG version and IMGT/HLA version simultaneously using CheckRelease().
+* Removed UpdateRelease(GetRelease). See vignette.
+* Vignette update to reflect changes.
+
+BIGDAWG v1.3.5 (Release date: 2016-04-20) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Minor wording change to vignette to enhance clarity and reflect GitHub availability.
+* Added function to check release BIGDAWG uses for IMGT/HLA database. See vignette.
+* Added Hardy Weinberg Equilibrium testing for cases. Useful when employing other binary phenotypes.
+* Update bundled IMGT/HLA amino acid exon alignment to latest release (3.24.0)
+
 BIGDAWG v1.3.4 (Release date: 2016-04-08) Derek Pappas <dpappas@chori.org>
 ====================================================================================
-Changes:.
+Changes:
 * Added output of subject haplotypes to file when running haplotype analysis.
 * Bug fix in haplotype generation and outputs.
 * Bug fix in when locus has only a single allele. Thanks go to Antoine Lizee.
@@ -18,18 +58,15 @@ Changes:
 * When running multiple locus sets the for haplotype analysis, now displays which 
   haplotype is being run.
 
-
 BIGDAWG v1.2.8 (Release date: 2016-02-28) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 Changes:
 * Bug fix.
 
-
 BIGDAWG v1.2.7 (Release date: 2016-02-27) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 Changes:
 * Bug fix for chi square output using some data sets.
-
 
 BIGDAWG v1.2.6 (Release date: 2016-02-19) Derek Pappas <dpappas@chori.org>
 ====================================================================================
@@ -38,7 +75,6 @@ Changes:
 * Bug fix when removing missing data as set by 'Missing' parameter. Thanks go to Arun Khattri.
 * Added reference to BIGDAWG publication in DESCRIPTION and vignette.
 * Update bundled IMGT/HLA amino acid exon alignment to latest release (3.23.0)
-
 
 BIGDAWG v1.2.1 (Release date: 2015-11-09) Derek Pappas <dpappas@chori.org>
 ====================================================================================

@@ -117,7 +117,7 @@ PreCheck <- function(Tab,All.ColNames,rescall,HLA) {
   nGrp1 <- length(Tab[Grp1,2])
   
   if(min(nGrp0,nGrp1)==0) {
-    Err.Log("Case.Con")
+    Err.Log(Output,"Case.Con")
     stop("Analysis Stopped.",call. = F)
   }
   
@@ -151,7 +151,7 @@ PreCheck <- function(Tab,All.ColNames,rescall,HLA) {
     Grp1res <- max(unlist(lapply(Loci,function(x) max(unlist(lapply(strsplit(unlist(GTYPE[Grp1,which(colnames(GTYPE)==x)]),split=":"),length))))))
     
     if(max(Grp0res,Grp1res)>4) {
-      Err.Log("High.Res")
+      Err.Log(Output,"High.Res")
       stop("Analysis Stopped.",call. = F)
     }
     

@@ -11,8 +11,10 @@ GetFiles <- function(Loci) {
   # Get P-Groups Files
   download.file("http://hla.alleles.org/wmda/hla_nom_p.txt",destfile="hla_nom_p.txt")
   
-  # Remove Number from Loci names
-  Loci.rep <- unique(gsub("[[:digit:]]","",Loci))
+  # Remove Number from Loci names. For DRBx, replace with DRB.
+  # Changes here also affect ExonPtnAlign.Create()
+  Loci.rep <- Loci[-grep("DRB",Loci)]
+  Loci.rep <- sort(c(Loci.rep,"DRB"))
   
   # Get Locus Based Alignments
   for(i in 1:length(Loci.rep)) {
@@ -93,7 +95,7 @@ ExonPtnAlign.Create <- function(Locus,RefTab) {
   Pgrps <- PgrpFormat(Pgrps,Locus)
   
   #Read in Alignment
-  Locus.sub <- gsub("[[:digit:]]","",Locus)
+  if( grepl("DRB",Locus) ) { Locus.sub <- "DRB" } else { Locus.sub <- Locus }
   Name <- paste(Locus.sub,"_prot.txt",sep="")
   Align <- read.table(Name,fill=T,header=F,sep="\t",stringsAsFactors=F,strip.white=T,colClasses="character")
   

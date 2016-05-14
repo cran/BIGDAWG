@@ -4,9 +4,11 @@
 \alias{Err.Log}
 \title{Error Code Display and Logging}
 \usage{
-Err.Log(x, y = NULL)
+Err.Log(Output, x, y = NULL)
 }
 \arguments{
+\item{Output}{Logical indicating if Error logging should be written to a file.}
+
 \item{x}{Log Code.}
 
 \item{y}{Misc information relevant to error.}
