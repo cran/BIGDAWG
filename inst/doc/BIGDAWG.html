@@ -12,7 +12,7 @@
 
 <meta name="author" content="Derek Pappas, Ph.D. (dpappas@chori.org)" />
 
-<meta name="date" content="2016-05-12" />
+<meta name="date" content="2016-08-26" />
 
 <title>BIGDAWG</title>
 
@@ -32,13 +32,13 @@
 
 <h1 class="title toc-ignore">BIGDAWG</h1>
 <h4 class="author"><em>Derek Pappas, Ph.D. (<a href="mailto:dpappas@chori.org">dpappas@chori.org</a>)</em></h4>
-<h4 class="date"><em>2016-05-12</em></h4>
+<h4 class="date"><em>2016-08-26</em></h4>
 
 
 
 <ul>
-<li>Package Version: 1.4.0</li>
-<li>HLA/IMGT Database Release: 3.24.0, 2016-04-15</li>
+<li>Package Version: 1.5.4</li>
+<li>HLA/IMGT Database Release: 3.25.0, 2016-07-14</li>
 </ul>
 <div id="overview" class="section level2">
 <h2>Overview</h2>
@@ -92,8 +92,8 @@ BIGDAWG will accept any name for novel alleles. However, it is suggested you fol
 <td align="center">44:02</td>
 <td align="center">01:01</td>
 <td align="center">03:01</td>
-<td align="center">NA</td>
-<td align="center">NA</td>
+<td align="center">Abs</td>
+<td align="center">Abs</td>
 </tr>
 <tr class="even">
 <td align="left">subject2</td>
@@ -125,6 +125,15 @@ BIGDAWG will accept any name for novel alleles. However, it is suggested you fol
 <div id="data-output" class="section level2">
 <h2>Data Output</h2>
 <p>After the package is run, BIGDAWG will create a new folder entitled ‘output hhmmss ddmmyy’ in the working directory (unless otherwise specified by Results.Dir parameter, see below). Within the output folder will be a precheck file (‘Data_Summary.txt’) detailing the summary statistics of the dataset and the results of the Hardy-Weinberg equilibrium test (‘HWE.txt’). If any errors are present, a log file (‘Error_Log.txt’) will be written. If no locus subsets are specified (see parameters section), a single subfolder entitled ‘set1’ will contain the outputs of each association analysis run. If multiple locus subsets are optioned, subfolders for each locus set will be created containing the respective analytic results for that subset. Within each set subfolder, a parameter file will detail the parameters that are relevant to that subset.</p>
+<p>Data output to both the console and text files can be supressed with Verbose=F and Output=F respectively. This is particularly useful when the user prefers to send the results to an object (Return=T) rather than to text files for further analysis. The result is returned as a list with indices for the Hardy-Weinberg equilibrium test (HWE when run) and indices corresponding to the results for each Loci.Set (Set1, Set2, etc). If no Loci.Sets were specified, then only one list element will exist for Set1.</p>
+<p>For an example. If BIGDAWG outputs to an object called ‘BD’ in R (see examples below).</p>
+<p>BD<br />
+..$HWE - Results of the the Hardy-Weinberg equilibrium test<br />
+..$Set1$H - Results of the ‘Haplotype’ analysis for Set1<br />
+..$Set1$L - Results of the ‘Locus’ analysis for Set1<br />
+..$Set1$A - Results of the ‘Amino Acid’ analysis for Set1</p>
+<p>names(BD) - Display complete list of available sets to index</p>
+<p>If the user chooses to run all pairwise combinations of loci (All.Pairwise=T) for the haplotype analysis, BD$H mentioned above will be a list corresponding each analysis run for all loci available (1st index in the list) and for each pairwise locus combination. For a complete list of available pairwise results, use names(BD$H).</p>
 </div>
 <div id="error-messages-and-codes" class="section level2">
 <h2>Error Messages and Codes</h2>
@@ -132,7 +141,7 @@ BIGDAWG will accept any name for novel alleles. However, it is suggested you fol
 </div>
 <div id="parameters" class="section level2">
 <h2>Parameters</h2>
-<p><code>BIGDAWG(Data, HLA=T, Run.Tests, Loci.Set, All.Pairwise=F, Trim=F, Res=2, Missing=0, Cores.Lim=1L, Results.Dir)</code></p>
+<p><code>BIGDAWG(Data, HLA=T, Run.Tests, Loci.Set, All.Pairwise=F, Trim=F, Res=2, Missing=0, Cores.Lim=1L, Results.Dir, Return=F, Output=T, Verbose=T)</code></p>
 <p><strong>Data</strong></p>
 <p>Class: String. Required. No Default.</p>
 <p>e.g., <code>Data=&quot;HLA_data&quot;</code> -or- <code>Data=&quot;foo.txt&quot;</code></p>
@@ -171,6 +180,15 @@ BIGDAWG will accept any name for novel alleles. However, it is suggested you fol
 <p><strong>Results.Dir</strong></p>
 <p>Class: String. Optional. Default = see Data Output section.</p>
 <p>String name of a folder for BIGDAWG output. Subfolder for each locus set will be generated within any output folder specified.</p>
+<p><strong>Return</strong></p>
+<p>Class: Logical. Optional. Default = F.</p>
+<p>Specifies if BIGDAWG should output analysis results to a specified object.</p>
+<p><strong>Output</strong></p>
+<p>Class: Logical. Optional. Default = T.</p>
+<p>Turns on or off the writing of results to files. The default will write all results to text files in the output directory.</p>
+<p><strong>Verbose</strong></p>
+<p>Class: Logical. Optional. Default = T.</p>
+<p>Sets the levels of detail that should be displayed on the console. The default will display summaries of the analysis from each specified test. When turned off, only the completion status of each test is displayed.</p>
 </div>
 <div id="examples" class="section level2">
 <h2>Examples</h2>
@@ -192,7 +210,11 @@ BIGDAWG(Data=&quot;data.txt&quot;, HLA=F, Run.Tests=c(&quot;HWE&quot;,&quot;L&qu
 BIGDAWG(Data=&quot;data.txt&quot;, Run.Tests=&quot;A&quot;, Trim=T, Res=2)
 
 # Run the haplotype analysis with subsets of loci on a file called 'data.txt'
-BIGDAWG(Data=&quot;data.txt&quot;, Run.Tests=&quot;H&quot;, Loci.Set=list(c(&quot;DRB1&quot;,&quot;DQB1&quot;,&quot;DPB1&quot;),c(&quot;DRB1&quot;,&quot;DQB1&quot;)))</code></pre>
+BIGDAWG(Data=&quot;data.txt&quot;, Run.Tests=&quot;H&quot;, Loci.Set=list(c(&quot;DRB1&quot;,&quot;DQB1&quot;,&quot;DPB1&quot;),c(&quot;DRB1&quot;,&quot;DQB1&quot;)))
+
+# Run the full analysis, minimize console output, disable write to file, output to object 'BD'
+BD &lt;- BIGDAWG(Data=&quot;data.txt&quot;, Output=F, Return=T, Verbose=F)
+</code></pre>
 </div>
 <div id="updating-the-bundled-imgthla-protein-alignment" class="section level2">
 <h2>Updating the bundled IMGT/HLA protein alignment</h2>

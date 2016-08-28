@@ -1,3 +1,33 @@
+BIGDAWG v1.5.4 (Release date: 2016-08-26) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Small changes in code organization.
+* Update bundled IMGT/HLA amino acid exon alignment to latest release (3.25.0)
+
+BIGDAWG v1.5.3 (Release date: 2016-08-25) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Fix bug in UpdateRelease() on some installations.
+
+BIGDAWG v1.5.2 (Release date: 2016-08-03) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Fix for an incorrect error message wording. Thanks to Farrel Buchinsky.
+* Fix for data read-in when 1-Field resolution. Thanks to Farrel Buchinsky.
+
+BIGDAWG v1.5.1 (Release date: 2016-06-20) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Bug fix in output list.
+
+BIGDAWG v1.5.0 (Release date: 2016-06-15) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* BIGDAWG can now return results as list with parameter Return=T.
+* Minimize console output with Verbose=F.
+* Turn off write results to file with Output=F.
+* Bug fix for DRB3/4/5 parsing with NA's.
+
 BIGDAWG v1.4.0 (Release date: 2016-05-12) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 Changes:

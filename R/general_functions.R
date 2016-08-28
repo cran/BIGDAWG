@@ -26,7 +26,8 @@ Err.Log <- function (Output, x, y=NULL) {
          Bad.Locus.HLA = { Error <- "There may be a discrepancy with HLA loci names. Unrecognized locus name(s) encountered." },
          Bad.Allele.HLA = { Error <- "There may be a discrepancy with allele names. Unrecognized allele name(s) encountered." },
          #Other
-         No.Internet = { Error <- "You do not seem to be connected to the internet. CheckRelease() or UpdateRelease() cannot proceed." }
+         No.Internet = { Error <- "You do not seem to be connected to the internet. CheckRelease() or UpdateRelease() cannot proceed." },
+         TooMany.Missing = { Error <- "You data is missing too many values at each locus. Try using Missing='ignore' when running BIGDAWG and avoid haplotype test." }
   )
   cat(Error,"\n")
   if(Output) { write.table(Error,file="Error_Log.txt",sep="\t",quote=F,col.names=F,row.names=F,append=T) }

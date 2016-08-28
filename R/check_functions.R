@@ -108,8 +108,10 @@ CheckAlleles <- function(x,y,z1,z2) {
 #' @param All.ColNames Column names from genotype data.
 #' @param rescall HLA resolution set for analysis.
 #' @param HLA HLA bigdawg argument passed to function
+#' @param Verbose Summary display carryover from BIGDAWG function.
+#' @param Output Data output carryover form BIGDAWG function
 #' @note This function is for internal BIGDAWG use only.
-PreCheck <- function(Tab,All.ColNames,rescall,HLA) {
+PreCheck <- function(Tab,All.ColNames,rescall,HLA,Verbose,Output) {
   
   Grp0 <- which(Tab[,2]==0)
   Grp1 <- which(Tab[,2]==1)
@@ -133,17 +135,19 @@ PreCheck <- function(Tab,All.ColNames,rescall,HLA) {
   Grp0miss <- unlist(lapply(Loci,function(x) sum(is.na(GTYPE[Grp0,which(colnames(GTYPE)==x)]))))
   Grp1miss <- unlist(lapply(Loci,function(x) sum(is.na(GTYPE[Grp1,which(colnames(GTYPE)==x)]))))
   
-  cat("  Sample Summary\n")
-  cat("    Sample Size (n):",nrow(Tab),"\n")
-  cat("    ...Number of Controls/Cases:",paste(paste(nGrp0,nGrp1,sep="/"),collapse=", "),"\n")
-  cat("    Allele Count (2n):",nrow(Tab)*2,"\n")
-  cat("    Total loci in file:",nLoci,"\n")
-  cat("    Unique loci:",paste(Loci,collapse=", "),"\n") 
-  cat("    Unique alleles per locus:",paste(nGTYPE,collapse=", "),"\n")
-  cat("    ...Unique in Controls/Cases:",paste(paste(Grp0un,Grp1un,sep="/"),collapse=", "),"\n")
-  cat("    Missing alleles per locus:",paste(nMissing,collapse=", "),"\n")
-  cat("    ...Missing in Controls/Cases:",paste(paste(Grp0miss,Grp1miss,sep="/"),collapse=", "),"\n")
-  cat("\n")
+  if(Verbose) {
+    cat("  Sample Summary\n")
+    cat("    Sample Size (n):",nrow(Tab),"\n")
+    cat("    ...Number of Controls/Cases:",paste(paste(nGrp0,nGrp1,sep="/"),collapse=", "),"\n")
+    cat("    Allele Count (2n):",nrow(Tab)*2,"\n")
+    cat("    Total loci in file:",nLoci,"\n")
+    cat("    Unique loci:",paste(Loci,collapse=", "),"\n") 
+    cat("    Unique alleles per locus:",paste(nGTYPE,collapse=", "),"\n")
+    cat("    ...Unique in Controls/Cases:",paste(paste(Grp0un,Grp1un,sep="/"),collapse=", "),"\n")
+    cat("    Missing alleles per locus:",paste(nMissing,collapse=", "),"\n")
+    cat("    ...Missing in Controls/Cases:",paste(paste(Grp0miss,Grp1miss,sep="/"),collapse=", "),"\n")
+    cat("\n")
+  }
   
   if(HLA) {
     
@@ -155,18 +159,20 @@ PreCheck <- function(Tab,All.ColNames,rescall,HLA) {
       stop("Analysis Stopped.",call. = F)
     }
     
-    cat("  Observed Allele Resolution\n")
-    cat("    Max Resolution Controls:",paste(Grp0res,"-Field",sep=""),"\n")
-    cat("    Max Resolution Cases:",paste(Grp1res,"-Field",sep=""),"\n")
-    cat("    Defined Resolution:",rescall,"\n")
-    if(Grp0res!=Grp1res){ cat("  ***** Warning. \n") }
-    if(Grp0res!=Grp1res){ cat("  ***** There may exist a Case-Control field resolution imbalance.\n") }
-    if(Grp0res!=Grp1res){ cat("  ***** Considering trimming to",paste(min(Grp0res,Grp1res),"-Field resolution.",sep=""),"\n") }
-    cat("\n")
+    if(Verbose){
+      cat("  Observed Allele Resolution\n")
+      cat("    Max Resolution Controls:",paste(Grp0res,"-Field",sep=""),"\n")
+      cat("    Max Resolution Cases:",paste(Grp1res,"-Field",sep=""),"\n")
+      cat("    Defined Resolution:",rescall,"\n")
+      if(Grp0res!=Grp1res){ cat("  ***** Warning. \n") }
+      if(Grp0res!=Grp1res){ cat("  ***** There may exist a Case-Control field resolution imbalance.\n") }
+      if(Grp0res!=Grp1res){ cat("  ***** Considering trimming to",paste(min(Grp0res,Grp1res),"-Field resolution.",sep=""),"\n") }
+      cat("\n")
+    }
   }
   
   if(HLA) {
-    Output <- list(SampleSize=nrow(Tab),
+    Out <- list(SampleSize=nrow(Tab),
                    No.Controls=nGrp0,
                    No.Cases=nGrp1,
                    AlleleCount=nrow(Tab)*2,
@@ -179,7 +185,7 @@ PreCheck <- function(Tab,All.ColNames,rescall,HLA) {
                    SuggestedRes=paste(min(Grp0res,Grp1res),"-Field",sep=""),
                    SetRes=rescall)
   } else {
-    Output <- list(SampleSize=nrow(Tab),
+    Out <- list(SampleSize=nrow(Tab),
                    No.Controls=nGrp0,
                    No.Cases=nGrp1,
                    AlleleCount=nrow(Tab)*2,
@@ -190,6 +196,6 @@ PreCheck <- function(Tab,All.ColNames,rescall,HLA) {
                    SetRes=rescall)
   }
   
-  return(do.call(rbind,Output))
+  return(do.call(rbind,Out))
   
 }

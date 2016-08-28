@@ -1,7 +1,7 @@
 ---
 title: "BIGDAWG"
 author: "Derek Pappas, Ph.D. (dpappas@chori.org)"
-date: "2016-05-12"
+date: "2016-08-26"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using BIGDAWG}
@@ -9,8 +9,8 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-* Package Version: 1.4.0
-* HLA/IMGT Database Release: 3.24.0, 2016-04-15
+* Package Version: 1.5.4
+* HLA/IMGT Database Release: 3.25.0, 2016-07-14
 
 ## Overview
 
@@ -36,7 +36,7 @@ BIGDAWG will accept any name for novel alleles. However, it is suggested you fol
 
 |SubjectID |Disease |   A   |   A   |   B   |   B   | DRB1  | DRB1  | DRB3  | DRB3  |
 |----------|:------:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-|subject1  |0       |01:01  |02:01  |08:01  |44:02  |01:01  |03:01  |NA     |NA     |
+|subject1  |0       |01:01  |02:01  |08:01  |44:02  |01:01  |03:01  |Abs    |Abs    |
 |subject2  |1       |02:01  |24:02  |51:01  |51:01  |11:01  |14:01  |02:02  |02:11  |
 |subject3  |0       |03:01  |26:02  |NA     |NA     |10:01  |08:01  |00:00  |00:00  |
 
@@ -45,13 +45,28 @@ BIGDAWG will accept any name for novel alleles. However, it is suggested you fol
 
 After the package is run, BIGDAWG will create a new folder entitled 'output hhmmss ddmmyy' in the working directory (unless otherwise specified by Results.Dir parameter, see below). Within the output folder will be a precheck file ('Data_Summary.txt') detailing the summary statistics of the dataset and the results of the Hardy-Weinberg equilibrium test ('HWE.txt'). If any errors are present, a log file ('Error_Log.txt') will be written. If no locus subsets are specified (see parameters section), a single subfolder entitled ‘set1’ will contain the outputs of each association analysis run. If multiple locus subsets are optioned, subfolders for each locus set will be created containing the respective analytic results for that subset. Within each set subfolder, a parameter file will detail the parameters that are relevant to that subset.
 
+Data output to both the console and text files can be supressed with Verbose=F and Output=F respectively. This is particularly useful when the user prefers to send the results to an object (Return=T) rather than to text files for further analysis. The result is returned as a list with indices for the Hardy-Weinberg equilibrium test (HWE when run) and indices corresponding to the results for each Loci.Set (Set1, Set2, etc). If no Loci.Sets were specified, then only one list element will exist for Set1.
+  
+For an example. If BIGDAWG outputs to an object called 'BD' in R (see examples below).  
+
+BD  
+..\$HWE - Results of the the Hardy-Weinberg equilibrium test  
+..\$Set1\$H - Results of the 'Haplotype' analysis for Set1  
+..\$Set1\$L - Results of the 'Locus' analysis for Set1  
+..\$Set1\$A - Results of the 'Amino Acid' analysis for Set1  
+  
+ names(BD) - Display complete list of available sets to index  
+  
+If the user chooses to run all pairwise combinations of loci (All.Pairwise=T) for the haplotype analysis, BD\$H mentioned above will be a list corresponding each analysis run for all loci available (1st index in the list) and for each pairwise locus combination. For a complete list of available pairwise results, use names(BD\$H).
+
+
 ## Error Messages and Codes
 
 BIGDAWG has a few built-in checks to ensure data format consistency and compatibility, especially for HLA data. BIGDAWG also does a parameter review before performing chi-squared tests and returns ‘NCalc’ (not calculated) when all genotypes have expected counts < 5 or the degrees of freedom do not allow for a test (e.g., dof < 1).
 
 ## Parameters
 
-`BIGDAWG(Data, HLA=T, Run.Tests, Loci.Set, All.Pairwise=F, Trim=F, Res=2, Missing=0, Cores.Lim=1L, Results.Dir)`
+`BIGDAWG(Data, HLA=T, Run.Tests, Loci.Set, All.Pairwise=F, Trim=F, Res=2, Missing=0, Cores.Lim=1L, Results.Dir, Return=F, Output=T, Verbose=T)`
 
 **Data**
 
@@ -130,6 +145,23 @@ Class: String. Optional. Default = see Data Output section.
 
 String name of a folder for BIGDAWG output. Subfolder for each locus set will be generated within any output folder specified.
 
+**Return**
+
+Class: Logical. Optional. Default = F.
+
+Specifies if BIGDAWG should output analysis results to a specified object.
+
+**Output**
+
+Class: Logical. Optional. Default = T.
+
+Turns on or off the writing of results to files. The default will write all results to text files in the output directory.
+
+**Verbose**
+
+Class: Logical. Optional. Default = T.
+
+Sets the levels of detail that should be displayed on the console. The default will display summaries of the analysis from each specified test. When turned off, only the completion status of each test is displayed.
 
 ## Examples
 
@@ -154,6 +186,10 @@ BIGDAWG(Data="data.txt", Run.Tests="A", Trim=T, Res=2)
 
 # Run the haplotype analysis with subsets of loci on a file called 'data.txt'
 BIGDAWG(Data="data.txt", Run.Tests="H", Loci.Set=list(c("DRB1","DQB1","DPB1"),c("DRB1","DQB1")))
+
+# Run the full analysis, minimize console output, disable write to file, output to object 'BD'
+BD <- BIGDAWG(Data="data.txt", Output=F, Return=T, Verbose=F)
+
 ```
 
 ## Updating the bundled IMGT/HLA protein alignment

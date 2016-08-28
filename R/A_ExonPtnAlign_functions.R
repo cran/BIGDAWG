@@ -11,14 +11,9 @@ GetFiles <- function(Loci) {
   # Get P-Groups Files
   download.file("http://hla.alleles.org/wmda/hla_nom_p.txt",destfile="hla_nom_p.txt")
   
-  # Remove Number from Loci names. For DRBx, replace with DRB.
-  # Changes here also affect ExonPtnAlign.Create()
-  Loci.rep <- Loci[-grep("DRB",Loci)]
-  Loci.rep <- sort(c(Loci.rep,"DRB"))
-  
   # Get Locus Based Alignments
-  for(i in 1:length(Loci.rep)) {
-    Locus <- Loci.rep[i]
+  for(i in 1:length(Loci)) {
+    Locus <- Loci[i]
     FileName <- paste(Locus,"_prot.txt",sep="")
     URL <- paste("ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/",FileName,sep="")
     download.file(URL,FileName)
@@ -40,8 +35,8 @@ GetFiles <- function(Loci) {
 #' @param Locus Locus to be filtered on.
 #' @note This function is for internal BIGDAWG use only.
 PgrpFormat <- function(x,Locus) {  
-  #Format
-  x[,1] <- gsub("\\*","",x[,1])
+  
+  # Identify for Locus ... change necessary if DRB
   x.sub <- x[which(x[,1]==Locus),]
   rownames(x.sub) <- NULL
   x.sub[,2] <- sapply(x.sub[,2],function(i) paste(paste(Locus,"*",unlist(strsplit(i,"/")),sep=""),collapse="/"))
@@ -88,15 +83,20 @@ PgrpExtract <- function(x,y) {
 #' @note This function is for internal BIGDAWG use only.
 ExonPtnAlign.Create <- function(Locus,RefTab) {
   
+  #########################################################################
+  # Need to remove if DRB split into single locus files
+  if(grepl("DRB",Locus)) { Locus.get <- "DRB" } else { Locus.get <- Locus }
+  #########################################################################
+  
   AlignMatrix <- NULL; rm(AlignMatrix)
   
   #Read in P-Groups 
   Pgrps <- read.table("hla_nom_p.txt",fill=T,header=F,sep=";",stringsAsFactors=F,strip.white=T,colClasses="character")
+  Pgrps[,1] <- gsub("\\*","",Pgrps[,1])
   Pgrps <- PgrpFormat(Pgrps,Locus)
   
   #Read in Alignment
-  if( grepl("DRB",Locus) ) { Locus.sub <- "DRB" } else { Locus.sub <- Locus }
-  Name <- paste(Locus.sub,"_prot.txt",sep="")
+  Name <- paste(Locus.get,"_prot.txt",sep="")
   Align <- read.table(Name,fill=T,header=F,sep="\t",stringsAsFactors=F,strip.white=T,colClasses="character")
   
   #Trim

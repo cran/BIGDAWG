@@ -1,10 +1,10 @@
 #' Hardy Weinbergy Equilibrium Function
 #'
-#' This is the main wrapper function for the HWE analysis.
+#' This is the main function for the HWE analysis.
 #' @param Tab data frame of genotype files post processing.
 #' @param All.ColNames character vector of Tab object column names.
 #' @note This function is for internal BIGDAWG use only.
-HWE.wrapper <- function(Tab,All.ColNames) {
+HWE <- function(Tab,All.ColNames) {
   
   HWE.out <- list()
   

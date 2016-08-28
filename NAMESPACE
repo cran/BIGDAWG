@@ -2,5 +2,5 @@ exportPattern("^[[:alpha:]]+")
 importFrom("graphics", "axis", "mtext", "title")
 importFrom("stats", "chisq.test", "fisher.test", "na.omit", "pchisq",
           "qnorm", "xtabs")
-importFrom("utils", "combn", "download.file", "packageVersion",
+importFrom("utils", "data", "combn", "download.file", "packageVersion",
           "read.table", "write.table")

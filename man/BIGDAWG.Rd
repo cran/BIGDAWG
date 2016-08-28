@@ -6,7 +6,7 @@
 \usage{
 BIGDAWG(Data, HLA = TRUE, Run.Tests, Loci.Set, All.Pairwise = FALSE,
   Trim = FALSE, Res = 2, EVS.rm = FALSE, Missing = 2, Cores.Lim = 1L,
-  Results.Dir, Output = TRUE)
+  Results.Dir, Return = FALSE, Output = TRUE, Verbose = TRUE)
 }
 \arguments{
 \item{Data}{Name of the genotype data file.}
@@ -29,9 +29,13 @@ BIGDAWG(Data, HLA = TRUE, Run.Tests, Loci.Set, All.Pairwise = FALSE,
 
 \item{Cores.Lim}{Interger setting the number of cores accessible to BIGDAWG (Windows, Cores = 1L).}
 
-\item{Results.Dir}{Optional, full directory name for BIGDAWG output.}
+\item{Results.Dir}{Optional, full path directory name for BIGDAWG output.}
 
-\item{Output}{Logical indicating if data should be written to output directory (mainly used for testing).}
+\item{Return}{Logical Should analysis results be returned back to console.}
+
+\item{Output}{Logical Should analysis results be written to output directory as text files.}
+
+\item{Verbose}{Logical Should a summary of each analysis be displayed.}
 }
 \description{
 This is the main wrapper function for each analysis.
@@ -44,11 +48,11 @@ This is the main wrapper function for each analysis.
 BIGDAWG(Data="HLA_data", Run.Tests="H", Missing=0, Loci.Set=list(c("DRB1","DQB1")))
 
 # Hardy-Weinberg and Locus analysis ignoring missing data
-# Significant associations with phenotype at all but DQB1
+# Significant locus associations with phenotype at all but DQB1
 BIGDAWG(Data="HLA_data", Run.Tests=c("HWE","L"), Missing="ignore")
 
 # Hardy-Weinberg analysis trimming data to 2-Field resolution
-# Significant deviation at DQB1
+# Significant locus deviation at DQB1
 BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2)
 }
 

@@ -4,7 +4,7 @@
 \alias{PreCheck}
 \title{Data summary function}
 \usage{
-PreCheck(Tab, All.ColNames, rescall, HLA)
+PreCheck(Tab, All.ColNames, rescall, HLA, Verbose, Output)
 }
 \arguments{
 \item{Tab}{Loci available in exon protein list alignment object.}
@@ -14,6 +14,10 @@ PreCheck(Tab, All.ColNames, rescall, HLA)
 \item{rescall}{HLA resolution set for analysis.}
 
 \item{HLA}{HLA bigdawg argument passed to function}
+
+\item{Verbose}{Summary display carryover from BIGDAWG function.}
+
+\item{Output}{Data output carryover form BIGDAWG function}
 }
 \description{
 Summary function for sample population within data file.

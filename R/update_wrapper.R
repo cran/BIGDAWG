@@ -1,11 +1,11 @@
 #' Update function for protein aligment upon new IMGT HLA data release
 #'
-#' This updates the protein aligment used in checking HLA loci and alleles as well as in the amino acid analysis.
-#' @param Loci Character vector of loci that should be used to create new alignment object (default = HLA-A,B,C,DRB1/3/4/5,DQA1,DQB1,DPA1,DPB1).
+#' This updates the protein aligment used in checking HLA loci and alleles as well as in the amino acid analysis. Alignment must exist in database (ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/) or update will fail.
+#' @param Add.Loci Character string or vector of loci that should be added to default loci (default = HLA-A,B,C,DRB1/3/4/5,DQA1,DQB1,DPA1,DPB1).
 #' @param Restore Logical specifying if the original alignment file be restored.
 #' @param Force Logical specifiying if update should be forced.
 #' @param Output Logical indicating if error reporting should be written to file.
-UpdateRelease <- function(Loci=NULL,Force=F,Restore=F,Output=F) {
+UpdateRelease <- function(Add.Loci=NULL,Force=F,Restore=F,Output=F) {
   
   if( !inherits(try(XML::readHTMLTable("http://cran.r-project.org/web/packages/BIGDAWG/index.html",header=F),silent=T),"try-error") ) {
   
@@ -14,6 +14,7 @@ UpdateRelease <- function(Loci=NULL,Force=F,Restore=F,Output=F) {
   
     getDir <- path.package('BIGDAWG')
     putDir <- paste(getDir,"/data",sep="")
+    if(!dir.exists(putDir)) { dir.create(putDir) }
     
     if(!Restore) {
       
@@ -42,22 +43,27 @@ UpdateRelease <- function(Loci=NULL,Force=F,Restore=F,Output=F) {
           Safe <- c(Safe[!grepl(".txt",Safe)],"UpdatePtnAlign.RData")
         
         #STEP 1: Define Loci and Read in Reference Exon Map Files
-        #Note all DRB, DPA, DPB, DQA, and DQB are located in single locus specific files
           # Loci
-          if(is.null(Loci)) {
+          if(is.null(Add.Loci)) {
             Loci <- c("A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5")
           } else {
-            Loci <- unique(c(Loci,"A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5"))
+            Loci <- unique(c(Add.Loci,"A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5"))
           }
         
           # Map
           RefTab <- BIGDAWG::ExonPtnList$RefExons
-    
-        
+          
+          #########################################################################
+          # Need to remove following lines if DRB split into single locus files
+          # Currently DRB1/3/4/5 are contained in single DRB.prot file.
+          Loci.rep <- Loci[-grep("DRB",Loci)]
+          Loci.rep <- sort(c(Loci.rep,"DRB"))
+          #########################################################################
+          
         #STEP 2: Download protein alignments and other ancillary files
           cat("Updating reference object for the amino acid analysis.\n")
           cat("Downloading alignment files from the IMGT/HLA.\n")
-          GetFiles(Loci)
+          GetFiles(Loci.rep)
           Release <- read.table('Release.txt',sep="\t") # created during GetFiles download
         
         #STEP 3: Format alignments for exons of interest

@@ -22,14 +22,32 @@ CheckRelease <- function(Package=T,Alignment=T,Output=F) {
       
       RV <- XML::readHTMLTable("http://www.ebi.ac.uk/ipd/imgt/hla/docs/release.html",header=T)
       RV.current <- as.character(lapply(RV,"[",1)[[1]][1,])
-      RV.BIGDAWG <- gsub(" ","",unlist(strsplit(as.character(BIGDAWG::ExonPtnList$Release[[1]]),":"))[2])
+      
+      UPL <- paste(path.package('BIGDAWG'),"/data/UpdatePtnAlign.RData",sep="")
+      UpdatePtnList <- NULL ; rm(UpdatePtnList)
+      if( file.exists(UPL) ) { 
+        load(UPL)
+        EPL <- UpdatePtnList
+        rm(UpdatePtnList,UPL)
+        UPL.flag=T
+      } else { 
+        EPL <- ExonPtnList
+        UPL.flag=F }
+      
+      RV.BIGDAWG <- gsub(" ","",unlist(strsplit(as.character(EPL$Release[[1]]),":"))[2])
       
     }
    
     cat("\n")
     if(Package) { cat("BIGDAWG Versions:\n","Installed Version: ",CurrR,"\n Release Version: ",CranR,"\n Developmental version: ",GitHubR,"\n") }
     if(Package & Alignment) { cat("\n") }
-    if(Alignment) { cat("IMGT/HLA Versions:\n","IMGT/HLA Version: ",RV.current,"\n Installed version: ",RV.BIGDAWG,"\n") }
+    if(Alignment) { 
+      if(UPL.flag) {
+          cat("IMGT/HLA Versions:\n","IMGT/HLA Version: ",RV.current,"\n Installed version (from update): ",RV.BIGDAWG,"\n") 
+        } else {
+          cat("IMGT/HLA Versions:\n","IMGT/HLA Version: ",RV.current,"\n Installed version: ",RV.BIGDAWG,"\n") 
+        }
+      }
     cat("\n")
   
   } else {
