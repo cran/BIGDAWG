@@ -4,8 +4,8 @@
 \alias{A.wrapper}
 \title{Amino Acid Wrapper}
 \usage{
-A.wrapper(nloci, loci, loci.ColNames, Locus, genos, grp, nGrp0, nGrp1, EPL,
-  Cores, Output, Verbose)
+A.wrapper(nloci, loci, loci.ColNames, genos, grp, nGrp0, nGrp1, EPL, Cores,
+  Output, Verbose)
 }
 \arguments{
 \item{nloci}{Number of loci being analyzed.}
@@ -13,8 +13,6 @@ A.wrapper(nloci, loci, loci.ColNames, Locus, genos, grp, nGrp0, nGrp1, EPL,
 \item{loci}{Loci being analyzed.}
 
 \item{loci.ColNames}{The column names of the loci being analyzed.}
-
-\item{Locus}{Locus being analyzed.}
 
 \item{genos}{Genotype table.}
 

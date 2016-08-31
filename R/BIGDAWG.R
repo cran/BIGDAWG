@@ -197,7 +197,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       rows.rm <- which(test > Missing)
       ID.rm <- Tab[rows.rm,1]
       Tab <- Tab[-rows.rm,]
-      write.table(ID.rm, file="Removed_SampleIDs.txt", sep="\t", row.names=F, col.names=F, quote=F)
+      if(Output) { write.table(ID.rm, file="Removed_SampleIDs.txt", sep="\t", row.names=F, col.names=F, quote=F) }
     }
     rm(geno.desc,test,ID.rm)
     if(nrow(Tab)==0) { Err.Log(Output,"TooMany.Missing") ; stop("Analysis Stopped.",call. = F) }

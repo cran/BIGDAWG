@@ -4,7 +4,6 @@
 #' @param nloci Number of loci being analyzed.
 #' @param loci Loci being analyzed.
 #' @param loci.ColNames The column names of the loci being analyzed.
-#' @param Locus Locus being analyzed.
 #' @param genos Genotype table.
 #' @param grp Case/Control or Phenotype groupings.
 #' @param nGrp0 Number of controls.
@@ -14,7 +13,7 @@
 #' @param Output Data return carryover from main BIGDAWG function
 #' @param Verbose Summary display carryover from main BIGDAWG function
 #' @note This function is for internal BIGDAWG use only.
-A.wrapper <- function(nloci,loci,loci.ColNames,Locus,genos,grp,nGrp0,nGrp1,EPL,Cores,Output,Verbose) {
+A.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,EPL,Cores,Output,Verbose) {
   
   # Define Lists for Per Loci Running Tallies
   AAlog <-  list()

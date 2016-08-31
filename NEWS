@@ -1,3 +1,8 @@
+BIGDAWG v1.5.5 (Release date: 2016-08-29) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Bug fixed - accidently introduced in v1.5.4 that would cause 'A' test failure
+
 BIGDAWG v1.5.4 (Release date: 2016-08-26) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 Changes:

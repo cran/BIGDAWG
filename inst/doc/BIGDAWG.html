@@ -12,7 +12,7 @@
 
 <meta name="author" content="Derek Pappas, Ph.D. (dpappas@chori.org)" />
 
-<meta name="date" content="2016-08-26" />
+<meta name="date" content="2016-08-29" />
 
 <title>BIGDAWG</title>
 
@@ -32,12 +32,12 @@
 
 <h1 class="title toc-ignore">BIGDAWG</h1>
 <h4 class="author"><em>Derek Pappas, Ph.D. (<a href="mailto:dpappas@chori.org">dpappas@chori.org</a>)</em></h4>
-<h4 class="date"><em>2016-08-26</em></h4>
+<h4 class="date"><em>2016-08-29</em></h4>
 
 
 
 <ul>
-<li>Package Version: 1.5.4</li>
+<li>Package Version: 1.5.5</li>
 <li>HLA/IMGT Database Release: 3.25.0, 2016-07-14</li>
 </ul>
 <div id="overview" class="section level2">
@@ -53,7 +53,7 @@ When there is missing information, either for lack of genotyping information or 
 <p>Data missing due to lack of a molecular genotyping result is considered not available (NA). Acceptable NA strings include: NA, ****, -, na and Na. Empty data cells will be considered NA.</p>
 <p>Data missing due to genomic structural variation (i.e., no locus present) is considered absence. Acceptable absence strings include: Absent, absent, Abs, ABS, ab, Ab, AB, ^. The last symbol is the unicode caret symbol. BIGDAWG allows for a special allele name that indicates absence of an HLA locus: 00, 00:00, 00:00:00 and 00:00:00:00 are all acceptable indicators of locus absence. When choosing to use 00’s (zeros) to populate allele name fields, use similar or higher levels of resolution <a href="http://hla.alleles.org/nomenclature/naming.html">http://hla.alleles.org</a> and follow the same naming convention as with other genotype calls (either with or without locus prefix). If using a single column pair for DRB3/4/5 and the “00” absence indicator, then do <strong>NOT</strong> affix a locus prefix for the absent calls. In this case, only include the locus prefix for known DRB345 genotypes (i.e., DRB3/4/5*00:00 is <strong>NOT</strong> an acceptable name). For HLA data, the 00:00 naming convention is preferred and all absent designations will be converted to allow the amino acid analysis to test phenotypic associations with locus absence (see below).</p>
 <p><strong>Novel Alleles</strong><br />
-BIGDAWG will accept any name for novel alleles. However, it is suggested you follow the same naming convention for novel alleles as with other genotypes calls in your data, either with or without the locus prefix. For example, new alleles could be submitted as follows: New, 01:New, or A*01:New. The BIGDAWG analysis for amino acids cannot accept new allele designations. If you would like to run the amino acid analysis, it is suggested you replace a new allele with NA or omit the subject entirely.</p>
+BIGDAWG will accept novel allele names. However, it is suggested you follow the same naming convention for novel alleles as with other genotypes calls in your data, either with or without the locus prefix. For example, new alleles could be submitted as follows: New, 01:New, or A*01:New. Unfortunately, the BIGDAWG amino acids analysis cannot accept new allele designations and will display an error. If you would like to run the amino acid analysis, it is suggested you replace the new allele with NA or omit the subject entirely.</p>
 <p><strong>Example of data architecture and acceptable values:</strong></p>
 <table style="width:117%;">
 <colgroup>
@@ -125,15 +125,17 @@ BIGDAWG will accept any name for novel alleles. However, it is suggested you fol
 <div id="data-output" class="section level2">
 <h2>Data Output</h2>
 <p>After the package is run, BIGDAWG will create a new folder entitled ‘output hhmmss ddmmyy’ in the working directory (unless otherwise specified by Results.Dir parameter, see below). Within the output folder will be a precheck file (‘Data_Summary.txt’) detailing the summary statistics of the dataset and the results of the Hardy-Weinberg equilibrium test (‘HWE.txt’). If any errors are present, a log file (‘Error_Log.txt’) will be written. If no locus subsets are specified (see parameters section), a single subfolder entitled ‘set1’ will contain the outputs of each association analysis run. If multiple locus subsets are optioned, subfolders for each locus set will be created containing the respective analytic results for that subset. Within each set subfolder, a parameter file will detail the parameters that are relevant to that subset.</p>
-<p>Data output to both the console and text files can be supressed with Verbose=F and Output=F respectively. This is particularly useful when the user prefers to send the results to an object (Return=T) rather than to text files for further analysis. The result is returned as a list with indices for the Hardy-Weinberg equilibrium test (HWE when run) and indices corresponding to the results for each Loci.Set (Set1, Set2, etc). If no Loci.Sets were specified, then only one list element will exist for Set1.</p>
+<p>Data output to both the console and text files can be supressed with Verbose=F and Output=F respectively. This is particularly useful when the user prefers to send the results to an object (Return=T) rather than to text files for further analysis. The result is returned as a list with indices for the Hardy-Weinberg equilibrium test and indices for each result within the Loci.Set (Set1, Set2, etc). If no Loci.Sets were specified, only one list element will exist for Set1.</p>
 <p>For an example. If BIGDAWG outputs to an object called ‘BD’ in R (see examples below).</p>
 <p>BD<br />
 ..$HWE - Results of the the Hardy-Weinberg equilibrium test<br />
 ..$Set1$H - Results of the ‘Haplotype’ analysis for Set1<br />
 ..$Set1$L - Results of the ‘Locus’ analysis for Set1<br />
-..$Set1$A - Results of the ‘Amino Acid’ analysis for Set1</p>
+..$Set1$A - Results of the ‘Amino Acid’ analysis for Set1<br />
+..$Set2...<br />
+..$Set3...</p>
 <p>names(BD) - Display complete list of available sets to index</p>
-<p>If the user chooses to run all pairwise combinations of loci (All.Pairwise=T) for the haplotype analysis, BD$H mentioned above will be a list corresponding each analysis run for all loci available (1st index in the list) and for each pairwise locus combination. For a complete list of available pairwise results, use names(BD$H).</p>
+<p>If the user chooses to run all pairwise combinations of loci (All.Pairwise=T) for the haplotype analysis, BD$H mentioned above will be a list corresponding to each analysis run for (1) all loci available (1st index in the list) and (2) for each pairwise locus combination (2nd index and greater). For a complete list of available pairwise results, use names(BD$H).</p>
 </div>
 <div id="error-messages-and-codes" class="section level2">
 <h2>Error Messages and Codes</h2>
@@ -249,7 +251,7 @@ install.packages(&quot;devtools&quot;)
 library(&quot;devtools&quot;)
 install_github(&quot;pappasd/BIGDAWG&quot;, build_vignettes = TRUE)
 
-# For a temporarily install of the developmental version
+# For a temporary install of the developmental version
 library(&quot;devtools&quot;)
 dev_mode(on=T)
 install_github(&quot;pappasd/BIGDAWG&quot;)
