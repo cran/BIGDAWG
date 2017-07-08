@@ -12,9 +12,8 @@ getHap(SID, HaploEM)
 \item{HaploEM}{Haplotype output object from haplo.stat::haplo.em function.}
 }
 \description{
-Builds table of haplotypes from
+Builds table of haplotypes
 }
 \note{
 This function is for internal BIGDAWG use only.
 }
-

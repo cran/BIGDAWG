@@ -19,4 +19,3 @@ Displays error codes attributable to data formatting and Locus/Allele naming. Wr
 \note{
 This function is for internal BIGDAWG use only.
 }
-

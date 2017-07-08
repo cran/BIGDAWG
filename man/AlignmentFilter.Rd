@@ -19,4 +19,3 @@ Filter Protein Exon Alignment File for Specific Alleles.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

@@ -18,4 +18,3 @@ UpdateRelease(Add.Loci = NULL, Force = F, Restore = F, Output = F)
 \description{
 This updates the protein aligment used in checking HLA loci and alleles as well as in the amino acid analysis. Alignment must exist in database (ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/) or update will fail.
 }
-

@@ -13,6 +13,8 @@
 #' @note This function is for internal BIGDAWG use only.
 L.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,Output,Verbose) {
   
+  cat("\n>>>> STARTING LOCUS LEVEL ANALYSIS...\n")
+  
   Allele.binned <- list() # Alleles binned during chi-square test
   Allele.freq <- list() # Alleles Frequencies
   overall.chisq <- list() # Chi-Square Table
@@ -43,12 +45,6 @@ L.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,Output,Verb
   Out[['OR']] <- do.call(rbind,ORtable)
   Out[['FB']] <- do.call(rbind,Final_binned)
   
-  cat("> LOCUS LEVEL ANALYSIS COMPLETED","\n")
-  if(Verbose) {
-    print(Out[['CS']],row.names=F)
-    cat("\n")
-  }
-  
   if(Output) {
     ## write to file
     write.table(Out[['AF']], file = paste("Locus_freqs.txt",sep=""), sep="\t", row.names = F, col.names=T, quote = F)
@@ -58,6 +54,12 @@ L.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,Output,Verb
     write.table(Out[['CS']], file = paste("Locus_chisq.txt",sep=""), sep="\t", row.names = F, col.names=T, quote = F)  
   }
   
+    cat("> LOCUS LEVEL ANALYSIS COMPLETED","\n")
+  if(Verbose) {
+    print(Out[['CS']],row.names=F)
+    cat("\n")
+  }
+    
   return(Out)
   
 }

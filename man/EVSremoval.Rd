@@ -17,4 +17,3 @@ Removes expression variant suffixes from HLA alleles in the exon protein alignme
 \note{
 This function is for internal BIGDAWG use only.
 }
-

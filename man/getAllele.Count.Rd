@@ -15,4 +15,3 @@ Using Freq.Final, recompute number of alleles
 \note{
 This function is for internal BIGDAWG use only.
 }
-

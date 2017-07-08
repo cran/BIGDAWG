@@ -15,4 +15,3 @@ Calculates chi-squared contingency table tests and bins rare cells.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

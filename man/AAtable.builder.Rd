@@ -17,4 +17,3 @@ Build Contingency Tables for Amino Acid Analysis.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

@@ -15,4 +15,3 @@ Variation of the cci.pvalue function
 \note{
 This function is for internal BIGDAWG use only.
 }
-

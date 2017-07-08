@@ -12,4 +12,3 @@ ExonPtnList
 Alignment object for use in the amino acid analysis.
 }
 \keyword{datasets}
-

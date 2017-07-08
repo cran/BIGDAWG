@@ -17,4 +17,3 @@ Calculate chi square test statistic
 \note{
 This function is for internal BIGDAWG use only.
 }
-

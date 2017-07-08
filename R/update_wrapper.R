@@ -86,6 +86,7 @@ UpdateRelease <- function(Add.Loci=NULL,Force=F,Restore=F,Output=F) {
       if(!file.exists('UpdatePtnAlign.RData')) { stop("No prior update to restore.", call.= F) }
       cat("Restoring original alignment reference object for amino acid analysis.\n")
       invisible(file.remove('UpdatePtnAlign.RData'))
+      cat("Restored.\n")
       
     }
     

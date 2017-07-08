@@ -1,3 +1,78 @@
+BIGDAWG v1.12 (Release date: 2017-06-21) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* BIGDAWG v1.10 & v1.11 restricted to internal releases.
+* Transferred github repository location to github.com/IgDAWG/BIGDAWG
+* Added multi-core capabilities to haplotype analysis to speed up pairwise analysis. Useful for large datasets.
+* Update to haplotype output files.
+* Analysis results can be merged into single files with Merge.Output=T. Not recommend for very large datasets and running all pairwise combinations in the haplotype analysis.
+* Updated bundled IMGT/HLA amino acid exon alignment to latest release (Release 3.28.0, 2017-04-13)
+
+BIGDAWG v1.9 (Release date: 2017-01-20) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Added warning that when All.Pairwise=T or the locus or amino acid tests are run with multiple sets, there will be duplication of analyses and results when sets contain overlapping loci.
+* When All.Pairwise=T, only pairwise combinations are run in the haplotype analysis.
+* Changes to output list structure when Return=T.
+* Updated bundled IMGT/HLA amino acid exon alignment to latest release (Release 3.27.0, 2017-01-20)
+
+BIGDAWG v1.8.4 (Release date: 2017-01-12) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Naming update to haplotype output files. Haplotype loci will no longer be appended 
+  to the filename. When All.Pairwise=T, the filename will be appended with "PairwiseSet"
+  and the set number. A file will also be written to indicate which pairwise set
+  corresponds to which haplotypes.
+
+BIGDAWG v1.8.3 (Release date: 2016-12-26) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Updated vignette
+
+BIGDAWG v1.8.2 (Release date: 2016-12-14) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Small adjustments to console output for clarity and grammar.
+* Moved knitr and rmarkdown from Suggests to Imports.
+
+BIGDAWG v1.8.1 (Release date: 2016-12-13) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Adjustment to data output merging function.
+* Small fix to 'A' analysis when output to object.
+
+BIGDAWG v1.8 (Release date: 2016-12-10) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Added output of merged analyses to main output folder (only when Output = T).
+
+BIGDAWG v1.7 (Release date: 2016-12-08) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Adjusted function for counting missing alleles to avoid memory limitations. Ported from haplo.stats.
+
+BIGDAWG v1.6 (Release date: 2016-12-02) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Update bundled IMGT/HLA amino acid exon alignment to latest release (3.26.0.1)
+* Update to URL for downloading *_prot.txt alignment files
+* Small fixes to UpdateRelease code when downloading alignment files from IMGT.
+
+BIGDAWG v1.5.8 (Release date: 2016-12-02) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Fix bug that may be encountered when specifying a set of loci to run.
+
+BIGDAWG v1.5.7 (Release date: 2016-10-05) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Pandoc requirement for installing from GitHub without RStudio. Thanks to Hugh Salamon.
+
+BIGDAWG v1.5.6 (Release date: 2016-09-14) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* URL change for 'hla_nom_p.txt' download. Thanks to Hugh Salamon.
+
 BIGDAWG v1.5.5 (Release date: 2016-08-29) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 Changes:

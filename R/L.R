@@ -64,6 +64,7 @@ L <- function(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1) {
   L.tmp <- list()
   
   ## Alleles.binned_out
+  if(sum(is.na(alleles_binned))==2) { alleles_binned <- NA }
   if(!is.null(nrow(alleles_binned))) {
     Allele.binned.tmp <- cbind(rep(Locus,nrow(alleles_binned)),
                                rownames(alleles_binned),
@@ -73,7 +74,7 @@ L <- function(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1) {
     if(sum(grepl("\\^",Allele.binned.tmp[,'Allele']))>0) { Allele.binned.tmp[,'Allele'] <- gsub("\\^","Abs",Allele.binned.tmp[,'Allele']) }
     L.tmp[['binned']] <- Allele.binned.tmp
   } else { 
-    binned.out <- cbind(Locus,'Nothing.binned',"-","-")
+    binned.out <- cbind(Locus,'Nothing.binned',NA,NA)
     colnames(binned.out) <- c("Locus","Allele","Group.0","Group.1")
     rownames(binned.out) <- NULL
     L.tmp[['binned']] <- binned.out

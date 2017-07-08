@@ -88,13 +88,13 @@ A <- function(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
       rownames(binned.out) <- NULL
       A.tmp[['binned']] <- binned.out
     } else {
-       binned.out <- cbind(Locus,'Nothing.binned',"-","-","-")
+       binned.out <- cbind(Locus,'Nothing.binned',NA,NA,NA)
        colnames(binned.out) <- c("Locus","Position","Residue","Group.0","Group.1")
        rownames(binned.out) <- NULL
        A.tmp[['binned']] <- binned.out
     }
   } else{
-    binned.out <- cbind(Locus,'Nothing.binned',"-","-","-")
+    binned.out <- cbind(Locus,'Nothing.binned',NA,NA,NA)
     colnames(binned.out) <- c("Locus","Position","Residue","Group.0","Group.1")
     rownames(binned.out) <- NULL
     A.tmp[['binned']] <- binned.out

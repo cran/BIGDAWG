@@ -39,7 +39,7 @@ CheckRelease <- function(Package=T,Alignment=T,Output=F) {
     }
    
     cat("\n")
-    if(Package) { cat("BIGDAWG Versions:\n","Installed Version: ",CurrR,"\n Release Version: ",CranR,"\n Developmental version: ",GitHubR,"\n") }
+    if(Package) { cat("BIGDAWG Versions:\n","Installed Version: ",CurrR,"\n CRAN Release Version: ",CranR,"\n Developmental version: ",GitHubR,"\n") }
     if(Package & Alignment) { cat("\n") }
     if(Alignment) { 
       if(UPL.flag) {

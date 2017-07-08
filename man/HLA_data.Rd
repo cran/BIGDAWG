@@ -12,4 +12,3 @@ HLA_data
 A synthetic dataset of HLA genotypes for using bigdawg.
 }
 \keyword{datasets}
-

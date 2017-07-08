@@ -21,4 +21,3 @@ Checks available alleles against data to ensure complete overlap.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

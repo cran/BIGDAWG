@@ -15,4 +15,3 @@ Replaces allowable absent allele strings with ^ symbol.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

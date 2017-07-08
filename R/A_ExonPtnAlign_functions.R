@@ -9,14 +9,14 @@ GetFiles <- function(Loci) {
   #downloads hla.xml file
   
   # Get P-Groups Files
-  download.file("http://hla.alleles.org/wmda/hla_nom_p.txt",destfile="hla_nom_p.txt")
+  download.file("https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/wmda/hla_nom_p.txt",destfile="hla_nom_p.txt",method="libcurl")
   
   # Get Locus Based Alignments
   for(i in 1:length(Loci)) {
     Locus <- Loci[i]
     FileName <- paste(Locus,"_prot.txt",sep="")
-    URL <- paste("ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/",FileName,sep="")
-    download.file(URL,FileName)
+    URL <- paste("https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/alignments/",FileName,sep="")
+    download.file(URL,destfile = FileName,method="libcurl")
     
     if (i==1) {
       tmp <- read.table(FileName,fill=T,sep="\t",stringsAsFactors=F)

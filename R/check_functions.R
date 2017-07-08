@@ -15,6 +15,25 @@ CheckHLA <- function(x) {
   return(Flag)
 }
 
+#'
+#'
+#' Separate locus and allele names if data is formatted as Loci*Allele
+#' @param Output Logical indicating if Error logging should be written to a file.
+#' @param Tab All columns of HLA genotyping data.
+#' @note This function is for internal BIGDAWG use only. 
+CheckLociName <- function(Output,Tab) {
+  if(sum(grepl("\\*",Tab[,3:ncol(Tab)]))>0) {
+    tmp <- gsub("^","*^",Tab)
+    Format.Check <- length(apply(Tab[,3:ncol(Tab)],MARGIN=2,FUN=function(x) which(grepl("\\*",na.omit(x))==F)))
+    if(Format.Check>0) {
+      Err.Log(Output,"Uneven.Prefix")
+      stop("Analysis Stopped.",call. = F)
+    }
+    Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),FUN=function(x) unlist(lapply(strsplit(x,split="\\*"),"[",2)))
+  }
+  return(Tab)
+}
+
 #' Loci presence check
 #'
 #' Checks available loci against data specific to ensure complete overlap.

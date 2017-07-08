@@ -15,4 +15,3 @@ Download Protein Alignment and Accessory Files
 \note{
 This function is for internal BIGDAWG use only.
 }
-

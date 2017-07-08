@@ -29,4 +29,3 @@ This is the workhorse function for the amino acid analysis.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

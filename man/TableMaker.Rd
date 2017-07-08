@@ -15,4 +15,3 @@ Table construction of per haplotype for odds ratio, confidence intervals, and pv
 \note{
 This function is for internal BIGDAWG use only.
 }
-

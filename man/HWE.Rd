@@ -17,4 +17,3 @@ This is the main function for the HWE analysis.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

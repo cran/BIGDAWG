@@ -15,6 +15,8 @@
 #' @note This function is for internal BIGDAWG use only.
 A.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,EPL,Cores,Output,Verbose) {
   
+  cat("\n>>>> STARTING AMINO ACID LEVEL ANALYSIS...\n")
+  
   # Define Lists for Per Loci Running Tallies
   AAlog <-  list()
   AminoAcid.binned <- list()

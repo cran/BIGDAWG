@@ -21,4 +21,3 @@ make2x2 function port epicalc version 2.15.1.0 (Virasakdi Chongsuvivatwong, 2012
 \note{
 This function is for internal BIGDAWG use only.
 }
-

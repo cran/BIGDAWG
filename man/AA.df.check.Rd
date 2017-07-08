@@ -15,4 +15,3 @@ Checks amino acid contingency table data frame to ensure required variation exis
 \note{
 This function is for internal BIGDAWG use only.
 }
-

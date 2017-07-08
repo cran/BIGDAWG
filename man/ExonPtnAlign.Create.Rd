@@ -17,4 +17,3 @@ Dynamically creates an alignmnet of Allele exons for Analysis.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

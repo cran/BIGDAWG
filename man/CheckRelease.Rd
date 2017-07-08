@@ -19,4 +19,3 @@ This updates the protein aligment used in checking HLA loci and alleles as well 
 \note{
 Requires active internet connection.
 }
-

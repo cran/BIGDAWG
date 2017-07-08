@@ -15,4 +15,3 @@ Calculates odds ratio and pvalues from 2x2 table
 \note{
 This function is for internal BIGDAWG use only.
 }
-

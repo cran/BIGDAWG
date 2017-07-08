@@ -17,4 +17,3 @@ Format the hla_nom_p.txt read table object for a specific locus.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

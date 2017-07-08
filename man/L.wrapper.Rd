@@ -31,4 +31,3 @@ Wrapper for main L function
 \note{
 This function is for internal BIGDAWG use only.
 }
-

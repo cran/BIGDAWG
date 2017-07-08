@@ -15,4 +15,3 @@ Checks DR haplotypes for correct zygosity and flags unanticipated haplotypes
 \note{
 This function is for internal BIGDAWG use only.
 }
-

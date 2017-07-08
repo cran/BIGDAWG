@@ -17,4 +17,3 @@ Trim a properly formatted HLA allele to desired number of fields.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

@@ -21,4 +21,3 @@ Chi Square contingency matrix builder with rare cell binning
 \note{
 This function is for internal BIGDAWG use only.
 }
-

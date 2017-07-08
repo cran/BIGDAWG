@@ -1,7 +1,7 @@
 ---
 title: "BIGDAWG"
 author: "Derek Pappas, Ph.D. (dpappas@chori.org)"
-date: "2016-08-29"
+date: "2017-06-21"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using BIGDAWG}
@@ -9,8 +9,8 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-* Package Version: 1.5.5
-* HLA/IMGT Database Release: 3.25.0, 2016-07-14
+* Package Version: 1.12
+* HLA/IMGT Database Release: 3.28.0, 2017-04-13
 
 ## Overview
 
@@ -18,7 +18,7 @@ vignette: >
 
 ## Input Data
 
-Data for BIGDAWG should be in a tab delimited text format (UTF-8 encoding). The first row must be a header line and must include column names for genotype data. The first two columns must contain subject IDs and phenotypes (0 = control, 1 = case). While a phenotype maybe include disease status, non-status phenotypes (onset, severity, ancestry, etc.) maybe used. However, phenotype designatons in the dataset are restricted to the use of 0s and 1s. Genotype pairs must be located in adjacent columns. Column names for a given locus must have the same name; do not use '_1', '.1', etc.
+Data for BIGDAWG should be in a tab delimited text format (UTF-8 encoding). The first row must be a header line and must include column names for genotype data. The first two columns must contain subject IDs and phenotypes (0 = control, 1 = case), respectively. A phenotype is not limited to disease status and may include other phenotypes such as onset, severity, ancestry, etc. However, phenotype designatons in the dataset are restricted to the use of 0s and 1s. Genotype pairs must be located in adjacent columns. Column names for a given locus must have the same name; do not use '_1', '.1', etc. Genotype calls may include any text (numeric or character) except the number 0.
 
 For HLA alleles, you may choose to format your genotype calls with our without the locus prefix. For example, for HLA-A, a given genotype call maybe 01:01:01:01 or A\*01:01:01:01. Allele names can include any level of resolution, from a single field up to the full length name. For HLA-DRB3,-DRB4,-DRB5 genotype calls, you may choose to represent those in a single pair of columns or as separate pairs of columns for each locus. However, when submitted as a single pair of columns, genotypes must be formatted as Locus*Allele (including non-DRB loci). The column names must either be DRB345 or DRB3/4/5. Homozygous or hemizygous status for DRB3, DRB4 and DRB5 genotypes is determined in reference to DRB1 genotypes based on the haplotypes as defined by Andersson, 1998 (Andersson G. 1998. Evolution of the HLA-DR region. [Front Biosci. 3:d739-45](http://www.ncbi.nlm.nih.gov/pubmed/9675159)). If you wish to define your own zygosity, it is suggested you split them into separate pairs of columns for each locus.
 
@@ -29,8 +29,10 @@ Data missing due to lack of a molecular genotyping result is considered not avai
 
 Data missing due to genomic structural variation (i.e., no locus present) is considered absence. Acceptable absence strings include: Absent, absent, Abs, ABS, ab, Ab, AB, ^. The last symbol is the unicode caret symbol. BIGDAWG allows for a special allele name that indicates absence of an HLA locus: 00, 00:00, 00:00:00 and 00:00:00:00 are all acceptable indicators of locus absence. When choosing to use 00's (zeros) to populate allele name fields, use similar or higher levels of resolution [http://hla.alleles.org](http://hla.alleles.org/nomenclature/naming.html) and follow the same naming convention as with other genotype calls (either with or without locus prefix). If using a single column pair for DRB3/4/5 and the "00" absence indicator, then do **NOT** affix a locus prefix for the absent calls. In this case, only include the locus prefix for known DRB345 genotypes (i.e., DRB3/4/5*00:00 is **NOT** an acceptable name). For HLA data, the 00:00 naming convention is preferred and all absent designations will be converted to allow the amino acid analysis to test phenotypic associations with locus absence (see below).
 
+Finally, when missing alleles (due to lack of genotype) for a locus are included in the haplotype analysis, the haplotype estimation method may impute the identity of the missing alleles for that subject. If such imputation is not desired, the "Missing"" parameter should be set to 0.
+
 **Novel Alleles**  
-BIGDAWG will accept novel allele names. However, it is suggested you follow the same naming convention for novel alleles as with other genotypes calls in your data, either with or without the locus prefix. For example, new alleles could be submitted as follows: New, 01:New, or A*01:New. Unfortunately, the BIGDAWG amino acids analysis cannot accept new allele designations and will display an error. If you would like to run the amino acid analysis, it is suggested you replace the new allele with NA or omit the subject entirely.  
+BIGDAWG will accept novel allele names. However, it is suggested you follow the same naming convention for novel alleles as with other genotypes calls in your data, either with or without the locus prefix. For example, novel alleles could be submitted as follows: Novel, 01:Novel, or A*01:Novel. Unfortunately, the BIGDAWG amino acid analysis cannot accept novel allele designations and will display an error. If you would like to run the amino acid analysis, it is suggested you replace the novel allele with NA or omit the subject entirely.  
 
 **Example of data architecture and acceptable values:**
 
@@ -43,23 +45,34 @@ BIGDAWG will accept novel allele names. However, it is suggested you follow the 
 
 ## Data Output
 
-After the package is run, BIGDAWG will create a new folder entitled 'output hhmmss ddmmyy' in the working directory (unless otherwise specified by Results.Dir parameter, see below). Within the output folder will be a precheck file ('Data_Summary.txt') detailing the summary statistics of the dataset and the results of the Hardy-Weinberg equilibrium test ('HWE.txt'). If any errors are present, a log file ('Error_Log.txt') will be written. If no locus subsets are specified (see parameters section), a single subfolder entitled ‘set1’ will contain the outputs of each association analysis run. If multiple locus subsets are optioned, subfolders for each locus set will be created containing the respective analytic results for that subset. Within each set subfolder, a parameter file will detail the parameters that are relevant to that subset.
+After the package is run, BIGDAWG will create a new folder entitled 'output hhmmss ddmmyy' in the working directory (unless otherwise specified by Results.Dir parameter, see below). Within the output folder will be a precheck file ('Data_Summary.txt') detailing the summary statistics of the dataset and the results of the Hardy-Weinberg equilibrium test ('HWE.txt'). If any errors are present, a log file ('Error_Log.txt') will be written. If no locus subsets are specified (see parameters section), a single subfolder entitled ‘Set1’ will contain the outputs of each association analysis run. If multiple locus subsets are defined, subfolders for each locus set will be created containing the respective analytic results for that subset. Within each set subfolder, a parameter file will detail the parameters that are relevant to that subset.
 
-Data output to both the console and text files can be supressed with Verbose=F and Output=F respectively. This is particularly useful when the user prefers to send the results to an object (Return=T) rather than to text files for further analysis. The result is returned as a list with indices for the Hardy-Weinberg equilibrium test and indices for each result within the Loci.Set (Set1, Set2, etc). If no Loci.Sets were specified, only one list element will exist for Set1.
+When all pairwise combinations are run in the haplotype analysis, each pairwise set will be written to a single file. A separate file called "haplotype_PairwiseSets.txt" will be written to the corresponding set's directory and will breakdown the locus make up for each PairwiseSet.
+
+Data output to both the console and text files can be supressed with Verbose=F and Output=F respectively. This is particularly useful when the user prefers to send the results to an R object (Return=T, see below) rather than to text files for further analysis. Finally, when multiple analyses are run (i.e., HWE, H, L, A) the data for each analysis (Chi Squares, Odds Ratios, Allele Frequencies, Allele Counts, etc.) can be written as set of files labeled 'Merge' for convenient access (Merge.Ouput=T).
+
+*Output As List Object*  
+With the pararmeter "Return=T", the result is returned as a list with indices for each analysis result (HWE, H, L, A). Defined loci sets will exists as list sub-elements under each respective analysis. If no Loci.Sets were specified, only one list element will exist for Set1.
   
 For an example. If BIGDAWG outputs to an object called 'BD' in R (see examples below).  
 
-BD  
+BD  (e.g., 3 loci sets defined)  
 ..\$HWE - Results of the the Hardy-Weinberg equilibrium test  
-..\$Set1\$H - Results of the 'Haplotype' analysis for Set1  
-..\$Set1\$L - Results of the 'Locus' analysis for Set1  
-..\$Set1\$A - Results of the 'Amino Acid' analysis for Set1  
-..\$Set2\...  
-..\$Set3\...
+..\$H\$Set1 - Results of the 'Haplotype' analysis for Set1
+..\$H\$Set2 - Results of the 'Haplotype' analysis for Set2  
+..\$H\$Set3 - Results of the 'Haplotype' analysis for Set3  
+..\$L\... - Results of the 'Locus' analysis  
+..\$A\... - Results of the 'Amino Acid' analysis  
 
-names(BD) - Display complete list of available sets to index  
-  
-If the user chooses to run all pairwise combinations of loci (All.Pairwise=T) for the haplotype analysis, BD\$H mentioned above will be a list corresponding to each analysis run for (1) all loci available (1st index in the list) and (2) for each pairwise locus combination (2nd index and greater). For a complete list of available pairwise results, use names(BD\$H).
+or when "All.Pairwise=T" (e.g., 3 loci, 3 pairwise comparisons possible, single locus set)  
+..\$HWE - Results of the the Hardy-Weinberg equilibrium test  
+..\$H\$Set1.PairwiseSet1 - Results of the 'Haplotype' analysis for Set1 Pairwise Set 1  
+..\$H\$Set1.PairwiseSet2 - Results of the 'Haplotype' analysis for Set1 Pairwise Set 2  
+..\$H\$Set1.PairwiseSet3 - Results of the 'Haplotype' analysis for Set1 Pairwise Set 3  
+..\$L\$Set1 - Results of the 'Locus' analysis for Set1  
+..\$A\$Set1 - Results of the 'Amino Acid' analysis for Set1  
+
+names(BD) - Display complete list of available sets to index. For a complete list of available pairwise results, use names(BD\$H). This results list is written to the results directory as an R object called 'Analysis.RData' for later use.
 
 
 ## Error Messages and Codes
@@ -90,9 +103,9 @@ Class: String or Character vector. Optional. Default = Run all tests.
 
 e.g., `Run.Tests = c("L","A")` -or- `Run.Tests = "HWE"`
 
-Specifies which tests to run in analysis. "HWE" will call the Hardy Weinberg Equilibrium test, "H" will call the haplotype association test, "L" will call the locus association test, and "A" will call the amino acid test. Combinations of the test are permitted.
+Specifies which tests to run in analysis. "HWE" will run the Hardy Weinberg Equilibrium test, "H" will run the haplotype association test, "L" will run the locus association test, and "A" will run the amino acid association test. Combinations of the test are permitted as indicated in the example.
   
-Currently, the amino acid analysis is limited to the HLA-A, -B, -C, -DRB1, -DRB3, -DRB4, -DRB5, -DQA1, -DQB1, -DPA1 and -DPB1 loci.
+The amino acid test generally requires the most processing time. Taking advantage of multi-core machines can minimize this time (see below). Moreover, avoid defining multiple Loci.Sets (see below) with overlapping loci as processing time will increasing redundantly. Currently, the amino acid analysis is limited to the HLA-A, -B, -C, -DRB1, -DRB3, -DRB4, -DRB5, -DQA1, -DQB1, -DPA1 and -DPB1 loci.
 
 
 **Loci.Set**
@@ -101,15 +114,15 @@ Class: List. Optional. Default = Use all loci.
 
 e.g., `Loci.Set=list(c("DRB1","DQB1"),c("A","DRB1","DPB1"), c("DRB1","DRB3"))`
 
-Input list defining which loci to use for analyses. Combinations are permitted. If you included HLA-DRB3,-DRB4,-DRB5 as a collapsed column pair ('DRB3/4/5'), you must specifiy the single locus in the Loci.set if you wish them to be included in an analysis set (i.e., 'DRB3' **NOT** 'DRB3/4/5').
+Input list defining which loci to use for analyses. Combinations are permitted. If you included HLA-DRB3,-DRB4,-DRB5 as a collapsed column pair ('DRB3/4/5'), you must specifiy the single locus in the Loci.set if you wish them to be included in an analysis set (i.e., 'DRB3' **NOT** 'DRB3/4/5'). The pair of alleles for a locus must be in adjacent columns in the analyzed data set.
 
-The pair of alleles for a locus must be in adjacent columns in the analyzed data set. Running multiple sets is ONLY relevant for the haplotype analysis. For all other analyses, loci are treated independently. Consider running haplotype analysis independently when optioning multi-locus sets to avoid redundancy of the other analyses. Each locus set's output will be contained within a separate set folder numbered numerical (see Data Output section).
+Running multiple sets is generally only relevant for the haplotype analysis without all pairwise combinations. For all other analyses, loci are treated independently. Consider running haplotype analysis independently when optioning multi-locus sets that included overlapping loci to avoid redundancies. Each locus set's output will be contained within a separate set folder numbered numerically corresponding to their order in the Loci.set parameter (see Data Output section).
 
 **All.Pairwise**
 
 Class: Logical. Optional. Default = F.
 
-Should pairwise combinations of loci be run in the haplotype analysis? Only relevant to haplotype analysis.
+Should pairwise combinations of loci be run in the haplotype analysis? Only relevant to haplotype analysis. When optioned, only pairwise combinations of loci will be run and not all the loci in a given data set.
 
 **EVS.rm**
 
@@ -139,7 +152,7 @@ Sets the allowable per subject threshold for missing alleles. Relevant to runnin
 
 Class: Integer. Optional. Default = 1 Core.
 
-Specifies the number of cores accessible by BIGDAWG in amino acid analysis. Not relevant to Windows operating systems which will use only a single core. More than 1 core is best when optioned in command line R. Not recommend for GUIs, e.g. RStudio.
+Specifies the number of cores accessible by BIGDAWG in amino acid analysis. Not relevant to Windows operating systems which will use only a single core. More than 1 core is best when optioned in command line R and is not recommend when used in combination with a GUI, e.g. RStudio.
 
 **Results.Dir**
 
@@ -158,6 +171,12 @@ Specifies if BIGDAWG should output analysis results to a specified object.
 Class: Logical. Optional. Default = T.
 
 Turns on or off the writing of results to files. The default will write all results to text files in the output directory.
+
+**Merge.Output**
+
+Class: Logical. Optional. Default = F.
+
+Turns on or off the merging of all analysis results into single files labeled 'Merged_xxxx.txt". This process is rapid for smaller sets of loci (less than 50). However it can become increasingly cpu time intensive when there are many loci analyzed in conjuction with all pairwise combinations in the haplotype analysis. This parameter is subordinate to Output=T.
 
 **Verbose**
 
@@ -216,7 +235,7 @@ UpdateRelease(Restore=T)
 
 ## Updating BIGDAWG to latest developmental versions
 
-Developmental versions of BIGDAWG can be downloaded through [GitHub](https://github.com/pappasd/BIGDAWG/) or using the following code (requires R package 'devtools'). These versions will include the most up-to-date bug fixes as well as access to new features that are still under development. GitHub versions are constantly under development and if you prefer a more stable fixed release, install BIGDAWG from the CRAN respository. You may check BIGDAWG versions using CheckRelease().
+Developmental versions of BIGDAWG can be downloaded through [GitHub](https://github.com/IgDAWG/BIGDAWG/) or using the following code (requires R package 'devtools'). These versions will include the most up-to-date bug fixes as well as access to new features that are still under development. GitHub versions are constantly under development and if you prefer a more stable fixed release, install BIGDAWG from the CRAN respository. You may check BIGDAWG versions using CheckRelease(). Local builing of vignettes requires pandoc and pandoc-citeproc if you do not use RStudio [Pandoc](http://pandoc.org/installing.html). Before installation from GitHub, it is recommended that all other R packages be up to date. May require a R/Rstudio close and restart.
 
 ```
 # Identify the installed (local), release (CRAN), and developmental (GitHub) versions of BIGDAWG.
@@ -230,12 +249,13 @@ install.packages("devtools")
 # Load latest BIGDAWG version from GitHub
 # May require closing and reopening of R Studio after install
 library("devtools")
-install_github("pappasd/BIGDAWG", build_vignettes = TRUE)
+install_github("IgDAWG/BIGDAWG", build_vignettes = TRUE) # Requires Pandoc or RStudio
+install_github("IgDAWG/BIGDAWG") # No Pandoc or RStudio
 
 # For a temporary install of the developmental version
 library("devtools")
 dev_mode(on=T)
-install_github("pappasd/BIGDAWG")
+install_github("IgDAWG/BIGDAWG")
 # .... run BIGDAWG analysis
 dev_mode(on=F)
 ```

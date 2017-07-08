@@ -15,4 +15,3 @@ Checks data to see if HLA data is properly formatted.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

@@ -19,4 +19,3 @@ This is the workhorse function for each group analysis.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

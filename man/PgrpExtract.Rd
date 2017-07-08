@@ -17,4 +17,3 @@ Identify P group for a given allele if exists.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

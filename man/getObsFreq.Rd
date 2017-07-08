@@ -17,4 +17,3 @@ Get observed frequency of genotypes
 \note{
 This function is for internal BIGDAWG use only.
 }
-

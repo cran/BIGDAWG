@@ -19,4 +19,3 @@ Synthesize Object for Exon Protein Alignments.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

@@ -21,4 +21,3 @@ Wrapper for main HWE function
 \note{
 This function is for internal BIGDAWG use only.
 }
-

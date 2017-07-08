@@ -6,7 +6,8 @@
 \usage{
 BIGDAWG(Data, HLA = TRUE, Run.Tests, Loci.Set, All.Pairwise = FALSE,
   Trim = FALSE, Res = 2, EVS.rm = FALSE, Missing = 2, Cores.Lim = 1L,
-  Results.Dir, Return = FALSE, Output = TRUE, Verbose = TRUE)
+  Results.Dir, Return = FALSE, Output = TRUE, Merge.Output = FALSE,
+  Verbose = TRUE)
 }
 \arguments{
 \item{Data}{Name of the genotype data file.}
@@ -17,7 +18,7 @@ BIGDAWG(Data, HLA = TRUE, Run.Tests, Loci.Set, All.Pairwise = FALSE,
 
 \item{Loci.Set}{Input list defining which loci to use for analyses (combinations permitted).}
 
-\item{All.Pairwise}{Logical indicating whether all pairwise.}
+\item{All.Pairwise}{Logical indicating whether all pairwise loci should be analyzed in haplotype analysis.}
 
 \item{Trim}{Logical indicating if HLA alleles should be trimmed to a set resolution.}
 
@@ -27,15 +28,17 @@ BIGDAWG(Data, HLA = TRUE, Run.Tests, Loci.Set, All.Pairwise = FALSE,
 
 \item{Missing}{Numeric setting allowable missing data for running analysis (may use "ignore").}
 
-\item{Cores.Lim}{Interger setting the number of cores accessible to BIGDAWG (Windows, Cores = 1L).}
+\item{Cores.Lim}{Interger setting the number of cores accessible to BIGDAWG (Windows limit is 1 core).}
 
-\item{Results.Dir}{Optional, full path directory name for BIGDAWG output.}
+\item{Results.Dir}{Optional, string of full path directory name for BIGDAWG output.}
 
-\item{Return}{Logical Should analysis results be returned back to console.}
+\item{Return}{Logical Should analysis results be returned as list.}
 
-\item{Output}{Logical Should analysis results be written to output directory as text files.}
+\item{Output}{Logical Should analysis results be written to output directory.}
 
-\item{Verbose}{Logical Should a summary of each analysis be displayed.}
+\item{Merge.Output}{Logical Should analysis results be merged into a single file for easy access.}
+
+\item{Verbose}{Logical Should a summary of each analysis be displayed in console.}
 }
 \description{
 This is the main wrapper function for each analysis.
@@ -43,9 +46,9 @@ This is the main wrapper function for each analysis.
 \examples{
 ### The following examples use the synthetic data set bundled with BIGDAWG
 
-# Haplotype analysis with no missing genotypes for two loci
+# Haplotype analysis with no missing genotypes for two loci using 1 core
 # Significant haplotypic association with phenotype 
-BIGDAWG(Data="HLA_data", Run.Tests="H", Missing=0, Loci.Set=list(c("DRB1","DQB1")))
+BIGDAWG(Data="HLA_data", Run.Tests="H", Missing=0, Loci.Set=list(c("DRB1","DQB1")), Cores.Lim=1)
 
 # Hardy-Weinberg and Locus analysis ignoring missing data
 # Significant locus associations with phenotype at all but DQB1
@@ -55,4 +58,3 @@ BIGDAWG(Data="HLA_data", Run.Tests=c("HWE","L"), Missing="ignore")
 # Significant locus deviation at DQB1
 BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2)
 }
-

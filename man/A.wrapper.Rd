@@ -36,4 +36,3 @@ Wrapper function for amino acid analysis.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

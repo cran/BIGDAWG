@@ -25,4 +25,3 @@ Summary function for sample population within data file.
 \note{
 This function is for internal BIGDAWG use only.
 }
-

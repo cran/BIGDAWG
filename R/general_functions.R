@@ -9,25 +9,27 @@ Err.Log <- function (Output, x, y=NULL) {
   
   switch(x,
          #Formatting
-         Bad.DRB345.format =  { Error <- "You have included DRB3/4/5 columns, but the alleles calls are not formatted as Locus*Allele. Please see vignette." },
-         Bad.DRB345.hap =  { Error <- "We have encountered unanticipated DR haplotypes. Please see the 'Flagged_DRB345_Haplotypes.txt' output file." },
-         Uneven.Prefix =  { Error <- "It seems some (not all) of your loci are formatted as Locus*Allele. Please ensure all loci share a similar format." },
-         Bad.Format.HLA = { Error <- "Your HLA data includes Locus*Allele genotype formatting. Please ensure all known genotypes (including absent calls) follow this format." },
-         Bad.Format.Trim = { Error <- "Your HLA data does not appear to be formatted properly for trimming. Please see vignette." },
-         Bad.Format.EVS = { Error <- "Your HLA data does not appear to be formatted properly for EVS stripping. Please see vignette." },
-         Case.Con = { Error <- "Your data does not appear to contain both cases and controls. Please see vignette." },
-         Loci.No = { Error <- "You have opted to run the haplotype analysis with too few loci. Please check Set definitions." },
-         Loci.No.AP = { Error <- "You have set All.Pairwise to 'True' but one or more your defined locus sets contain too few loci. Please check Set definitions." },
-         Low.Res = { Error <- "The resolution of your HLA data is less than 2 or does not appear to be formatted properly. Please see vignette." },
-         High.Res = { Error <- "Your HLA does not appear to be formatted properly, >4 fields detected. Please see vignette" },
+         Bad.Data = { Error <- "\nYou seem to have data that are 0's or 1's, please considering replacing with another value. Please see vignette." },
+         Bad.DRB345.format =  { Error <- "\nYou have included DRB3/4/5 columns, but the alleles calls are not formatted as Locus*Allele. Please see vignette." },
+         Bad.DRB345.hap =  { Error <- "\nWe have encountered unanticipated DR haplotypes. Please see the 'Flagged_DRB345_Haplotypes.txt' output file." },
+         Uneven.Prefix =  { Error <- "\nIt seems some (not all) of your loci are formatted as Locus*Allele. Please ensure all loci share a similar format." },
+         Bad.Format.HLA = { Error <- "\nYour HLA data includes Locus*Allele genotype formatting. Please ensure all known genotypes (including absent calls) follow this format." },
+         Bad.Format.Trim = { Error <- "\nYour HLA data does not appear to be formatted properly for trimming. Please see vignette." },
+         Bad.Format.EVS = { Error <- "\nYour HLA data does not appear to be formatted properly for EVS stripping. Please see vignette." },
+         Case.Con = { Error <- "\nYour data does not appear to contain both cases and controls. Please see vignette." },
+         Loci.No = { Error <- "\nYou have opted to run the haplotype analysis with too few loci. Please check Set definitions." },
+         Loci.No.AP = { Error <- "\nYou have set All.Pairwise to 'True' but one or more your defined locus sets contain too few loci. Please check Set definitions." },
+         Low.Res = { Error <- "\nThe resolution of your HLA data is less than 2 or does not appear to be formatted properly. Please see vignette." },
+         High.Res = { Error <- "\nYour HLA does not appear to be formatted properly, >4 fields detected. Please see vignette" },
          #Names
-         Bad.Filename = {  Error <- paste("BIGDAWG could not locate a file labeled: ",y," in the specificied working directory.",sep="") },
-         Bad.Locus.NA = { Error <- "Your seemed to have specified a locus in the Loci.Set that is not present in your data file." },
-         Bad.Locus.HLA = { Error <- "There may be a discrepancy with HLA loci names. Unrecognized locus name(s) encountered." },
-         Bad.Allele.HLA = { Error <- "There may be a discrepancy with allele names. Unrecognized allele name(s) encountered." },
+         Bad.Filename = {  Error <- paste("\nBIGDAWG could not locate a file labeled: ",y," in the specificied working directory.",sep="") },
+         Bad.Locus.NA = { Error <- "\nYou seem to have specified a locus in the Loci.Set that is not present in your data file." },
+         Bad.Locus.HLA = { Error <- "\nThere may be a discrepancy with HLA loci names. Unrecognized locus name(s) encountered." },
+         Bad.Allele.HLA = { Error <- "\nThere may be a discrepancy with allele names. Unrecognized allele name(s) encountered." },
          #Other
-         No.Internet = { Error <- "You do not seem to be connected to the internet. CheckRelease() or UpdateRelease() cannot proceed." },
-         TooMany.Missing = { Error <- "You data is missing too many values at each locus. Try using Missing='ignore' when running BIGDAWG and avoid haplotype test." }
+         MultipleSets = { Error <- "\nWARNING!!! You have opted to run multiple sets with overlapping loci. To avoid duplication of effort and results from the all pairwise haplotype tests, the locus test, and/or the amino acid test(!!!), it is suggested you run these tests separately on either the largest loci set possible or all loci in a given data set." },
+         No.Internet = { Error <- "\nYou do not seem to be connected to the internet. CheckRelease() or UpdateRelease() cannot proceed." },
+         TooMany.Missing = { Error <- "\nYour data is missing too many values at each locus. Try using Missing='ignore' when running BIGDAWG and avoid haplotype test." }
   )
   cat(Error,"\n")
   if(Output) { write.table(Error,file="Error_Log.txt",sep="\t",quote=F,col.names=F,row.names=F,append=T) }
@@ -200,6 +202,36 @@ DRB345.zygosity <- function(x) {
   
 }
 
+#' DRB345 haplotype zygosity flag check
+#'
+#' Identify DR345 flagged haplotypes
+#' @param tmp Output of DRB345.zygosity
+#' @param Tab Data frame of sampleIDs, phenotypes, and genotypes
+#' @note This function is for internal BIGDAWG use only.
+DRB345.flag <- function(tmp,Tab) {
+  
+  DR.Flags <- list()
+  
+  tmp.DR3 <- do.call(rbind,lapply(tmp,"[[",2))
+  if(length(which(tmp.DR3==T)>0)) {
+    DR.Flags[['DRB3']] <- c("DRB3",paste(Tab[which(tmp.DR3==T),1],collapse=","))
+  } else { DR.Flags[['DRB3']] <- NULL }
+  
+  tmp.DR4 <- do.call(rbind,lapply(tmp,"[[",3))
+  if(length(which(tmp.DR4==T)>0)) { 
+    DR.Flags[['DRB4']] <- c("DRB4",paste(Tab[which(tmp.DR4==T),1],collapse=",")) 
+  } else { DR.Flags[['DRB4']] <- NULL }
+  
+  tmp.DR5 <- do.call(rbind,lapply(tmp,"[[",4))
+  if(length(which(tmp.DR5==T)>0)) { 
+    DR.Flags[['DRB5']] <- c("DRB5",paste(Tab[which(tmp.DR5==T),1],collapse=","))
+  } else { DR.Flags[['DRB5']] <- NULL }
+  
+  DR.Flags <- do.call(rbind,DR.Flags)
+  return(DR.Flags)
+  
+}
+
 #' HLA trimming function
 #'
 #' Trim a properly formatted HLA allele to desired number of fields.
@@ -249,7 +281,8 @@ RunChiSq <- function(x) {
     New.df <- rbind(unbinned,colSums(x[Rare.rows,]))
     rownames(New.df)[nrow(New.df)] <- "binned"
   } else {
-    binned <- c(NA,NA)
+    binned <- cbind(NA,NA)
+    colnames(binned) <- c("Group.0","Group.1")
     New.df <- x
   }
 
@@ -350,3 +383,145 @@ cci.pval.list <- function(x) {
   return(tmp)
 }
 
+#' Haplotype missing Allele summary function
+#'
+#' Summary function for identifying missing alleles in a matrix of genotypes.
+#' @param geno Matrix of genotypes.
+#' @param miss.val Vector of codes for allele missing values.
+#' @note This function is for internal BIGDAWG use only and is ported from haplo.stats.
+summaryGeno.2 <- function (geno, miss.val = 0) {
+  # Ported from R package haplo.stats v 1.7.7
+  # Authors: Sinnwell JP, Schaid DJ
+  # URL: https://cran.r-project.org/web/packages/haplo.stats/index.html
+  n.loci <- ncol(geno)/2
+  nr <- nrow(geno)
+  geno <- haplo.stats::setupGeno(geno, miss.val)
+  loc0 <- numeric(nr)
+  loc1 <- numeric(nr)
+  loc2 <- numeric(nr)
+  for (i in 1:nr) {
+    first.indx <- seq(1, (2 * n.loci - 1), by = 2)
+    miss.one <- is.na(geno[i, first.indx]) | is.na(geno[i, 
+                                                        first.indx + 1])
+    miss.two <- is.na(geno[i, first.indx]) & is.na(geno[i, 
+                                                        first.indx + 1])
+    loc2[i] <- sum(miss.two)
+    loc1[i] <- sum(miss.one - miss.two)
+    loc0[i] <- sum(!miss.one)
+  }
+  tbl <- data.frame(missing0 = loc0, missing1 = loc1, missing2 = loc2)
+  return(tbl)
+}
+
+#' Data Object Merge and Output
+#'
+#' Whole data set table construction of per haplotype for odds ratio, confidence intervals, and pvalues
+#' @param BD.out Output of analysis as list.
+#' @param Run Tests that are to be run as defined by Run.Tests.
+#' @param OutDir Output directory defined by Results.Dir or default.
+#' @note This function is for internal BIGDAWG use only.
+MergeData_Output <- function(BD.out,Run,OutDir) {
+  
+  FM.out <- data.frame(Analysis=character(),
+                       Locus=character(),
+                       Allele=character(),
+                       Group.0=numeric(),
+                       Group.1=numeric())
+  
+  CN.out <- data.frame(Analysis=character(),
+                       Locus=character(),
+                       Allele=character(),
+                       Group.0=numeric(),
+                       Group.1=numeric())
+  
+  OR.out <- data.frame(Analysis=character(),
+                       Locus=character(),
+                       Allele=character(),
+                       OR=numeric(),
+                       CI.Lower=numeric(),
+                       CI.Upper=numeric(),
+                       p.value=numeric(),
+                       sig=character())
+  
+  CS.out <- data.frame(Analysis=character(),
+                       Locus=character(),
+                       x.square=numeric(),
+                       df=numeric(),
+                       p.value=numeric(),
+                       sig=character())
+  
+  for(i in Run) {
+    
+    switch(i,
+           H= { TestName <- "Haplotype" },
+           L= { TestName <- "Locus" },
+           A= { TestName <- "AminoAcid" } )
+    
+    Test <- BD.out[[i]]
+    
+    for(k in 1:length(Test)) {
+      
+      Test.sub <- Test[[k]]
+      
+      #Frequencies
+      tmp <- Test.sub$freq
+      if(i=="A") { Allele <- paste(tmp[,'Position'],tmp[,'Residue'],sep="::") }
+      switch(i,
+             H = { tmp <- cbind(rep(TestName,nrow(tmp)),rep(colnames(tmp)[1],nrow(tmp)),tmp) },
+             L = { tmp <- cbind(rep(TestName,nrow(tmp)),tmp) },
+             A = { tmp <- cbind(rep(TestName,nrow(tmp)),tmp[,'Locus'],Allele,tmp[,c('Group.0','Group.1')]) })
+      colnames(tmp) <- c("Analysis","Locus","Allele","Group.0","Group.1")
+      FM.out <- rbind(tmp,FM.out) ; rm(tmp)
+      
+      #Counts
+      tmp <- Test.sub$table
+      if(i=="A") { Allele <- paste(tmp[,'Position'],tmp[,'Residue'],sep="::") }
+      switch(i,
+             H = { tmp <- cbind(rep(TestName,nrow(tmp)),rep(colnames(tmp)[1],nrow(tmp)),tmp) },
+             L = { tmp <- cbind(rep(TestName,nrow(tmp)),tmp) },
+             A = { tmp <- cbind(rep(TestName,nrow(tmp)),tmp[,'Locus'],Allele,tmp[,c('Group.0','Group.1')]) })
+      colnames(tmp) <- c("Analysis","Locus","Allele","Group.0","Group.1")
+      CN.out <- rbind(tmp,CN.out) ; rm(tmp)
+      
+      #Odds Ratios
+      tmp <- Test.sub$OR
+      if(i=="A") { Allele <- paste(tmp[,'Position'],tmp[,'Residue'],sep="::") }
+      switch(i,
+             H = { tmp <- cbind(rep(TestName,nrow(tmp)),rep(colnames(tmp)[1],nrow(tmp)),tmp) },
+             L = { tmp <- cbind(rep(TestName,nrow(tmp)),tmp) },
+             A = { tmp <- cbind(rep(TestName,nrow(tmp)),tmp[,'Locus'],Allele,tmp[,c("OR","CI.lower","CI.upper","p.value","sig")]) })
+      colnames(tmp) <- c("Analysis","Locus","Allele","OR","CI.Lower","CI.Upper","p.value","sig")
+      OR.out <- rbind(tmp,OR.out) ; rm(tmp)
+      
+      #ChiSq
+      tmp <- Test.sub$chisq
+      if(i=="A") { Locus <- paste(tmp[,'Locus'],tmp[,'Position'],sep="::") }
+      switch(i,
+             H = { tmp <- cbind(rep(TestName,nrow(tmp)), rep(names(Test)[k],nrow(tmp)), tmp) },
+             L = { tmp <- cbind(rep(TestName,nrow(tmp)), tmp) },
+             A = { tmp <- cbind(rep(TestName,nrow(tmp)), Locus, tmp[,c('X.square','df','p.value','sig')] ) } )
+      colnames(tmp)[1:2] <- c("Analysis","Locus")
+      rownames(tmp) <- NULL
+      CS.out <- rbind(tmp,CS.out); rm(tmp)
+      
+    }; rm(k)
+    
+  }; rm(i)
+  
+  setwd(OutDir)
+  
+  # Remove redundant entries
+  # Especially relevant to multi-set runs
+  FM.out <- unique(FM.out)
+  CN.out <- unique(CN.out)
+  CS.out <- unique(CS.out)
+  
+  OR.out <- apply(OR.out,MARGIN=c(1,2),as.character)
+  OR.out <- unique(OR.out)
+  
+  write.table(FM.out,file="Merged_Frequencies.txt",sep="\t",col.names=T,row.names=F,quote=F)
+  write.table(CN.out,file="Merged_Counts.txt",sep="\t",col.names=T,row.names=F,quote=F)
+  write.table(CS.out,file="Merged_ChiSq.txt",sep="\t",col.names=T,row.names=F,quote=F)
+  write.table(OR.out,file="Merged_OddsRatio.txt",sep="\t",col.names=T,row.names=F,quote=F)
+  
+}

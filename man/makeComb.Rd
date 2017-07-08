@@ -15,4 +15,3 @@ Make data frame of possible genotype combinations
 \note{
 This function is for internal BIGDAWG use only.
 }
-
