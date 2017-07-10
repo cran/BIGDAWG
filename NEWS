@@ -1,7 +1,17 @@
+BIGDAWG v1.14 (Release date: 2017-07-09) Derek Pappas <dpappas@chori.org>
+====================================================================================
+* Adjusted maximum multi-core allowance to 90% of available processor cores.
+
+BIGDAWG v1.13 (Release date: 2017-07-07) Derek Pappas <dpappas@chori.org>
+====================================================================================
+Changes:
+* Submission to CRAN
+* Minor vignette updates.
+
 BIGDAWG v1.12 (Release date: 2017-06-21) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 Changes:
-* BIGDAWG v1.10 & v1.11 restricted to internal releases.
+* BIGDAWG v1.10 and v1.11 restricted to internal releases.
 * Transferred github repository location to github.com/IgDAWG/BIGDAWG
 * Added multi-core capabilities to haplotype analysis to speed up pairwise analysis. Useful for large datasets.
 * Update to haplotype output files.

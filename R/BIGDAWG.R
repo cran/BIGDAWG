@@ -19,13 +19,13 @@
 #' @examples
 #' ### The following examples use the synthetic data set bundled with BIGDAWG
 #' 
-#' # Haplotype analysis with no missing genotypes for two loci using 1 core
-#' # Significant haplotypic association with phenotype 
-#' BIGDAWG(Data="HLA_data", Run.Tests="H", Missing=0, Loci.Set=list(c("DRB1","DQB1")), Cores.Lim=1)
+#' # Haplotype analysis with no missing genotypes for two loci sets
+#' # Significant haplotypic association with phenotype
+#' # BIGDAWG(Data="HLA_data", Run.Tests="H", Missing=0, Loci.Set=list(c("DRB1","DQB1")))
 #' 
 #' # Hardy-Weinberg and Locus analysis ignoring missing data
 #' # Significant locus associations with phenotype at all but DQB1
-#' BIGDAWG(Data="HLA_data", Run.Tests=c("HWE","L"), Missing="ignore")
+#' # BIGDAWG(Data="HLA_data", Run.Tests="L", Missing="ignore")
 #' 
 #' # Hardy-Weinberg analysis trimming data to 2-Field resolution
 #' # Significant locus deviation at DQB1
@@ -54,8 +54,6 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       OutDir <- Results.Dir
     }
   }
-  
-  if(Sys.info()['sysname']=="Windows") {Cores=1L} else {Cores <- parallel::detectCores()}
   
   #Check for the updated ExonPtnList 'UpdatePtnList' and use if found.
   UpdatePtnList <- NULL ; rm(UpdatePtnList)
@@ -222,11 +220,17 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   }
   
   # MULTICORE LIMITATIONS
-  if (Cores.Lim!=1L) { 
-    if(Sys.info()['sysname']=="Windows" & as.numeric(Cores.Lim)>1) {
-      cat("You seem to be using Windows and specified the number of Cores be >1. Please see vignette.\n") }
-    Cores <- as.integer(Cores.Lim)
-  }
+  if (Cores.Lim!=1L) {
+    if(Sys.info()['sysname']=="Windows" & as.numeric(Cores.Lim)>1) { 
+      Err.Log(Output,"Cores.Windows")
+      stop("Analysis Stopped.",call. = F)
+    }
+    Cores.Max <- as.integer( floor( parallel::detectCores() * 0.9) )
+    if( Cores.Lim > Cores.Max ) { 
+      Cores <- Cores.Max
+      cat("Adjusting to",Cores.Max,"processor cores.\n")
+    } else { Cores <- Cores.Lim }
+  } else { Cores <- Cores.Lim }
 
   ## __________________ HLA specific checks
   if(Trim & !HLA) { cat("Trimming only relevant to HLA data, no trimming performed.\n") }
