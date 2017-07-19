@@ -30,7 +30,13 @@ Err.Log <- function (Output, x, y=NULL) {
          MultipleSets = { Error <- "\nWARNING!!! You have opted to run multiple sets with overlapping loci. To avoid duplication of effort and results from the all pairwise haplotype tests, the locus test, and/or the amino acid test(!!!), it is suggested you run these tests separately on either the largest loci set possible or all loci in a given data set." },
          No.Internet = { Error <- "\nYou do not seem to be connected to the internet. CheckRelease() or UpdateRelease() cannot proceed." },
          TooMany.Missing = { Error <- "\nYour data is missing too many values at each locus. Try using Missing='ignore' when running BIGDAWG and avoid haplotype test." },
-         Cores.Windows = { Error <- "\nYou seem to be using Windows and specified more than 1 processor cores to be used. Please see vignette." }
+         Cores.Windows = { Error <- "\nYou seem to be using Windows and specified more than 1 processor cores to be used. Please see vignette." },
+         #Notifications
+         Ignore.Missing = { Error <- "\nConsider setting a missing threshold or running without the haplotype ('H') analysis. A large number of missing data in the haplotype analysis will affect performance, require large amounts of RAM, and in the worst case crash your computer." },
+         Big.Missing = { Error <- "\nThe number of allowable missing will affect performance.\nConsider running with a smaller 'Missing' value or without the haplotype ('H') analysis.\ncontinuing......" },
+         AllPairwise.Merge = { Error <- "\nYou have opted to run all pairwise combinations and merge the final data tables. For a large number of loci, this could take a long time. You have been warned!" },
+         NotHLA.Trim = { Error <- "\nTrimming only relevant to HLA data, no trimming performed." },
+         NotHLA.EVS.rm = { Error <- "\nExpression variant suffix stripping only relevant to HLA data, no stripping performed." }
   )
   cat(Error,"\n")
   if(Output) { write.table(Error,file="Error_Log.txt",sep="\t",quote=F,col.names=F,row.names=F,append=T) }
@@ -42,10 +48,9 @@ Err.Log <- function (Output, x, y=NULL) {
 #' @param df Genotypes dataframe.
 #' @note This function is for internal BIGDAWG use only.
 rmABstrings <- function(df) {
-  
-  df[,3:ncol(df)] <- apply(df[,3:ncol(df)], MARGIN=c(1,2), FUN=function(x) gsub("ABSENT|Absent|absent|Abs|ABS|ab|Ab|AB|00|00:00|00:00:00|00:00:00:00","^",x) )
+  df[,3:ncol(df)] <- apply(df[,3:ncol(df)], MARGIN=c(1,2), FUN=function(x) gsub("ABSENT|Absent|absent|Abs|ABS|ab|Ab|AB|00:00|00:00:00|00:00:00:00","^",x) )
+  df[df=="00"] <- "^"
   return(df)
-  
 }
 
 #' Expression Variant Suffix Removal

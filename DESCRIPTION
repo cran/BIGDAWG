@@ -1,8 +1,8 @@
 Package: BIGDAWG
 Type: Package
 Title: Case-Control Analysis of Multi-Allelic Loci
-Version: 1.14
-Date: 2017-07-09
+Version: 1.14.2
+Date: 2017-07-18
 Author: Derek Pappas <dpappas@chori.org>, Steve Mack <sjmack@chori.org>, Jill
     Hollenbach <Jill.Hollenbach@ucsf.edu>
 Maintainer: Steve Mack <sjmack@chori.org>
@@ -17,6 +17,6 @@ Imports: XML, haplo.stats, parallel, knitr, rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2017-07-10 05:52:04 UTC; PappasDesktop
+Packaged: 2017-07-19 05:28:23 UTC; PappasDesktop
 Repository: CRAN
-Date/Publication: 2017-07-10 12:21:00 UTC
+Date/Publication: 2017-07-19 07:48:15 UTC

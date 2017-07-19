@@ -1,3 +1,12 @@
+BIGDAWG v1.14.2 (Release date: 2017-07-18) Derek Pappas <dpappas@chori.org>
+====================================================================================
+* Fixed bug where allele names with '00' would be eroneously changed.
+
+BIGDAWG v1.14.1 (Release date: 2017-07-10) Derek Pappas <dpappas@chori.org>
+====================================================================================
+* Minor adjustments to code for organization and clarity.
+* Fixed bug where sample IDs were not exporting with subject haplotypes. However, they were reported in the same order as the source data.
+
 BIGDAWG v1.14 (Release date: 2017-07-09) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 * Adjusted maximum multi-core allowance to 90% of available processor cores.

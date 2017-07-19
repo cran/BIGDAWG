@@ -179,11 +179,11 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   # MISSING DATA
   if(Missing == "ignore") {
     cat("Ignoring any missing data.\n")
-    cat("Consider setting a missing threshold or running without the haplotype ('H') analysis. A large number of missing data in the haplotype analysis will affect performance, require large amounts of RAM, and in the worst case crash your computer.\n")
+    Err.Log(Output,"Ignore.Missing")
     rows.rm <- NULL
   } else {
     if (Missing > 2) {
-      if ("H" %in% Run) { cat("The number of allowable missing will affect performance.\nConsider running with a smaller 'Missing' value or without the haplotype ('H') analysis.\ncontinuing......") }
+      if ("H" %in% Run) { Err.Log(Output,"Big.Missing") }
     }
     cat("Removing any missing data. This will affect Hardy-Weinberg Equilibrium test.\n")
     geno.desc <- summaryGeno.2(Tab[,3:ncol(Tab)], miss.val=NAstrings)
@@ -214,9 +214,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   
   # DATA MERGE AND NUMBER OF LOCI
   if(Output && Merge.Output && All.Pairwise) {
-    if(ncol(Tab)>52) {
-      cat("You have opted to run all pairwise combinations and merge the final data tables. For a large number of loci, this could take a long time. You have been warned!\n") 
-    }
+    if(ncol(Tab)>52) { Err.Log(Output,"AllPairwise.Merge") }
   }
   
   # MULTICORE LIMITATIONS
@@ -233,8 +231,8 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   } else { Cores <- Cores.Lim }
 
   ## __________________ HLA specific checks
-  if(Trim & !HLA) { cat("Trimming only relevant to HLA data, no trimming performed.\n") }
-  if(EVS.rm & !HLA) { cat("Expression variant suffix stripping only relevant to HLA data, no stripping performed.\n") }
+  if(Trim & !HLA) { Err.Log(Output,"NotHLA.Trim") }
+  if(EVS.rm & !HLA) { Err.Log(Output,"NotHLA.EVS.rm") }
   
   if(HLA) {
     

@@ -106,12 +106,18 @@ H.MC.wrapper <- function(SID,Tabsub,loci,loci.ColNames,genos,grp,All.Pairwise,Ou
         
       } else { 
         
-        H.out[['freq']] <- H.list[[1]][['freq']]
-        H.out[['binned']] <- H.list[[1]][['binned']]
-        H.out[['OR']] <- H.list[[1]][['OR']]
-        H.out[['chisq']] <- H.list[[1]][['chisq']]
-        H.out[['table']] <- H.list[[1]][['table']]
-        H.out[['Haplotypes']] <- H.list[[1]][['Haplotypes']]
+        #Frequencies-binned-OR-chisq-table
+          H.out[['freq']] <- H.list[[1]][['freq']]
+          H.out[['binned']] <- H.list[[1]][['binned']]
+          H.out[['OR']] <- H.list[[1]][['OR']]
+          H.out[['chisq']] <- H.list[[1]][['chisq']]
+          H.out[['table']] <- H.list[[1]][['table']]
+        
+        #Haplotyeps
+          tmp <- H.list[[1]][['Haplotypes']]
+          tmp <- cbind(SID,tmp)
+          colnames(tmp)[1] <- "SAMPLE.ID"
+          H.out[['Haplotypes']] <- tmp
             
       }
     
