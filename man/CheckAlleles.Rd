@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_functions.R
 \name{CheckAlleles}
 \alias{CheckAlleles}
-\title{Allele presence check}
+\title{Allele Legitimacy Check}
 \usage{
 CheckAlleles(x, y, z1, z2)
 }

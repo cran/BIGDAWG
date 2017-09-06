@@ -1,3 +1,25 @@
+BIGDAWG v1.16 (Release date: 2017-09-05) Derek Pappas <dpappas@chori.org>
+====================================================================================
+* Some code re-structuring.
+* Added parameter check function.
+* Updated bundled IMGT/HLA amino acid exon alignment to latest release (Release 3.29.0.1, 2017-08-18).
+
+BIGDAWG v1.15.3 (Release date: 2017-08-07) Derek Pappas <dpappas@chori.org>
+====================================================================================
+* Now Data argument accepts properly formatted R dataframes (Data=foo).
+
+BIGDAWG v1.15.2 (Release date: 2017-08-07) Derek Pappas <dpappas@chori.org>
+====================================================================================
+* Release v1.15.1 restricted to internal releases.
+* Fixed miscellaneous bugs specific to HLA data processing.
+* Now allows for .1, .2, _1, and _2 in column names.
+* Updates to vignette.
+
+BIGDAWG v1.15 (Release date: 2017-08-02) Derek Pappas <dpappas@chori.org>
+====================================================================================
+* Fixed miscellaneous bugs specific to HLA data processing.
+* Minor adjustments to code for organization and clarity.
+
 BIGDAWG v1.14.2 (Release date: 2017-07-18) Derek Pappas <dpappas@chori.org>
 ====================================================================================
 * Fixed bug where allele names with '00' would be eroneously changed.

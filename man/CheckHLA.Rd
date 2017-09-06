@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_functions.R
 \name{CheckHLA}
 \alias{CheckHLA}
-\title{HLA formatting check}
+\title{HLA Formatting Check}
 \usage{
 CheckHLA(x)
 }

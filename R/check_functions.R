@@ -1,5 +1,55 @@
-#' HLA formatting check
+#' Check Input Parameters
 #'
+#' Check input parameters for invalid entries.
+#' @param HLA Logical indicating whether data is HLA class I/II genotyping data only.
+#' @param All.Pairwise Logical indicating whether all pairwise loci should be analyzed in haplotype analysis.
+#' @param Trim Logical indicating if HLA alleles should be trimmed to a set resolution.
+#' @param Res Numeric setting what desired resolution to trim HLA alleles.
+#' @param EVS.rm Logical indicating if expression variant suffixes should be removed.
+#' @param Missing Numeric setting allowable missing data for running analysis (may use "ignore").
+#' @param Cores.Lim Interger setting the number of cores accessible to BIGDAWG (Windows limit is 1 core).
+#' @param Return Logical Should analysis results be returned as list.
+#' @param Output Logical Should analysis results be written to output directory.
+#' @param Merge.Output Logical Should analysis results be merged into a single file for easy access.
+#' @param Verbose Logical Should a summary of each analysis be displayed in console.
+#' @note This function is for internal use only.
+Check.Params <- function (HLA,All.Pairwise,Trim,Res,EVS.rm,Missing,Cores.Lim,Return,Output,Merge.Output,Verbose) {
+  
+  # Logicals: HLA=TRUE, All.Pairwise=FALSE, EVS.rm=FALSE, Trim=FALSE, Return=FALSE, Merge.Output=FALSE, Verbose=TRUE, Output=TRUE,
+  # Numerics: Res=2, Missing=2, Cores.Lim=1L
+  # Untested: Data, Results.Dir, Run.Tests, Loci.Set
+  
+  if( !is.logical(HLA) ) { Err.Log("P.Error","HLA") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( !is.logical(All.Pairwise) ) { Err.Log("P.Error","All.Pairwise") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( !is.logical(EVS.rm) ) { Err.Log("P.Error","EVS.rm") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( !is.logical(Trim) ) { Err.Log("P.Error","Trim") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( !is.logical(Return) ) { Err.Log("P.Error","Return") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( !is.logical(Merge.Output) ) { Err.Log("P.Error","Merge.Output") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( !is.logical(Verbose) ) { Err.Log("P.Error","Verbose") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( !is.logical(Output) ) { Err.Log("P.Error","Output") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( !is.numeric(Res) ) { Err.Log("P.Error","Res") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( !is.numeric(Missing) ) { Err.Log("P.Error","Missing") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( !is.numeric(Cores.Lim) || !is.integer(Cores.Lim) ) { Err.Log("P.Error","Cores.Lim") ; stop("Conversion Stopped.",call.=FALSE) }
+  
+}
+
+#' Check Cores Parameters
+#'
+#' Check cores limitation for OS compatibility
+#' @param Cores.Lim Integer How many cores can be used.
+Check.Cores <- function(Cores.Lim) {
+  if ( Cores.Lim!=1L ) {
+    Cores.Max <- as.integer( floor( parallel::detectCores() * 0.9) )
+    if(Sys.info()['sysname']=="Windows" && as.numeric(Cores.Lim)>1) {
+      Err.Log("Windows.Cores") ; stop("Conversion stopped.",call. = F)
+    } else if( Cores.Lim > Cores.Max ) { Cores <- Cores.Max
+    } else { Cores <- Cores.Lim }
+  } else { Cores <- Cores.Lim }
+  return(Cores)
+}
+
+#' HLA Formatting Check
+#' 
 #' Checks data to see if HLA data is properly formatted.
 #' @param x All columns of HLA genotyping data.
 #' @note This function is for internal BIGDAWG use only.
@@ -15,17 +65,18 @@ CheckHLA <- function(x) {
   return(Flag)
 }
 
-#'
-#'
+#' Allele Name Format Fix
+#' 
 #' Separate locus and allele names if data is formatted as Loci*Allele
 #' @param Output Logical indicating if Error logging should be written to a file.
 #' @param Tab All columns of HLA genotyping data.
 #' @note This function is for internal BIGDAWG use only. 
-CheckLociName <- function(Output,Tab) {
-  if(sum(grepl("\\*",Tab[,3:ncol(Tab)]))>0) {
-    tmp <- gsub("^","*^",Tab)
+FixAlleleName <- function(Output,Tab) {
+  fixCell <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),FUN=function(x) grepl("\\*",na.omit(x)))
+  if( sum(fixCell)>0 ) {
+    Tab[Tab=="^"] <- "*^"
     Format.Check <- length(apply(Tab[,3:ncol(Tab)],MARGIN=2,FUN=function(x) which(grepl("\\*",na.omit(x))==F)))
-    if(Format.Check>0) {
+    if( Format.Check>0 ) {
       Err.Log(Output,"Uneven.Prefix")
       stop("Analysis Stopped.",call. = F)
     }
@@ -34,9 +85,9 @@ CheckLociName <- function(Output,Tab) {
   return(Tab)
 }
 
-#' Loci presence check
-#'
-#' Checks available loci against data specific to ensure complete overlap.
+#' Loci Legitimacy Check
+#' 
+#' Checks available loci against data to ensure complete overlap.
 #' @param x Loci available in exon protein list alignment object.
 #' @param y Unique column names
 #' @note This function is for internal BIGDAWG use only.
@@ -60,8 +111,8 @@ CheckLoci <- function(x,y) {
   return(Output)
 }
 
-#' Allele presence check
-#'
+#' Allele Legitimacy Check
+#' 
 #' Checks available alleles against data to ensure complete overlap.
 #' @param x Exon protein list alignment object.
 #' @param y Genotypes from data file
@@ -120,8 +171,8 @@ CheckAlleles <- function(x,y,z1,z2) {
   return(Output)
 }
 
-#' Data summary function
-#'
+#' Data Summary Function
+#' 
 #' Summary function for sample population within data file.
 #' @param Tab Loci available in exon protein list alignment object.
 #' @param All.ColNames Column names from genotype data.

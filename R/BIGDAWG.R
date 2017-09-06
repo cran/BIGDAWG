@@ -1,4 +1,4 @@
-#' BIGDAWG wrapper function
+#' BIGDAWG Main Wrapper Function
 #'
 #' This is the main wrapper function for each analysis.
 #' @param Data Name of the genotype data file.
@@ -36,7 +36,11 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   
   MainDir <- getwd()
   on.exit(setwd(MainDir), add = TRUE)
-    
+  
+  # Check Parameters
+  if(missing(Data)) { Err.Log("P.Missing","Data") ; stop("Conversion Stopped.",call.=FALSE) }
+  Check.Params(HLA,All.Pairwise,Trim,Res,EVS.rm,Missing,Cores.Lim,Return,Output,Merge.Output,Verbose)
+  
   cat(rep("=",40))
   cat("\n          BIGDAWG: Bridging ImmunoGenomic Data Analysis Workflow Gaps\n")
   cat(rep("=",40),"\n")
@@ -56,20 +60,21 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   }
   
   #Check for the updated ExonPtnList 'UpdatePtnList' and use if found.
-  UpdatePtnList <- NULL ; rm(UpdatePtnList)
+  UpdatePtnList <- NULL
   UPL <- paste(path.package('BIGDAWG'),"/data/UpdatePtnAlign.RData",sep="")
   if( file.exists(UPL) ) { 
     load(UPL)
     EPL <- UpdatePtnList
     rm(UpdatePtnList)
     UPL.flag=T
-  } else { 
+  } else {
+    rm(UpdatePtnList)
     EPL <- BIGDAWG::ExonPtnList
     UPL.flag=F }
   
   cat("\n>>>>>>>>>>>>>>>>>>>>>>>>> BEGIN Analysis <<<<<<<<<<<<<<<<<<<<<<<<<\n\n")
   
-  # Output object
+  # Define Output object
   BD.out <- list()
   
 # ===================================================================================================================================== ####
@@ -77,89 +82,52 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   
   NAstrings=c("NA","","****","-","na","Na")
   
-  if (Data=="HLA_data") {
-    Tab <- BIGDAWG::HLA_data
-    colnames(Tab) <- toupper(colnames(Tab))
-    All.ColNames <- gsub(".1","",colnames(Tab),fixed=T)
-    rownames(Tab) <- NULL
-    DRBFLAG <- NULL
-    if(Output) { setwd(OutDir) }
+  if(is.character(Data)) {
+  
+    if (Data=="HLA_data") {
+      Tab <- BIGDAWG::HLA_data
+      colnames(Tab) <- toupper(colnames(Tab))
+      rownames(Tab) <- NULL
+      
+    } else {
+      
+      # Read in data and Pre-process
+      if(!file.exists(Data)) {
+        Err.Log(Output,"Bad.Filename", Data)
+        stop("Analysis stopped.",call.=F) }
+      Tab <- read.table(Data, header = T, sep="\t", stringsAsFactors = F, na.strings=NAstrings, fill=T, comment.char = "#", strip.white=T, blank.lines.skip=T, colClasses="character")
+      colnames(Tab) <- sapply(colnames(Tab),FUN=gsub,pattern="\\.1|\\.2|\\_1|\\_2",replacement="")
+      colnames(Tab) <- toupper(colnames(Tab))
+      colnames(Tab) <- gsub("DRB3.4.5|DRB3/4/5","DRB345",colnames(Tab))
+      rownames(Tab) <- NULL
+      Tab <- rmABstrings(Tab)
+      
+    }
     
   } else {
     
-    # Read in data and Pre-process
-    if(!file.exists(Data)) {
-      Err.Log(Output,"Bad.Filename", Data)
-      stop("Analysis stopped.",call.=F) }
-    Tab <- read.table(Data, header = T, sep="\t", stringsAsFactors = F, na.strings=NAstrings, fill=T, comment.char = "#", strip.white=T, blank.lines.skip=T, colClasses="character")
-    if(HLA==T) { if(sum(grepl("DRB3.4.5",colnames(Tab)))>0) { colnames(Tab) <- gsub("DRB3.4.5","DRB345",colnames(Tab))  } }
+    Tab <- Data
+    colnames(Tab) <- sapply(colnames(Tab),FUN=gsub,pattern="\\.1|\\.2|\\_1|\\_2",replacement="")
     colnames(Tab) <- toupper(colnames(Tab))
-    All.ColNames <- gsub(".1","",colnames(Tab),fixed=T)
+    colnames(Tab) <- gsub("DRB3.4.5|DRB3/4/5","DRB345",colnames(Tab))
     rownames(Tab) <- NULL
     Tab <- rmABstrings(Tab)
     
-    if(Output) { setwd(OutDir) }
-    
-    # Separate DRB345 if exists as single column pair and check zygosity
-    if(HLA==T) {
-      if(sum(grepl("DRB345",colnames(Tab)))>0) {
-        
-        cat("Processing DRB3/4/5 column data.\n")
-        
-        DRBFLAG <- T
-        getCol <- grep("DRB345",colnames(Tab))
-        
-        # Stop if not Locus*Allele formatting
-        if( sum(grepl("\\*",Tab[,getCol]))==0 ) {
-          Err.Log(Output,"Bad.DRB345.format")
-          stop("Analysis Stopped.",call. = F)
-        }
-        
-        # Expand DRB3/4/5 to separate column pairs
-        Tab <- DRB345.parser(Tab)
-        
-        # Check for locus hemizygosity by DR haplotype
-        Tab.list <- lapply(seq_len(nrow(Tab)),FUN=function(z) Tab[z,])
-        tmp <- lapply(Tab.list,FUN=DRB345.zygosity)
-        tmp.df <- lapply(tmp,"[[",1)
-        Tab <- as.data.frame(do.call(rbind,tmp.df))
-        All.ColNames <- gsub(".1","",colnames(Tab),fixed=T)
-        
-        #Identify DR345 flagged haplotypes
-        DR.Flags <- DRB345.flag(tmp,Tab)
-        
-        if(Output) {
-          if(!is.null(DR.Flags)) {
-            colnames(DR.Flags) <- c("Flagged.Locus","Sample.ID") ; rownames(DR.Flags) <- NULL
-            Err.Log(Output,"Bad.DRB345.hap") ; cat("\n")
-            write.table(DR.Flags,file="Flagged_DRB345_Haplotypes.txt",sep="\t",quote=F,row.names=F,col.names=T)
-          }
-        }
-        cat("\n")
-      } else { DRBFLAG <- F }
-    } else { DRBFLAG <- NULL }
-    
-    # Separate locus and allele names if data is formatted as Loci*Allele
-    if(HLA==T) { Tab <- CheckLociName(Output,Tab) }
-    
   }
-
-# ===================================================================================================================================== ####
-# Case-Control Summary ________________________________________________________________________________________________________________ ####
   
-  cat(">>>> CASE - CONTROL SUMMARY STATISTICS\n")
-  #cat(paste(rep("_",50),collapse=""),"\n")
-  if (Trim) { rescall <- paste(Res,"-Field",sep="") } else { rescall <- "Not Defined" }
-  Check <- PreCheck(Tab,All.ColNames,rescall,HLA,Verbose,Output)
-  if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.names=T,quote=F); rm(Check,rescall) }
-
+  # Define Data Columns
+  Data.Col <- seq(3,ncol(Tab))
+  
+  # Change to the required output directory
+  if(Output) { setwd(OutDir) }
+  
 # ===================================================================================================================================== ####
 # Data Processing and Sanity Checks ___________________________________________________________________________________________________ ####
   
   cat(">>>> DATA PROCESSING AND CHECKS.\n")
   #cat(paste(rep("_",50),collapse=""),"\n")
   
-  ## __________________ General processing and checks for any data
+  #### General processing and checks for all data
   
   # RUN TESTS DEFINITIONS
   if (missing(Run.Tests)) { Run <- c("HWE","H","L","A") } else { Run <- Run.Tests }
@@ -170,8 +138,8 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     }
   }
   
-  # BAD Data DEFINITIONS
-  if(length(c(which(Tab[,3:ncol(Tab)]==0),which(Tab[,3:ncol(Tab)]==1)))>0) {
+  # BAD DATA DEFINITIONS - No 1's or 0's
+  if(length(c(which(Tab[,Data.Col]==0),which(Tab[,Data.Col]==1)))>0) {
     Err.Log(Output,"Bad.Data")
     stop("Analysis Stopped.",call. = F)
   }
@@ -186,7 +154,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       if ("H" %in% Run) { Err.Log(Output,"Big.Missing") }
     }
     cat("Removing any missing data. This will affect Hardy-Weinberg Equilibrium test.\n")
-    geno.desc <- summaryGeno.2(Tab[,3:ncol(Tab)], miss.val=NAstrings)
+    geno.desc <- summaryGeno.2(Tab[,Data.Col], miss.val=NAstrings)
     test <- geno.desc[,2] + 2*geno.desc[,3]
     rows.rm <- which(test > Missing)
     if( length(rows.rm) > 0 ) {
@@ -199,17 +167,9 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     if(nrow(Tab)==0) { Err.Log(Output,"TooMany.Missing") ; stop("Analysis Stopped.",call. = F) }
   }
   
-  # LOCI SET DEFINITIONS
-  if (missing(Loci.Set)) {
-    Set <- list(c(3:ncol(Tab)))
-  } else {
-    Loci.Set <- lapply(Loci.Set,toupper)
-    if(CheckLoci(unique(All.ColNames[3:ncol(Tab)]),Loci.Set)$Flag) {
-      Err.Log(Output,"Bad.Locus.NA")
-      stop("Analysis Stopped.",call. = F)
-    } else {
-      if(sum(grepl("All",Loci.Set))>0) { Loci.Set[[which(Loci.Set=="All")]] <- unique(All.ColNames[3:ncol(Tab)])  } 
-      Set <- lapply(Loci.Set,FUN=function(x)seq(1,ncol(Tab),1)[All.ColNames %in% x]) }
+  # MULTIPLE SETS AND ANALYSIS DUPLICATION
+  if(!missing(Loci.Set)) {
+    if( length(Loci.Set)>1 && (All.Pairwise | "L" %in% Run | "A" %in% Run ) ) { Err.Log(Output,"MultipleSets") }
   }
   
   # DATA MERGE AND NUMBER OF LOCI
@@ -218,31 +178,66 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   }
   
   # MULTICORE LIMITATIONS
-  if (Cores.Lim!=1L) {
-    if(Sys.info()['sysname']=="Windows" & as.numeric(Cores.Lim)>1) { 
-      Err.Log(Output,"Cores.Windows")
-      stop("Analysis Stopped.",call. = F)
-    }
-    Cores.Max <- as.integer( floor( parallel::detectCores() * 0.9) )
-    if( Cores.Lim > Cores.Max ) { 
-      Cores <- Cores.Max
-      cat("Adjusting to",Cores.Max,"processor cores.\n")
-    } else { Cores <- Cores.Lim }
-  } else { Cores <- Cores.Lim }
+  Cores <- Check.Cores(Cores.Lim)
 
-  ## __________________ HLA specific checks
+  ##### HLA specific checks
+  
   if(Trim & !HLA) { Err.Log(Output,"NotHLA.Trim") }
   if(EVS.rm & !HLA) { Err.Log(Output,"NotHLA.EVS.rm") }
-  
+  if(!HLA) { DRBFLAG <- NULL }  else { DRB345.test <- length(grep("DRB345",colnames(Tab)))>0 }
+    
   if(HLA) {
     
-    if(Trim | EVS.rm | "A" %in% Run ) { cat("Running HLA specific functions...\n") }
+    if(Trim | EVS.rm | "A" %in% Run | DRB345.test ) { cat("Running HLA specific check functions...\n") }
+    
+    # Check Locus*Allele Formatting across all loci
+    CheckCol <- sum( apply(Tab[,Data.Col], MARGIN=c(1,2), FUN = function(x) grepl("\\*",na.omit(x))) )
+    TotalCol <- ( dim(Tab[,Data.Col])[1]*dim(Tab[,Data.Col])[2] ) - length( which(Tab[,Data.Col]=="^") ) 
+    
+    if( CheckCol>0 && CheckCol!=TotalCol ) {
+      Err.Log(Output,"Bad.Format.HLA")
+      stop("Analysis Stopped.",call. = F)
+    }
+    
+    # Separate DRB345 if exists as single column pair and check zygosity
+    if(DRB345.test) {
+      
+      cat("Processing DRB345 column data.\n")
+      
+      DRBFLAG <- T
+      #getCol <- grep("DRB345",colnames(Tab))
+      
+      # Expand DRB3/4/5 to separate column pairs
+      Tab <- DRB345.parser(Tab)
+      colnames(Tab) <- sapply(colnames(Tab),FUN=gsub,pattern="\\.1",replacement="")
+      
+      # Check for locus hemizygosity by DR haplotype
+      Tab.list <- lapply(seq_len(nrow(Tab)),FUN=function(z) Tab[z,])
+      tmp <- lapply(Tab.list,FUN=DRB345.zygosity)
+      tmp.df <- lapply(tmp,"[[",'Tab')
+      Tab <- as.data.frame(do.call(rbind,tmp.df))
+      
+      #Identify DR345 flagged haplotypes
+      DR.Flags <- DRB345.flag(tmp,Tab)
+      
+      if(Output) {
+        if(!is.null(DR.Flags)) {
+          Err.Log(Output,"Bad.DRB345.hap") ; cat("\n")
+          write.table(DR.Flags,file="Flagged_DRB345_Haplotypes.txt",sep="\t",quote=F,row.names=F,col.names=T)
+        }
+      }
+      
+      cat("\n")
+    } else { DRBFLAG <- F }
+    
+    # Separate locus and allele names if data is formatted as Loci*Allele
+    Tab <- FixAlleleName(Output,Tab)
     
     # Sanity Check for Resoltion if Trim="T" and Trim Data
-    if(Trim & CheckHLA(Tab[,3:ncol(Tab)])) {
+    if(Trim & CheckHLA(Tab[,Data.Col])) {
       cat("--Trimming Data.\n")
       Tab.untrim <- Tab
-      Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),GetField,Res=Res)
+      Tab[,Data.Col] <- apply(Tab[,Data.Col],MARGIN=c(1,2),GetField,Res=Res)
       rownames(Tab) <- NULL
     } else if (Trim) {
       Err.Log(Output,"Bad.Format.Trim")
@@ -250,9 +245,9 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     }
     
     # Sanity Check for Expresion Variant Suffix Stripping
-    if(EVS.rm & CheckHLA(Tab[,3:ncol(Tab)])) {
+    if(EVS.rm & CheckHLA(Tab[,Data.Col])) {
       cat("--Stripping Expression Variants Suffixes.\n")
-      Tab[,3:ncol(Tab)] <- apply(Tab[,3:ncol(Tab)],MARGIN=c(1,2),gsub,pattern="[[:alpha:]]",replacement="")
+      Tab[,Data.Col] <- apply(Tab[,Data.Col],MARGIN=c(1,2),gsub,pattern="[[:alpha:]]",replacement="")
       EVS.loci <- as.list(names(EPL))
       EPL <- lapply(EVS.loci,EVSremoval,EPList=EPL)
       names(EPL) <- EVS.loci ; rm(EVS.loci)
@@ -261,14 +256,17 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       stop("Analysis Stopped.",call. = F)
     }
     
+    # Sanity Check for Amino Acid Test Feasibility
     if ("A" %in% Run) {
+      
+      cat("Running Amino Acid Analysis specific checks functions...\n")
       
       Release <- as.character(unlist(EPL[['Release']]))
       
       # Sanity Check for Known HLA loci
       cat(paste("--Checking loci against ",Release,".\n",sep=""))
-      test <- CheckLoci(names(EPL),unique(All.ColNames[3:ncol(Tab)]))
-      if( test$Flag ) {
+      test <- CheckLoci(names(EPL),unique(colnames(Tab)[Data.Col]))
+      if(test$Flag) {
         Err.Log(Output,"Bad.Locus.HLA")
         cat("Problem loci:",test$Loci,"\n")
         stop("Analysis stopped.",call. = F)
@@ -276,7 +274,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       
       # Sanity Check for Known HLA alleles
       cat(paste("--Checking alleles against ",Release,".\n",sep=""))
-      test <- CheckAlleles(EPL, Tab[,3:ncol(Tab)], unique(All.ColNames[3:ncol(Tab)]), All.ColNames[3:ncol(Tab)])
+      test <- CheckAlleles(EPL, Tab[,Data.Col], unique(colnames(Tab)[Data.Col]), colnames(Tab)[Data.Col])
       if(sum(unlist(lapply(test,"[[",1)))>0) {
         Err.Log(Output,"Bad.Allele.HLA")
         tmp <- as.character(unlist(lapply(test[which(lapply(test,"[[",1)==T)],"[",2)))
@@ -284,16 +282,31 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
         stop("Analysis stopped.",call. = F)
       }
       
-    }
+    } # End A if statement
     
   } # End HLA if statement and HLA specific functionalities
 
-  # Multiple Sets And Analysis
-  if ( length(Set)>1 & (All.Pairwise | "L" %in% Run | "A" %in% Run ) ) {
-    if(!length(Set)==length(unique(unlist(Set)))) { Err.Log(Output,"MultipleSets") }
+  
+  # LOCI SET COLUMN DEFINITIONS
+  # This must follow DRB345 processing on the chance that DRB345 is formatted as single column and DRB3, DRB4, or DRB5 is defined in Loci.Set.
+  if(missing(Loci.Set)) {
+    Set <- list(Data.Col)
+  } else {
+    Loci.Set <- lapply(Loci.Set,FUN=function(x) sapply(x,toupper))
+    if(sum(grepl("All",Loci.Set))>0) { Loci.Set[[which(Loci.Set=="All")]] <- unique(colnames(Tab)[Data.Col])  } 
+    Set <- lapply(Loci.Set,FUN=function(x) seq(1,ncol(Tab))[colnames(Tab) %in% x])
   }
   
+# ===================================================================================================================================== ####
+# Case-Control Summary ________________________________________________________________________________________________________________ ####
 
+cat(">>>> CASE - CONTROL SUMMARY STATISTICS\n")
+#cat(paste(rep("_",50),collapse=""),"\n")
+if (Trim) { rescall <- paste(Res,"-Field",sep="") } else { rescall <- "Not Defined" }
+Check <- PreCheck(Tab,colnames(Tab),rescall,HLA,Verbose,Output)
+if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.names=T,quote=F); rm(Check,rescall) }
+
+  
 # ===================================================================================================================================== ####
 # Write to Parameter File _____________________________________________________________________________________________________________ ####
   
@@ -340,7 +353,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       cat("HWE performed at maximum available resolution.\n")
     }
     
-    HWE <- HWE.wrapper(Tab,All.ColNames,Output,Verbose)
+    HWE <- HWE.wrapper(Tab,colnames(Tab),Output,Verbose)
     BD.out[['HWE']] <- HWE
     rm(HWE)
     

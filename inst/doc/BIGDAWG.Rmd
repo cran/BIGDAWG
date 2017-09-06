@@ -1,7 +1,7 @@
 ---
 title: "BIGDAWG"
 author: "Derek Pappas, Ph.D. (dpappas@chori.org)"
-date: "2017-07-18"
+date: "2017-08-07"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using BIGDAWG}
@@ -9,8 +9,8 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-* Package Version: 1.14.2
-* HLA/IMGT Database Release: 3.28.0, 2017-04-13
+* Package Version: 1.16
+* HLA/IMGT Database Release 3.29.0.1, 2017-08-18
 
 ## Overview
 
@@ -18,21 +18,23 @@ vignette: >
 
 ## Input Data
 
-Data for BIGDAWG should be in a tab delimited text format (UTF-8 encoding). The first row must be a header line and must include column names for genotype data. The first two columns must contain subject IDs and phenotypes (0 = control, 1 = case), respectively. A phenotype is not limited to disease status and may include other phenotypes such as onset, severity, ancestry, etc. However, phenotype designatons in the dataset are restricted to the use of 0s and 1s. Genotype pairs must be located in adjacent columns. Column names for a given locus must have the same name; do not use '_1', '.1', etc. Genotype calls may include any text (numeric or character) except the number 0.
+Data for BIGDAWG should be in a tab delimited text format (UTF-8 encoding). The first row must be a header line and must include column names for genotype data. The first two columns must contain subject IDs and phenotypes (0 = control, 1 = case), respectively. A phenotype is not limited to disease status and may include other phenotypes such as onset, severity, ancestry, etc. However, phenotype designatons in the dataset are restricted to the use of 0s and 1s. Genotype pairs must be located in adjacent columns. Column names for a given locus may use '_1', '.1','_2','.2' to distinguish each locus pair. Genotype calls may include any text (numeric or character) except the numbers 1 and 0.
 
-For HLA alleles, you may choose to format your genotype calls with our without the locus prefix. For example, for HLA-A, a given genotype call maybe 01:01:01:01 or A\*01:01:01:01. Allele names can include any level of resolution, from a single field up to the full length name. For HLA-DRB3,-DRB4,-DRB5 genotype calls, you may choose to represent those in a single pair of columns or as separate pairs of columns for each locus. However, when submitted as a single pair of columns, genotypes must be formatted as Locus*Allele (including non-DRB loci). The column names must either be DRB345 or DRB3/4/5. Homozygous or hemizygous status for DRB3, DRB4 and DRB5 genotypes is determined in reference to DRB1 genotypes based on the haplotypes as defined by Andersson, 1998 (Andersson G. 1998. Evolution of the HLA-DR region. [Front Biosci. 3:d739-45](http://www.ncbi.nlm.nih.gov/pubmed/9675159)). If you wish to define your own zygosity, it is suggested you split them into separate pairs of columns for each locus.
+Data may also be passed to BIGDAWG as an R object (dataframe) following the same formatting as above for text files. You may also choose to run a synthetic HLA data set (see below) to observe a typical BIGDAWG analysis and experiment with parameter settings.
+
+For HLA alleles, you may choose to format your genotype calls with our without the locus prefix. For example, for HLA-A, a given genotype call maybe 01:01:01:01 or A\*01:01:01:01 or HLA-A\*01:01:01:01. Allele names can include any level of resolution, from a single field up to the full length name. For HLA-DRB3,-DRB4,-DRB5 genotype calls, you may choose to represent these as a single pair of columns or as separate pairs of columns for each locus. However, when submitted as a single pair of columns, all genotypes must be formatted as Locus*Allele (including non-DRB loci). The single pair column names may be  DRB345, DRB3.4.5 or DRB3/4/5. Homozygous or hemizygous status for DRB3, DRB4 and DRB5 genotypes is based on the DRB1 haplotype as defined by Andersson, 1998 (Andersson G. 1998. Evolution of the HLA-DR region. [Front Biosci. 3:d739-45](http://www.ncbi.nlm.nih.gov/pubmed/9675159)). If you wish to define your own zygosity, it is suggested you split them into separate pairs of columns for each locus manually.
 
 **Missing Information**  
 When there is missing information, either for lack of genotyping information or absence of genotyped loci, BIGDAWG allows for conventions to differentiate the type of data that is missing.
 
 Data missing due to lack of a molecular genotyping result is considered not available (NA). Acceptable NA strings include: NA, ****, -, na and Na. Empty data cells will be considered NA.
 
-Data missing due to genomic structural variation (i.e., no locus present) is considered absence. Acceptable absence strings include: Absent, absent, Abs, ABS, ab, Ab, AB, ^. The last symbol is the unicode caret symbol. BIGDAWG allows for a special allele name that indicates absence of an HLA locus: 00, 00:00, 00:00:00 and 00:00:00:00 are all acceptable indicators of locus absence. When choosing to use 00's (zeros) to populate allele name fields, use similar or higher levels of resolution [http://hla.alleles.org](http://hla.alleles.org/nomenclature/naming.html) and follow the same naming convention as with other genotype calls (either with or without locus prefix). If using a single column pair for DRB3/4/5 and the "00" absence indicator, then do **NOT** affix a locus prefix for the absent calls. In this case, only include the locus prefix for known DRB345 genotypes (i.e., DRB3/4/5*00:00 is **NOT** an acceptable name). For HLA data, the 00:00 naming convention is preferred and all absent designations will be converted to allow the amino acid analysis to test phenotypic associations with locus absence (see below).
+Data missing due to genomic structural variation (i.e., no locus present) is considered absence. Acceptable absence strings include: Absent, absent, Abs, ABS, ab, Ab, AB, ^. The last symbol is the unicode caret symbol. BIGDAWG allows for a special allele name that indicates absence of an HLA locus: 00, 00:00, 00:00:00 and 00:00:00:00 are all acceptable indicators of HLA locus absence. When choosing to use 00's (zeros) to populate allele name fields, use similar or higher levels of resolution [http://hla.alleles.org](http://hla.alleles.org/nomenclature/naming.html) and follow the same naming convention as with other genotype calls (either with or without locus prefix). If using a single column pair for DRB3/4/5 and the "00" absence indicator, then do **NOT** affix a locus prefix for the absent calls. In this case, only include the locus prefix for known DRB345 genotypes (i.e., DRB3/4/5*00:00 is **NOT** an acceptable name). For HLA data, the 00:00 naming convention is preferred and all absent designations will be converted to allow the amino acid analysis to test phenotypic associations with locus absence (see below).
 
-Finally, when missing alleles (due to lack of genotype) for a locus are included in the haplotype analysis, the haplotype estimation method may impute the identity of the missing alleles for that subject. If such imputation is not desired, the "Missing"" parameter should be set to 0.
+Finally, when missing alleles (due to lack of a genotype call and not locus absence) for a locus are included in the haplotype analysis, the haplotype estimation method may impute the identity of the missing alleles for that subject. If such imputation is not desired, the "Missing"" parameter should be set to 0.
 
 **Novel Alleles**  
-BIGDAWG will accept novel allele names. However, it is suggested you follow the same naming convention for novel alleles as with other genotypes calls in your data, either with or without the locus prefix. For example, novel alleles could be submitted as follows: Novel, 01:Novel, or A*01:Novel. Unfortunately, the BIGDAWG amino acid analysis cannot accept novel allele designations and will display an error. If you would like to run the amino acid analysis, it is suggested you replace the novel allele with NA or omit the subject entirely.  
+BIGDAWG will accept novel allele names. However, it is suggested you follow the same naming convention for novel alleles as with other genotypes calls in your data, either with or without the locus prefix. For example, novel alleles could be submitted as follows: Novel, 01:Novel, or A*01:Novel. Unfortunately, the BIGDAWG amino acid analysis cannot accept novel allele designations and will display an error. If you would like to run the amino acid analysis, you should replace the novel allele with NA or omit the subject entirely. 
 
 **Example of data architecture and acceptable values:**
 
@@ -87,7 +89,7 @@ BIGDAWG has a few built-in checks to ensure data format consistency and compatib
 
 Class: String. Required. No Default.
 
-e.g., `Data="HLA_data"` -or- `Data="foo.txt"`
+e.g., `Data="HLA_data"` -or- `Data="foo.txt" `-or- `Data=foo`
 
 Specifies genotype data file name. May use file name within working directory or full file name path to specify file location. See Data Input section for details about file formatting. Use 'Data=HLA_data' to analyze the bundled synthetic dataset.
 

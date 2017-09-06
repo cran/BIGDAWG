@@ -2,7 +2,7 @@
 % Please edit documentation in R/BIGDAWG.R
 \name{BIGDAWG}
 \alias{BIGDAWG}
-\title{BIGDAWG wrapper function}
+\title{BIGDAWG Main Wrapper Function}
 \usage{
 BIGDAWG(Data, HLA = TRUE, Run.Tests, Loci.Set, All.Pairwise = FALSE,
   Trim = FALSE, Res = 2, EVS.rm = FALSE, Missing = 2, Cores.Lim = 1L,

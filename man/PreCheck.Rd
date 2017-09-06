@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_functions.R
 \name{PreCheck}
 \alias{PreCheck}
-\title{Data summary function}
+\title{Data Summary Function}
 \usage{
 PreCheck(Tab, All.ColNames, rescall, HLA, Verbose, Output)
 }

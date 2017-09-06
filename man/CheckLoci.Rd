@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_functions.R
 \name{CheckLoci}
 \alias{CheckLoci}
-\title{Loci presence check}
+\title{Loci Legitimacy Check}
 \usage{
 CheckLoci(x, y)
 }
@@ -12,7 +12,7 @@ CheckLoci(x, y)
 \item{y}{Unique column names}
 }
 \description{
-Checks available loci against data specific to ensure complete overlap.
+Checks available loci against data to ensure complete overlap.
 }
 \note{
 This function is for internal BIGDAWG use only.
