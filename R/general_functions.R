@@ -1,15 +1,86 @@
+#' Prepare imported data
+#'
+#' Prepare imported data for processing, checks, and analysis.
+#' @param Tab Genotypes dataframe.
+#' @note This function is for internal BIGDAWG use only.
+prepData <- function(Tab) {
+  
+  Tab[] <- lapply(Tab, as.character)
+  
+  colnames(Tab) <- gsub( "HLA-","",colnames(Tab) )
+  colnames(Tab) <- gsub( "\\.1|\\.2|\\_1|\\_2","",colnames(Tab) )
+  colnames(Tab) <- toupper(colnames(Tab))
+  colnames(Tab) <- gsub( "DRB3.4.5|DRB3/4/5","DRB345",colnames(Tab) )
+  rownames(Tab) <- NULL
+  Tab <- rmABstrings(Tab)
+  
+  return(Tab)
+  
+}
+
 #' Replace absent allele strings
 #'
 #' Replaces allowable absent allele strings with ^ symbol.
 #' @param df Genotypes dataframe.
 #' @note This function is for internal BIGDAWG use only.
 rmABstrings <- function(df) {
-  df[,3:ncol(df)] <- apply(df[,3:ncol(df)], MARGIN=c(1,2), FUN=function(x) gsub("ABSENT|Absent|absent|Abs|ABS|ab|Ab|AB","^",x) )
+  df[] <- apply(df, MARGIN=c(1,2), FUN=function(x) gsub("ABSENT|Absent|absent|Abs|ABS|ab|Ab|AB","^",x) )
   df[df=="00"] <- "^"
   df[df=="00:00"] <- "^"
   df[df=="00:00:00"] <- "^"
   df[df=="00:00:00:00"] <- "^"
   return(df)
+}
+
+#' Replace or Fill 00:00 allele strings
+#'
+#' Replaces or Fills absent allele strings.
+#' @param x Genotype
+#' @param Locus Locus column to adjust.
+#' @param Type String specifying whether to pad ('Fill') or leave blank ('Remove') absent calls
+#' @note This function is for internal use only.
+Filler <- function(x,Locus=NULL,Type) {
+  
+  if (Type=="Fill") {
+    which(x=="")
+    Locus <- gsub("_1|_2","",Locus)
+    x[which(x=="")] <- paste(Locus,"*00:00",sep="")
+    
+  }
+  
+  if (Type=="Remove") {
+    
+    x[] <- sapply(x, FUN=function(x) gsub("ABSENT|Absent|absent|Abs|ABS|ab|Ab|AB","",x) )
+    x[grep("\\*00",x)] <- ""
+    
+  }
+  
+  if (Type=="Sub") {
+    
+    x[] <- sapply(x, FUN=function(x) gsub("ABSENT|Absent|absent|Abs|ABS|ab|Ab|AB","^",x) )
+    x[grep("\\*00",x)] <- "^"
+    
+  }
+  
+  return(x)
+  
+}
+
+#' Removes System and Locus from Alleles
+#'
+#' Removes the System and Locus designations for alleles calls in GL2Tab
+#' @param x Allele
+#' @note This function is for internal use only.
+Stripper <- function(x) {
+  
+  if( grepl("\\*",x) ) {
+    if( is.na(x) ) { Fix <- x
+      } else if ( x!="" ) { Fix <- unlist(strsplit(x,"\\*"))[2]
+      } else { Fix <- x }
+  } else { return (x) }
+  
+  return(Fix)
+  
 }
 
 #' Expression Variant Suffix Removal
@@ -48,139 +119,6 @@ GetField <- function(x,Res) {
     Out <- paste(Tmp[1:Res],collapse=":")
     return(Out)
   }
-}
-
-#' Chi-squared Contingency Table Test
-#'
-#' Calculates chi-squared contingency table tests and bins rare cells.
-#' @param x Contingency table.
-#' @note This function is for internal BIGDAWG use only.
-RunChiSq <- function(x) {
-  
-  ### get expected values for cells
-  ExpCnts <- chisq.test(as.matrix(x))$expected
-  
-  ## pull out cells that don't need binning, bin remaining
-  #unbinned
-  OK.rows <- as.numeric(which(apply(ExpCnts,min,MARGIN=1)>=5))
-  if(length(OK.rows)>0) {
-    if(length(OK.rows)>=2) {
-      unbinned <- x[OK.rows,]
-    } else {
-      unbinned <- do.call(cbind,as.list(x[OK.rows,]))
-      rownames(unbinned) <- rownames(x)[OK.rows]
-    }
-  } else {
-    unbinned <- NULL
-  }
-  
-  #binned
-  Rare.rows <- as.numeric(which(apply(ExpCnts,min,MARGIN=1)<5))
-  if(length(Rare.rows)>=2) {
-    binned <- x[Rare.rows,]
-    New.df <- rbind(unbinned,colSums(x[Rare.rows,]))
-    rownames(New.df)[nrow(New.df)] <- "binned"
-  } else {
-    binned <- cbind(NA,NA)
-    colnames(binned) <- c("Group.0","Group.1")
-    New.df <- x
-  }
-
-  if(nrow(New.df)>1) {
-  
-    # flag if final matrix fails Cochran's rule of thumb (more than 20% of exp cells are less than 5)
-    # True = OK ; False = Not good for Chi Square
-    ExpCnts <- chisq.test(New.df)$expected
-    if(sum(ExpCnts<5)==0){
-      flag <- FALSE
-    } else if( sum(ExpCnts<5)/sum(ExpCnts>=0)<=0.2 && sum(ExpCnts>=1)>length(ExpCnts) ){
-      flag <- FALSE
-    } else {
-      flag <- TRUE
-    }
-    
-    ## chi square test on binned data
-    df.chisq <- chisq.test(New.df)
-    Sig <- if(df.chisq$p.value > 0.05) { "NS" } else { "*" }
-    
-    
-    ## show results of overall chi-square analysis
-    tmp.chisq <- data.frame(cbind(round(df.chisq$statistic,digits=4),
-                                  df.chisq$parameter,
-                                  format.pval(df.chisq$p.value),
-                                  Sig))
-    colnames(tmp.chisq) <- c("X.square", "df", "p.value", "sig")
-    
-    chisq.out <- list(Matrix = New.df,
-                      Binned = binned,
-                      Test = tmp.chisq,
-                      Flag = flag)
-    
-    return(chisq.out)
-    
-  } else {
-    
-    flag <- TRUE
-    tmp.chisq <- data.frame(rbind(rep("NCalc",4)))
-    colnames(tmp.chisq) <- c("X.square", "df", "p.value", "sig")
-    chisq.out <- list(Matrix = New.df,
-                      Binned = binned,
-                      Test = tmp.chisq,
-                      Flag = flag)
-    
-  }
-  
-}
-
-#' Table Maker
-#'
-#' Table construction of per haplotype for odds ratio, confidence intervals, and pvalues
-#' @param x Contingency table with binned rare cells.
-#' @note This function is for internal BIGDAWG use only.
-TableMaker <- function(x) {
-  grp1_sum <- sum(x[,'Group.1'])
-  grp0_sum <- sum(x[,'Group.0'])
-  grp1_exp <- x[,'Group.1']
-  grp0_exp <- x[,'Group.0']
-  grp1_nexp <- grp1_sum - grp1_exp
-  grp0_nexp <- grp0_sum - grp0_exp
-  cclist <- cbind(grp1_exp, grp0_exp, grp1_nexp, grp0_nexp)
-  tmp <- as.data.frame(t(cclist))
-  names(tmp) <- row.names(x)
-  return(tmp)
-}
-
-#' Case Control Odds Ratio Calculation from Epicalc
-#'
-#' Calculates odds ratio and pvalues from 2x2 table
-#' @param x List of 2x2 matrices for calculation, output of TableMaker.
-#' @note This function is for internal BIGDAWG use only.
-cci.pval <- function(x) {
-  tmp <- list()
-  caseEx <- x[1]
-  controlEx <- x[2]
-  caseNonEx <- x[3]
-  controlNonEx <- x[4]
-  table1 <- make2x2(caseEx, controlEx, caseNonEx, controlNonEx)
-  tmp1 <- cci(cctable=table1, design = "case-control", graph = FALSE)
-  tmp[['OR']] <- round(tmp1$or,digits=2)
-  tmp[['CI.L']] <- round(tmp1$ci.or[1],digits=2)
-  tmp[['CI.U']] <- round(tmp1$ci.or[2],digits=2)
-  tmp[['p.value']] <-  format.pval(chisq.test(table1, correct=F)$p.value)
-  tmp[['sig']] <- ifelse(chisq.test(table1, correct=F)$p.value <= 0.05,"*","NS")
-  return(tmp)
-}
-
-#' Case Control Odds Ratio Calculation from Epicalc list variation
-#'
-#' Variation of the cci.pvalue function
-#' @param x List of 2x2 matrices to apply the cci.pvalue function. List output of TableMaker.
-#' @note This function is for internal BIGDAWG use only.
-cci.pval.list <- function(x) {
-  tmp <- lapply(x, cci.pval)
-  tmp <- do.call(rbind,tmp)
-  colnames(tmp) <- c("OR","CI.lower","CI.upper","p.value","sig")
-  return(tmp)
 }
 
 #' Haplotype missing Allele summary function
@@ -323,5 +261,106 @@ MergeData_Output <- function(BD.out,Run,OutDir) {
   write.table(CN.out,file="Merged_Counts.txt",sep="\t",col.names=T,row.names=F,quote=F)
   write.table(CS.out,file="Merged_ChiSq.txt",sep="\t",col.names=T,row.names=F,quote=F)
   write.table(OR.out,file="Merged_OddsRatio.txt",sep="\t",col.names=T,row.names=F,quote=F)
+  
+}
+
+#' File Name Extraction
+#'
+#' Function to extract file path.
+#' @param x File name.
+#' @note This function is for internal use only.
+getFileName <- function(x) {
+  
+  tmpDir <- dirname(x)
+  tmpName <- basename(x)
+  
+  if(basename(x)==x) {
+    outName <- paste("Converted_",x,sep="")
+  } else {
+    outName <- paste(tmpDir,"/Converted_",tmpName,sep="")
+  }
+  
+  outName <- gsub(".txt","",outName)
+  return(outName)
+  
+}
+
+#' Build Output Matrix for GL2Tab Conversion
+#'
+#' Initializes output matrix format for GL2Tab conversion
+#' @param System Character Genetic system HLA- or KIR
+#' @param Loci The loci for header names
+#' @note This function is for internal use only.
+Build.Matrix <- function(System,Loci) {
+  
+  Loci.Grp <- rep(Loci,each=2)
+  
+  if(System=="HLA-") {
+    Out <- mat.or.vec(nr=1,nc=length(Loci.Grp)+1) ; colnames(Out) <- c(Loci.Grp,"DR.HapFlag")
+  } else {
+    Out <- mat.or.vec(nr=1,nc=length(Loci.Grp)) ; colnames(Out) <- Loci.Grp
+  }
+  colnames(Out)[seq(1,length(Loci.Grp),by=2)] <- paste(Loci,"_1",sep="")
+  colnames(Out)[seq(2,length(Loci.Grp),by=2)] <- paste(Loci,"_2",sep="")
+  
+  return(Out)
+  
+}
+
+#' Tabular Data Locus Format Tool
+#'
+#' Correctly orders the expanded GL string
+#' @param x Single row of converted GL string
+#' @param Order Single row data frame for mapping converted GL strings
+#' @note This function is for internal use only.
+Format.Tab <- function(x,Order) {
+  
+  Order[,match(colnames(x),colnames(Order))] <- x
+  return(Order)
+  
+}
+
+#' Ambiguous Alleles Locus Name Formatting
+#'
+#' Remove or Append Locus name from/to allele in an ambiguous allele string
+#' @param x Allele String
+#' @param Type String specifying whether to strip ('off') or append ('on') locus prefix
+#' @note This function is for internal use only.
+Format.Allele <- function(x,Type) {
+  
+  if(Type=="off") {
+    if(grepl("/",x)) {
+      tmp <- strsplit(unlist(strsplit(x,"/")),"\\*")
+      Fix <- paste(unlist(lapply(tmp,"[",1)[1]),
+                   paste(unlist(lapply(tmp,"[",2)),collapse="/"),
+                   sep="*")
+    } else {  Fix <- x }
+  }
+  
+  if(Type=="on"){
+    if(grepl("/",x)) {
+      Locus <- unlist(strsplit(x,"\\*"))[1]
+      Fix <- paste(
+        paste(
+          Locus,unlist(strsplit(unlist(strsplit(x,"\\*"))[2],"/"))
+          ,sep="*")
+        ,collapse="/")
+    } else { Fix <- x }
+  }
+  
+  return(Fix)
+}
+
+#' Append Genetic System Locus Designation to Allele String
+#'
+#' Adds genetic system (HLA/KIR) to each allele name
+#' @param x Vector Column genotypes to append
+#' @param df.name String SystemLocus name for each allele.
+#' @note This function is for internal use only.
+Append.System <- function(x,df.name) {
+  
+  getAllele <- which(x!="")
+  x[getAllele] <- paste(df.name,x[getAllele],sep="*")
+  return(x)
   
 }

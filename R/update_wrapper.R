@@ -1,11 +1,13 @@
 #' Update function for protein aligment upon new IMGT HLA data release
 #'
-#' This updates the protein aligment used in checking HLA loci and alleles as well as in the amino acid analysis. Alignment must exist in database (ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/) or update will fail.
-#' @param Add.Loci Character string or vector of loci that should be added to default loci (default = HLA-A,B,C,DRB1/3/4/5,DQA1,DQB1,DPA1,DPB1).
+#' This updates the protein aligment used in checking HLA loci and alleles as well as in the amino acid analysis.
 #' @param Restore Logical specifying if the original alignment file be restored.
 #' @param Force Logical specifiying if update should be forced.
 #' @param Output Logical indicating if error reporting should be written to file.
-UpdateRelease <- function(Add.Loci=NULL,Force=F,Restore=F,Output=F) {
+UpdateRelease <- function(Force=F,Restore=F,Output=F) {
+
+# @param Add.Loci Character string or vector of loci that should be added to default loci (default = HLA-A,B,C,DRB1/3/4/5,DQA1,DQB1,DPA1,DPB1).
+# Add.Loci=NULL
   
   if( !inherits(try(XML::readHTMLTable("http://cran.r-project.org/web/packages/BIGDAWG/index.html",header=F),silent=T),"try-error") ) {
   
@@ -20,11 +22,18 @@ UpdateRelease <- function(Add.Loci=NULL,Force=F,Restore=F,Output=F) {
       
       #Check current version against BIGDAWG version
       if(!Force) {
-        RV <- XML::readHTMLTable("http://www.ebi.ac.uk/ipd/imgt/hla/docs/release.html",header=T)
+        setwd(putDir)
+        URL <- "https://www.ebi.ac.uk/ipd/imgt/hla/docs/release.html"
+        FileTmp <- tempfile(fileext=".html")
+        if( file.exists(FileTmp) ) { file.remove(FileTmp) }
+        invisible(httr::GET(URL,httr::write_disk(FileTmp)))
+        RV <- XML::readHTMLTable(FileTmp)
         RV.current <- as.character(lapply(RV,"[",1)[[1]][1,])
+        file.remove(FileTmp)
         RV.BIGDAWG <- unlist(strsplit(as.character(ExonPtnList$Release[[1]]),":"))[2]
         cat("Versions:\n","IMGT/HLA current: ",RV.current,"\n BIGDAWG version: ",RV.BIGDAWG,"\n")
         if(grepl(RV.current,RV.BIGDAWG)) { Flag <- T } else { Flag <- F }
+        
       } else {
         Flag <- F
       }# End if() for setting Flag
@@ -44,11 +53,11 @@ UpdateRelease <- function(Add.Loci=NULL,Force=F,Restore=F,Output=F) {
         
         #STEP 1: Define Loci and Read in Reference Exon Map Files
           # Loci
-          if(is.null(Add.Loci)) {
+          #if(is.null(Add.Loci)) {
             Loci <- c("A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5")
-          } else {
-            Loci <- unique(c(Add.Loci,"A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5"))
-          }
+          #} else {
+          #  Loci <- unique(c(Add.Loci,"A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5"))
+          #}
         
           # Map
           RefTab <- BIGDAWG::ExonPtnList$RefExons

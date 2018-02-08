@@ -4,10 +4,12 @@
 \alias{Check.Cores}
 \title{Check Cores Parameters}
 \usage{
-Check.Cores(Cores.Lim)
+Check.Cores(Cores.Lim, Output)
 }
 \arguments{
 \item{Cores.Lim}{Integer How many cores can be used.}
+
+\item{Output}{Logical Should analysis results be written to output directory.}
 }
 \description{
 Check cores limitation for OS compatibility

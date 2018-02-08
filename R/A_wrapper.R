@@ -1,7 +1,6 @@
 #' Amino Acid Wrapper
 #'
 #' Wrapper function for amino acid analysis.
-#' @param nloci Number of loci being analyzed.
 #' @param loci Loci being analyzed.
 #' @param loci.ColNames The column names of the loci being analyzed.
 #' @param genos Genotype table.
@@ -13,7 +12,7 @@
 #' @param Output Data return carryover from main BIGDAWG function
 #' @param Verbose Summary display carryover from main BIGDAWG function
 #' @note This function is for internal BIGDAWG use only.
-A.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,EPL,Cores,Output,Verbose) {
+A.wrapper <- function(loci,loci.ColNames,genos,grp,nGrp0,nGrp1,EPL,Cores,Output,Verbose) {
   
   cat("\n>>>> STARTING AMINO ACID LEVEL ANALYSIS...\n")
   
@@ -25,17 +24,20 @@ A.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,EPL,Cores,O
   ORtable <- list()
   Final_binned <- list()
   
+  cat("Processing Locus: ")
+  
   # Loop Through Loci
-  for(x in 1:nloci){
+  for(x in loci){
     
     # Get Locus
-    Locus <- loci[x]
+    Locus <- x
+    cat(Locus,".. ")
     
     # Read in Locus Alignment file for Locus specific exons
     ExonAlign <- EPL[[Locus]]; rownames(ExonAlign) <- NULL
     
     # Run Amino Acid Analysis
-    A.list <- A(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1,ExonAlign,Cores)
+    A.list <- A(Locus,loci.ColNames,genos,grp,nGrp0,nGrp1,ExonAlign,Cores)
     
     # Build Output Lists
     AAlog[[Locus]] <- A.list[['log']]
@@ -46,6 +48,8 @@ A.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,EPL,Cores,O
     AminoAcid.freq[[Locus]] <- A.list[['freq']]
     
   }; rm(x) #locus loop
+  
+  cat("\n\n")
   
   Out <- list()
   Out[['AL']] <- do.call(rbind,AAlog)

@@ -4,18 +4,19 @@
 #' @param Output Logical indicating if Error logging should be written to a file.
 #' @param x Log Code.
 #' @param y Misc information relevant to error.
+#' @param z Misc information relevant to error.
 #' @note This function is for internal BIGDAWG use only.
-Err.Log <- function (Output, x, y=NULL) {
+Err.Log <- function (Output, x, y=NULL, z=NULL) {
   
   cat("*****ERROR!******\n")
   switch(x,
          #Parameters
          P.Missing = { Error <- paste("\nNo ",y," specified. This parameter is not optional. Please see vignette.",sep="") },
          P.Error = { Error <- paste("\nInvalid ",y," parameter. Please see vignette.",sep="") },
-         Cores.Windows = { Error <- "\nYou have exceed the maximum allowable cores for Windows. Please see vignette." },
+         Windows.Cores = { Error <- "\nYou have exceed the maximum allowable cores for Windows. Please see vignette." },
          
          #Formatting
-         Bad.Data = { Error <- "\nYou seem to have data that are 0's or 1's, replace these with another value. Please see vignette." },
+         Bad.Data = { Error <- "\nYou seem to have subject data that are 0's or 1's, replace these with another value. Please see vignette." },
          Bad.DRB345.hap =  { Error <- "\nWe have encountered unanticipated DR haplotypes. Please see the 'Flagged_DRB345_Haplotypes.txt' output file." },
          Uneven.Prefix =  { Error <- "\nIt seems some (not all) of your loci are formatted as Locus*Allele. Please ensure all loci share a similar format." },
          Bad.Format.HLA = { Error <- "\nYour HLA data includes Locus*Allele genotype formatting. Please ensure all genotypes follow this format." },
@@ -30,8 +31,8 @@ Err.Log <- function (Output, x, y=NULL) {
          #Names
          Bad.Filename = {  Error <- paste("\nBIGDAWG could not locate a file labeled: ",y," in the specificied working directory.",sep="") },
          Bad.Locus.NA = { Error <- "\nYou seem to have specified a locus in the Loci.Set that is not present in your data file." },
-         Bad.Locus.HLA = { Error <- "\nThere may be a discrepancy with HLA loci names. Unrecognized locus name(s) encountered." },
-         Bad.Allele.HLA = { Error <- "\nThere may be a discrepancy with allele names. Unrecognized allele name(s) encountered." },
+         Bad.Locus.HLA = { Error <- paste("\nThere may be a discrepancy with HLA loci names. Unrecognized locus name(s) encountered: ",y,".",sep="") },
+         Bad.Allele.HLA = { Error <- paste("\nThere may be a discrepancy with allele names. Unrecognized allele name(s) encountered: ",y,".",sep="") },
          
          #Other
          MultipleSets = { Error <- "\nWARNING!!! You have opted to run multiple sets with overlapping loci. To avoid duplication of effort and results from the all pairwise haplotype tests, the locus test, and/or the amino acid test(!!!), it is suggested you run these tests separately on either the largest loci set possible or all loci in a given data set." },
@@ -41,7 +42,20 @@ Err.Log <- function (Output, x, y=NULL) {
          Big.Missing = { Error <- "\nThe number of allowable missing will affect performance.\nConsider running with a smaller 'Missing' value or without the haplotype ('H') analysis.\ncontinuing......" },
          AllPairwise.Merge = { Error <- "\nYou have opted to run all pairwise combinations and merge the final data tables. For a large number of loci, this could take a long time. You have been warned!" },
          NotHLA.Trim = { Error <- "\nTrimming only relevant to HLA data, no trimming performed." },
-         NotHLA.EVS.rm = { Error <- "\nExpression variant suffix stripping only relevant to HLA data, no stripping performed." }
+         NotHLA.EVS.rm = { Error <- "\nExpression variant suffix stripping only relevant to HLA data, no stripping performed." },
+         
+         #GLS Notifications
+         Tab.Format = { Error <- "\nThe conversion tool encountered GL string delimiters. This isn't valid data for Tab2GL converion. Please see vignette." },
+         GL.Format = { Error <- "\nYour GL strings may not be properly formatted. The conversion tool did not encounter the classic GL string delimiters. Please see vignette." },
+         File.Error = { Error <- paste("\nThe conversion tool could not locate a file labeled ",y," in the specified working directory.",sep="") },
+         GTYPE.Amb = { Error <- paste("\nThis appears to contain genotype list piping ('|') for genotype ambiguity strings (data rows: ",y,"). This is not supported in GLSconversion.",sep="") },
+         Table.Col = { Error <- "\nThe table for Tab2GL conversion is not properly formatted, too few columns. Please see vignette." },
+         Table.Pairs = { Error <- "\nThe table for Tab2GL conversion is not properly formatted, no locus column pairs encountered. Please see vignette." },
+         Table.Amb = { Error <- "\nYour data has duplicate identifying information rows, perhaps due to data genotype ambiguity." },
+         Locus.MultiField = { Error <- paste("\nYour GL string may be invalid. A locus cannot appear in multiple gene fields! ",z,ifelse(grepl(",",z)," appear"," appears")," in multiple fields of the GL string: ", y, ". Please see vignette.",sep="") },
+         Allele.Amb.Format = { Error <- paste("\nYour GL string may be invalid. The ambiguous allele ",y," is not properly formatted. Please see vignette.", sep="") },
+         notHLA.GLS = { Error <- paste("\nYou may want GLS conversion for non-HLA data. Currently, BIGDAWG only supports HLA for automatic GLS conversion. Please see vignette.", sep="") } 
+         
   )
   
   cat(Error,"\n")

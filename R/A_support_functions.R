@@ -163,3 +163,19 @@ AA.df.check <- function(x) {
     }
   } 
 }
+
+#' Create Empty Table
+#'
+#' Creates matrix of NA for no result tables.
+#' @param Locus Locus being analyzed.
+#' @param Names Column names for final matrix.
+#' @param nr Numebr of rows.
+#' @note This function is for internal BIGDAWG use only.
+Create.Null.Table <- function(Locus,Names,nr) {
+  nc <- length(Names)
+  Data <- c( Locus,rep(NA,nc-1) )
+  tmp <- matrix(Data,nrow=nr,ncol=nc)
+  colnames(tmp) <- Names
+  rownames(tmp) <- NULL
+  return(tmp)
+}

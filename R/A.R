@@ -1,8 +1,8 @@
 #' Amino Acid Analysis Function
 #'
 #' This is the workhorse function for the amino acid analysis.
-#' @param loci.ColNames The column names of the loci being analyzed.
 #' @param Locus Locus being analyzed.
+#' @param loci.ColNames The column names of the loci being analyzed.
 #' @param genos Genotype table.
 #' @param grp Case/Control or Phenotype groupings.
 #' @param nGrp0 Number of controls.
@@ -10,7 +10,7 @@
 #' @param ExonAlign Exon protein alignment filtered for locus.
 #' @param Cores Number of cores to use for analysis.
 #' @note This function is for internal BIGDAWG use only.
-A <- function(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
+A <- function(Locus,loci.ColNames,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
   
   # pull out locus specific columns
   getCol <- seq(1,length(loci.ColNames),1)[loci.ColNames %in% Locus]
@@ -22,7 +22,7 @@ A <- function(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
   Alleles <- sort(unique(c(HLA_grp[,2],HLA_grp[,3])))
   Alleles2F <- unique(as.character(sapply(Alleles, GetField, Res=2)))
   
-  if(length(Alleles)>1) {
+  if( length(Alleles)>1 ) {
     
     # Filter exon alignment matrix for specific alleles
     TabAA <- AlignmentFilter(ExonAlign,Alleles2F,Locus)
@@ -38,7 +38,7 @@ A <- function(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
     FlagAA.list <- parallel::mclapply(ConTabAA.list,AA.df.check,mc.cores=Cores)
     
     # Run ChiSq
-    csRange <- which(FlagAA.list==F)
+    csRange <- which(FlagAA.list==FALSE)
     ChiSqTabAA.list <- parallel::mclapply(ConTabAA.list[csRange],RunChiSq,mc.cores=Cores)
     
     # build data frame for 2x2 tables
@@ -48,11 +48,10 @@ A <- function(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
   
   } else {
     
-    # Filter exon alignment matrix for specific alleles
+    # Filter exon alignment matrix for single allele
     TabAA <- AlignmentFilter(ExonAlign,Alleles2F,Locus)
-    ET <- length(TabAA)
-    FlagAA.list <- as.list(rep(TRUE,length(TabAA[6:ET])))
-    names(FlagAA.list) <- names(TabAA[6:ET])
+    FlagAA.list <- as.list(rep(TRUE,length(TabAA[6:length(TabAA)])))
+    names(FlagAA.list) <- names(TabAA[6:length(TabAA)])
     
     ChiSqTabAA.list <- NA
     OR.list <- NA
@@ -112,16 +111,12 @@ A <- function(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
       rownames(ChiSq.out) <- NULL
       A.tmp[['chisq']] <- ChiSq.out
     } else {
-      ChiSq.out <- matrix(c(Locus,rep(NA,5)),ncol=6)
-      colnames(ChiSq.out) <- c("Locus","Position","X.square","df","p.value","sig")
-      rownames(ChiSq.out) <- NULL
-      A.tmp[['chisq']] <- ChiSq.out
+      Names <- c("Locus","Position","X.square","df","p.value","sig")
+      A.tmp[['chisq']] <- Create.Null.Table(Locus,Names,nr=1)
     }
   } else {
-    ChiSq.out <- matrix(c(Locus,rep(NA,5)),ncol=6)
-    colnames(ChiSq.out) <- c("Locus","Position","X.square","df","p.value","sig")
-    rownames(ChiSq.out) <- NULL
-    A.tmp[['chisq']] <- ChiSq.out
+    Names <- c("Locus","Position","X.square","df","p.value","sig")
+    A.tmp[['chisq']] <- Create.Null.Table(Locus,Names,nr=1)
   }
   
   ## ORtable_out
@@ -136,20 +131,16 @@ A <- function(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
       rownames(OR.out) <- NULL
       A.tmp[['OR']] <- OR.out
     } else {
-      OR.out <- matrix(c(Locus,rep(NA,7)),ncol=8)
-      colnames(OR.out) <- c("Locus","Position","Residue","OR","CI.lower","CI.upper","p.value","sig")
-      rownames(OR.out) <- NULL
-      A.tmp[['OR']] <- OR.out
+      Names <- c("Locus","Position","Residue","OR","CI.lower","CI.upper","p.value","sig")
+      A.tmp[['OR']] <- Create.Null.Table(Locus,Names,nr=1)
     }
   } else {
-    OR.out <- matrix(c(Locus,rep(NA,7)),ncol=8)
-    colnames(OR.out) <- c("Locus","Position","Residue","OR","CI.lower","CI.upper","p.value","sig")
-    rownames(OR.out) <- NULL
-    A.tmp[['OR']] <- OR.out
+    Names <- c("Locus","Position","Residue","OR","CI.lower","CI.upper","p.value","sig")
+    A.tmp[['OR']] <- Create.Null.Table(Locus,Names,nr=1)
   }
   
-  ## Final_binned_out
-  if(length(Final_binned.list)>1) {
+  ## Final_binned_out (Final Table)
+  if( length(Final_binned.list)>1 ) {
     Final_binned.out <- do.call(rbind,Final_binned.list)
     if(!is.null(Final_binned.out)) {
       Final_binned.out <- cbind(rep(Locus,nrow(Final_binned.out)),
@@ -160,28 +151,24 @@ A <- function(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
       rownames(Final_binned.out) <- NULL
       A.tmp[['table']] <- Final_binned.out
     } else {
-      Final_binned.out <- matrix(c(Locus,rep(NA,4)),ncol=5)
-      colnames(Final_binned.out) <- c("Locus","Position","Residue","Group.0","Group.1")
-      rownames(Final_binned.out) <- NULL
-      A.tmp[['table']] <- Final_binned.out
+      Final_binned.out <- NULL
+      Names <- c("Locus","Position","Residue","Group.0","Group.1")
+      A.tmp[['table']] <- Create.Null.Table(Locus,Names,nr=1)
     }
   } else {
-    Final_binned.out <- cbind(rep(Locus,length(TabAA[6:ET])),names(TabAA[6:ET]),as.character(TabAA[6:ET]),nGrp0,nGrp1)
-    colnames(Final_binned.out) <- c("Locus","Position","Residue","Group.0","Group.1")
-    rownames(Final_binned.out) <- NULL
-    A.tmp[['table']] <- Final_binned.out
+    Final_binned.out <- NULL
+    Names <- c("Locus","Position","Residue","Group.0","Group.1")
+    A.tmp[['table']] <- Create.Null.Table(Locus,Names,nr=1)
   }
   
   ## AminoAcid.freq_out
-  if(!is.null(Final_binned.out)) {
-    Final_binned.out[,'Group.0'] <- round(as.numeric(Final_binned.out[,'Group.0'])/nGrp0,digits=5)
-    Final_binned.out[,'Group.1'] <- round(as.numeric(Final_binned.out[,'Group.1'])/nGrp1,digits=5)
+  if( !is.null(Final_binned.out) ) {
+    Final_binned.out[,'Group.0'] <- round(as.numeric(Final_binned.out[,'Group.0']) / nGrp0,digits=5)
+    Final_binned.out[,'Group.1'] <- round(as.numeric(Final_binned.out[,'Group.1']) / nGrp1,digits=5)
     A.tmp[['freq']] <- Final_binned.out
   } else {
-    Final_binned.out <- matrix(c(Locus,rep(NA,4)),ncol=5)
-    colnames(Final_binned.out) <- c("Locus","Position","Residue","Group.0","Group.1")
-    rownames(Final_binned.out) <- NULL
-    A.tmp[['freq']] <- Final_binned.out
+    Names <- c("Locus","Position","Residue","Group.0","Group.1")
+    A.tmp[['freq']] <- Create.Null.Table(Locus,Names,nr=1)
   }
   
   return(A.tmp)

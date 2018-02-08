@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_functions.R
 \name{CheckLoci}
 \alias{CheckLoci}
-\title{Loci Legitimacy Check}
+\title{HLA Loci Legitimacy Check for Amino Acid Analysis}
 \usage{
 CheckLoci(x, y)
 }

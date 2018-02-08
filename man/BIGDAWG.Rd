@@ -12,7 +12,7 @@ BIGDAWG(Data, HLA = TRUE, Run.Tests, Loci.Set, All.Pairwise = FALSE,
 \arguments{
 \item{Data}{Name of the genotype data file.}
 
-\item{HLA}{Logical indicating whether data is HLA class I/II genotyping data only.}
+\item{HLA}{Logical Indicating whether data is HLA class I/II genotyping data only.}
 
 \item{Run.Tests}{Specifics which tests to run.}
 

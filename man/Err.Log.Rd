@@ -4,7 +4,7 @@
 \alias{Err.Log}
 \title{Error Code Display and Logging}
 \usage{
-Err.Log(Output, x, y = NULL)
+Err.Log(Output, x, y = NULL, z = NULL)
 }
 \arguments{
 \item{Output}{Logical indicating if Error logging should be written to a file.}
@@ -12,6 +12,8 @@ Err.Log(Output, x, y = NULL)
 \item{x}{Log Code.}
 
 \item{y}{Misc information relevant to error.}
+
+\item{z}{Misc information relevant to error.}
 }
 \description{
 Displays error codes attributable to data formatting and Locus/Allele naming. Writes to log file.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_functions.R
 \name{CheckHLA}
 \alias{CheckHLA}
-\title{HLA Formatting Check}
+\title{HLA Formatting Check for Amino Acid Analysis}
 \usage{
 CheckHLA(x)
 }
@@ -10,7 +10,7 @@ CheckHLA(x)
 \item{x}{All columns of HLA genotyping data.}
 }
 \description{
-Checks data to see if HLA data is properly formatted.
+Checks data to see if HLA data is properly formatted .
 }
 \note{
 This function is for internal BIGDAWG use only.

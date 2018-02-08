@@ -1,16 +1,16 @@
 ---
 title: "BIGDAWG"
 author: "Derek Pappas, Ph.D. (dpappas@chori.org)"
-date: "2017-08-07"
+date: "2018-02-07"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using BIGDAWG}
+  %\VignetteIndexEntry{BIGDAWG}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+  %\VignetteEncoding{UTF-8}
 ---
 
-* Package Version: 1.16
-* HLA/IMGT Database Release 3.29.0.1, 2017-08-18
+* Package Version: 2.1
+* HLA/IMGT DatabaseRelease 3.31.0, 2018-01-19
 
 ## Overview
 
@@ -29,20 +29,35 @@ When there is missing information, either for lack of genotyping information or 
 
 Data missing due to lack of a molecular genotyping result is considered not available (NA). Acceptable NA strings include: NA, ****, -, na and Na. Empty data cells will be considered NA.
 
-Data missing due to genomic structural variation (i.e., no locus present) is considered absence. Acceptable absence strings include: Absent, absent, Abs, ABS, ab, Ab, AB, ^. The last symbol is the unicode caret symbol. BIGDAWG allows for a special allele name that indicates absence of an HLA locus: 00, 00:00, 00:00:00 and 00:00:00:00 are all acceptable indicators of HLA locus absence. When choosing to use 00's (zeros) to populate allele name fields, use similar or higher levels of resolution [http://hla.alleles.org](http://hla.alleles.org/nomenclature/naming.html) and follow the same naming convention as with other genotype calls (either with or without locus prefix). If using a single column pair for DRB3/4/5 and the "00" absence indicator, then do **NOT** affix a locus prefix for the absent calls. In this case, only include the locus prefix for known DRB345 genotypes (i.e., DRB3/4/5*00:00 is **NOT** an acceptable name). For HLA data, the 00:00 naming convention is preferred and all absent designations will be converted to allow the amino acid analysis to test phenotypic associations with locus absence (see below).
+Data missing due to genomic structural variation (i.e., no locus present) is considered absence. Acceptable absence strings include: Absent, absent, Abs, ABS, ab, Ab, AB, @. The last symbol is the unicode at sign. BIGDAWG allows for a special allele name that indicates absence of an HLA locus: 00, 00:00, 00:00:00 and 00:00:00:00 are all acceptable indicators of HLA locus absence. When choosing to use 00's (zeros) to populate allele name fields, use similar or higher levels of resolution [http://hla.alleles.org](http://hla.alleles.org/nomenclature/naming.html) and follow the same naming convention as with other genotype calls (either with or without locus prefix). If using a single column pair for DRB3/4/5 and the "00" absence indicator, then do **NOT** affix a locus prefix for the absent calls. In this case, only include the locus prefix for known DRB345 genotypes (i.e., DRB3/4/5*00:00 is **NOT** an acceptable name). For HLA data, the 00:00 naming convention is preferred and all absent designations will be converted to allow the amino acid analysis to test phenotypic associations with locus absence (see below).
 
 Finally, when missing alleles (due to lack of a genotype call and not locus absence) for a locus are included in the haplotype analysis, the haplotype estimation method may impute the identity of the missing alleles for that subject. If such imputation is not desired, the "Missing"" parameter should be set to 0.
+
+**Genotype List Strings**  
+For for HLA alleles, you may submit your data formatted as a genotype list strings (GL strings) and BIGDAWG can automatically convert the data to a tabular format. The data should be 3-columns with the GL string in the third column (see table below). Data is restricted to **00:00** for absent designations when using GL strings, you should NOT use any other indicator of absence. Utilizing NA is not compatible with GL2Tab conversion.
+
+BIGDAWG also has a built-in function for converting between GL strings and tabular formatting using the GLSconvert() function. Please see the GLSconvert vignette for more detail.
 
 **Novel Alleles**  
 BIGDAWG will accept novel allele names. However, it is suggested you follow the same naming convention for novel alleles as with other genotypes calls in your data, either with or without the locus prefix. For example, novel alleles could be submitted as follows: Novel, 01:Novel, or A*01:Novel. Unfortunately, the BIGDAWG amino acid analysis cannot accept novel allele designations and will display an error. If you would like to run the amino acid analysis, you should replace the novel allele with NA or omit the subject entirely. 
 
 **Example of data architecture and acceptable values:**
 
+*Tabular*
+
 |SubjectID |Disease |   A   |   A   |   B   |   B   | DRB1  | DRB1  | DRB3  | DRB3  |
 |----------|:------:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-|subject1  |0       |01:01  |02:01  |08:01  |44:02  |01:01  |03:01  |Abs    |Abs    |
+|subject1  |0       |01:01  |02:01  |08:01  |44:02  |01:01  |08:01  |Abs    |Abs    |
 |subject2  |1       |02:01  |24:02  |51:01  |51:01  |11:01  |14:01  |02:02  |02:11  |
 |subject3  |0       |03:01  |26:02  |NA     |NA     |10:01  |08:01  |00:00  |00:00  |
+
+*Genotype List String*
+
+|SubjectID |Disease |GLString  |
+|----------|:------:|:-------------------------------------------------------------:|
+|Subject1  |0       |HLA-A\*01:01+HLA-A\*02:01\^HLA-B\*08:01+HLA-B\*44:02\^HLA-DRB1\*01:01+HLA-DRB1\*03:01^HLA-DRB3\*00:00+HLA-DRB3\*00:00 |
+|subject2  |1       |HLA-A\*02:01+HLA-A\*24:02\^HLA-B\*51:01+HLA-B\*51:01\^HLA-DRB1\*11:01+HLA-DRB1\*14:01^HLA-DRB3\*02:02+HLA-DRB3\*02:11 |
+|subject3  |0       |HLA-A\*01:01+HLA-A\*02:01\^HLA-DRB1\*01:01+HLA-DRB1\*03:01^HLA-DRB3\*00:00+HLA-DRB3\*00:00 |
 
 
 ## Data Output
@@ -148,7 +163,7 @@ Sets the desired resolution when trimming HLA alleles. Used only when `Trim = T`
 
 Class: String/Numeric. Optional. Default = 0.
 
-Sets the allowable per subject threshold for missing alleles. Relevant to running the haplotype analysis. Effects can be disastrous on processing time for large values of missing. Missing may be set as a number or as "ignore" to skip removal and retain all subjects.
+Sets the allowable per subject threshold for missing alleles. Relevant to running the haplotype analysis. Effects can be disastrous on processing time and memory allocation for large values (>2) of missing. Missing may be set as a number or as "ignore" to skip removal and retain all subjects. If you find BIGDAWG spending a lot time on the "Estimating Haplotypes..." step, reduced you missing to a value less than or equal to 2.
 
 **Cores.Lim**
 

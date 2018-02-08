@@ -45,132 +45,137 @@ DRB345.parser <- function(Tab) {
   
 }
 
-#' DRB345 haplotype zygosity checker
+#' DRB345 haplotype zygosity wrapper
 #'
 #' Checks DR haplotypes for correct zygosity and flags unanticipated haplotypes
-#' @param x Row of data set data frame following DRB345 parsing
-#' @note This function is for internal BIGDAWG use only.
-DRB345.zygosity <- function(x) {
+#' @param Genotype Row of data set data frame following DRB345 parsing
+#' @param Loci.DR DRBx Loci of interest to test for consistency
+#' @note This function is for internal use only.
+DRB345.Check.Wrapper <- function(Genotype,Loci.DR) {
+  
+  # Set non-DRB1 Loci
+  Loci.DR <- Loci.DR[-grep("DRB1",Loci.DR)]
+  
+  # Substitute ^ for 00:00
+  Genotype[] <- sapply(Genotype,as.character)
+  if( sum(grepl("\\^",Genotype)) > 0 ) { Genotype[] <- gsub("\\^","00:00",Genotype) ; Fill.Flag <- T } else { Fill.Flag <- F }
+  
+  # Apply Function to each DRBx Locus
+  tmp <- lapply(Loci.DR,FUN=DRB345.Check.Zygosity,Genotype=Genotype)
+  tmp.calls <- lapply( seq(length(tmp)), FUN = function(i) cbind(tmp[[i]]['Locus_1'], tmp[[i]]['Locus_2']) )
+  Genotype[,!grepl("DRB1",colnames(Genotype))] <- do.call(cbind, tmp.calls)
+  if( Fill.Flag ) { Genotype[] <- gsub("00:00","^",Genotype) }
+  
+  DR.HapFlag <- unlist(lapply(tmp,'[','Flag'))
+  DR.HapFlag <-paste(DR.HapFlag[which(DR.HapFlag!="")],collapse=",")
+  
+  Genotype <- cbind(Genotype,DR.HapFlag)
+  return(Genotype)
+  
+  
+}
+
+#' DRB345 haplotype zygosity checker single locus
+#'
+#' Checks DR haplotypes for correct zygosity and flags unanticipated haplotypes for a single DRBx
+#' @param Locus Locus of interest to test for consistency
+#' @param Genotype Row of data set data frame following DRB345 parsing
+#' @note This function is for internal use only.
+DRB345.Check.Zygosity <- function(Locus,Genotype) {
+  
+  # Remove Abs Strings
+  Genotype <- Filler(Genotype,Type="Remove") ; Genotype <- Genotype[which(Genotype!="")] ;  Genotype <- Genotype[which(Genotype!="")]
+  
+  DR.out <- data.frame(Locus_1=character(), Locus_2=character(), DR.HapFlag=character(), stringsAsFactors=F)
+  Abs <- paste(Locus,"*00:00",sep="")
+  
+  DR.Locus <- gsub("HLA-","",Locus) ; DR.Calls <- gsub("HLA-","",Genotype)
+  DR.Calls <- sapply(DR.Calls,FUN=GetField,Res=1) # get 1 Field Resolution for Genotype Calls
+  names(DR.Calls) <- NULL ; Flag <- NULL
+  
+  #DRB1 - get expected DRB3/4/5 genotypes
+  DR345.Exp.Calls <- DRB345.Exp(DR.Calls[grep("DRB1",DR.Calls)])
+  
+  #DRB345 Check
+  getDRB345 <- grep(DR.Locus,DR.Calls) ; DR.obs <- length(getDRB345) ; DR.exp <- sum(grepl(DR.Locus,DR345.Exp.Calls))
+  
+  # Assign Genotypes
+  if( DR.obs != DR.exp ) {
+    
+    # Inconsistent Genotype Possibilities
+    if ( DR.obs==0 && DR.exp>=1 ) {
+      # Missing Allele
+      DR.out[1, 'Locus_1'] <- Abs ; DR.out[1, 'Locus_2'] <- Abs ; DR.out[1, 'Flag'] <- paste(Locus,"_M",sep="")
+    } else if ( DR.obs >=1 && DR.exp==0 ) {
+      # Extra Allele
+      DR.out[1, 'Locus_1'] <- Genotype[getDRB345[1]] ; DR.out[1, 'Locus_2'] <- Abs ; DR.out[1, 'Flag'] <- paste(Locus,"_P",sep="")
+    } else if( DR.obs==1 && DR.exp==2 ) {
+      # Presumed Homozygote Missing Allele
+      DR.out[1, 'Locus_1'] <- Genotype[getDRB345[1]] ; DR.out[1, 'Locus_2'] <- Genotype[getDRB345[1]] ; DR.out[1, 'Flag'] <- ""
+    } else if( DR.obs==2 && DR.exp==1 ) {
+      
+      if( Genotype[getDRB345[1]] == Genotype[getDRB345[2]] ) {
+        # Extra Allele ... False Homozygote Assumption
+        DR.out[1, 'Locus_1'] <- Genotype[getDRB345[1]] ; DR.out[1, 'Locus_2'] <- Abs ; DR.out[1, 'Flag'] <- ""
+      } else {
+        # Extra Allele Present
+        DR.out[1, 'Locus_1'] <- Genotype[getDRB345[1]] ; DR.out[1, 'Locus_2'] <-Genotype[getDRB345[2]] ; DR.out[1, 'Flag'] <- paste(Locus,"_P",sep="")
+      }
+      
+    }
+    
+  } else {
+    
+    DR.out[1, 'Flag'] <- ""
+    
+    # Consistent Genotype
+    if(  DR.obs==0 ) {
+      DR.out[1, 'Locus_1'] <-Abs ; DR.out[1, 'Locus_2'] <- Abs
+    } else if( DR.obs==1 ) {
+      DR.out[1, 'Locus_1'] <- Genotype[getDRB345[1]] ; DR.out[1, 'Locus_2'] <- Abs
+    } else if ( DR.obs==2 ) {
+      DR.out[1, 'Locus_1'] <- Genotype[getDRB345[1]] ; DR.out[1, 'Locus_2'] <- Genotype[getDRB345[2]]
+    }
+    
+  }
+  
+  # Return Result
+  return(DR.out)
+  
+}
+
+#' DRB345 Expected
+#'
+#' Checks DRB1 Genotype and Returns Expected DR345 Loci
+#' @param DRB1.Genotype DRB1 Subject Genotypes
+#' @note This function is for internal use only.
+DRB345.Exp <- function(DRB1.Genotype) {
   
   #Checks for and fixes certain DRB345 errors that are consistent with known DR haplotypes
-  
-  Rules <- list("DRB1*01"="^","DRB1*10"="^","DRB1*08"="^",
+  Rules <- list("DRB1*01"="","DRB1*10"="","DRB1*08"="",
                 "DRB1*03"="DRB3","DRB1*11"="DRB3","DRB1*12"="DRB3","DRB1*13"="DRB3","DRB1*14"="DRB3",
                 "DRB1*04"="DRB4","DRB1*07"="DRB4","DRB1*09"="DRB4",
                 "DRB1*15"="DRB5","DRB1*16"="DRB5")
   
-  x.out <- x
-  x.1F <- apply(x,MARGIN=c(1,2),FUN=GetField,Res=1) # get 1 Field Resolution
+  DRB1.Genotype <- gsub("HLA-","",DRB1.Genotype)
+  DRB1.Genotype <- sapply(DRB1.Genotype,FUN=GetField,Res=1)
   
-  Flag <- NULL
-  
-  #DRB1 - get expected DRB3/4/5 genotypes
-  DRB1.1 <- x.1F[grep("DRB1",colnames(x.1F))[1]]
+  # Allele 1
+  DRB1.1 <- DRB1.Genotype[1]
   DR.Gtype <- as.character(Rules[DRB1.1])
   
-  DRB1.2 <- x.1F[grep("DRB1",colnames(x.1F))[2]]
+  # Allele 2
+  if(length(DRB1.Genotype)==1) {
+    #Consider Homozygote
+    DRB1.2 <-  DRB1.Genotype[1]
+  } else {
+    DRB1.2 <-  DRB1.Genotype[2]
+  }
   DR.Gtype <- c(DR.Gtype,as.character(Rules[DRB1.2]))
+  DR.Gtype <- DR.Gtype[which(DR.Gtype!="")]
   
-  #DRB3 Check
-  DRB3.col <- grep("DRB3",colnames(x.1F))
-  DRB3.abs <- grep("\\^",x.1F[DRB3.col])
-  if( sum(is.na(x.1F[DRB3.col]))==0 ) {
-    
-    DRB3.obs <- length(which(sapply(x.1F[DRB3.col],nchar)==7))
-    DRB3.exp <- as.numeric(sum(grepl("DRB3",DR.Gtype)))
-    A1 <- x.1F[DRB3.col[1]] ; A2 <- x.1F[DRB3.col[2]]
-    
-    if( DRB3.obs != DRB3.exp ) { 
-      if( DRB3.obs==2 && DRB3.exp==1 && A1==A2 ) { x.out[DRB3.col[2]] <- "^"  ; DR3.flag <- F
-      } else if( DRB3.obs==2 && DRB3.exp==1 && A1!=A2 ) { DR3.flag <- T
-      } else if( DRB3.obs==1 && DRB3.exp==2 ) { x.out[DRB3.col[2]] <- x[DRB3.col[1]]  ; DR3.flag <- F
-      } else { DR3.flag <- T }
-    } else { DR3.flag <- F }
-    
-  } else { DR3.flag <- F }
-  
-  #DRB4 Check
-  DRB4.col <- grep("DRB4",colnames(x.1F))
-  DRB4.abs <- grep("\\^",x.1F[DRB4.col])
-  if( sum(is.na(x.1F[DRB4.col]))==0 ) {
-    
-    DRB4.obs <- length(which(sapply(x.1F[DRB4.col],nchar)==7))
-    DRB4.exp <- as.numeric(sum(grepl("DRB4",DR.Gtype)))
-    A1 <- x.1F[DRB4.col[1]] ; A2 <- x.1F[DRB4.col[2]]
-    
-    if( DRB4.obs != DRB4.exp ) { 
-      if( DRB4.obs==2 && DRB4.exp==1 && A1==A2 ) { x.out[DRB4.col[2]] <- "^"  ; DR4.flag <- F
-      } else if( DRB4.obs==2 && DRB4.exp==1 && A1!=A2 ) { DR4.flag <- T
-      } else if( DRB4.obs==1 && DRB4.exp==2 ) { x.out[DRB4.col[2]] <- x[DRB4.col[1]]  ; DR4.flag <- F
-      } else { DR4.flag <- T }
-    } else { DR4.flag <- F }
-    
-  } else { DR4.flag <- F }
-  
-  #DRB5 Check
-  DRB5.col <- grep("DRB5",colnames(x.1F))
-  DRB5.abs <- grep("\\^",x.1F[DRB5.col])
-  if( sum(is.na(x.1F[DRB5.col]))==0 ) {
-    
-    DRB5.obs <- length(which(sapply(x.1F[DRB5.col],nchar)==7))
-    DRB5.exp <- as.numeric(sum(grepl("DRB5",DR.Gtype)))
-    A1 <- x.1F[DRB5.col[1]] ; A2 <- x.1F[DRB5.col[2]]
-    
-    if( DRB5.obs != DRB5.exp ) { 
-      if( DRB5.obs==2 && DRB5.exp==1 && A1==A2 ) { x.out[DRB5.col[2]] <- "^"  ; DR5.flag <- F
-      } else if( DRB5.obs==2 && DRB5.exp==1 && A1!=A2 ) { DR5.flag <- T
-      } else if( DRB5.obs==1 && DRB5.exp==2 ) { x.out[DRB5.col[2]] <- x[DRB5.col[1]]  ; DR5.flag <- F
-      } else { DR5.flag <- T }
-    } else { DR5.flag <- F }
-  } else { DR5.flag <- F }
-  
-  # Set Flag
-  if(DR3.flag) { Flag <- c(Flag,"DRB3")  }
-  if(DR4.flag) { Flag <- c(Flag,"DRB4")  }
-  if(DR5.flag) { Flag <- c(Flag,"DRB5")  }
-  if(!is.null(Flag)){ names(Flag) <- "DR_Hap_Error" }
-  
-  # Return Result
-  Out <- list()
-  colnames(x.out) <- colnames(x)
-  rownames(x.out) <- NULL
-  Out[['Tab']] <- x.out
-  Out[['Flag']] <- ifelse(is.null(Flag),"",paste(Flag,collapse=","))
-  return(Out)
+  if(length(DR.Gtype)>0) { DR.Gtype <- paste("HLA-",DR.Gtype,sep="") }
+  return(DR.Gtype)
   
 }
 
-#' DRB345 haplotype zygosity flag check
-#'
-#' Identify DR345 flagged haplotypes
-#' @param tmp Output of DRB345.zygosity
-#' @param Tab Data frame of sampleIDs, phenotypes, and genotypes
-#' @note This function is for internal BIGDAWG use only.
-DRB345.flag <- function(tmp,Tab) {
-  
-  DR.Flags <- list()
-  tmp.Flag <- do.call(rbind,lapply(tmp,"[[",2))
-  
-  if(sum(sapply(tmp.Flag,grepl,pattern='DRB3'))>0) {
-    getDRB.flag <- unlist(sapply(tmp.Flag,grep,pattern='DRB3'))
-    DR.Flags[['DRB3']] <- c("DRB3",paste(Tab[getDRB.flag,1],collapse=","))
-  } else { DR.Flags[['DRB3']] <- NULL }
-  
-  if(sum(sapply(tmp.Flag,grepl,pattern='DRB4'))>0) {
-    getDRB.flag <- unlist(sapply(tmp.Flag,grep,pattern='DRB4'))
-    DR.Flags[['DRB4']] <- c("DRB4",paste(Tab[getDRB.flag,1],collapse=","))
-  } else { DR.Flags[['DRB4']] <- NULL }
-  
-  if(sum(sapply(tmp.Flag,grepl,pattern='DRB5'))>0) {
-    getDRB.flag <- unlist(sapply(tmp.Flag,grep,pattern='DRB5'))
-    DR.Flags[['DRB5']] <- c("DRB5",paste(Tab[getDRB.flag,1],collapse=","))
-  } else { DR.Flags[['DRB5']] <- NULL }
-  
-  DR.Flags <- do.call(rbind,DR.Flags)
-  if(!is.null(DR.Flags)) {
-    colnames(DR.Flags) <- c("Flagged.Locus","Sample.ID")
-    rownames(DR.Flags) <- NULL
-  }
-  return(DR.Flags)
-  
-}

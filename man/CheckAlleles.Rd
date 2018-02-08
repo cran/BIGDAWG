@@ -2,18 +2,14 @@
 % Please edit documentation in R/check_functions.R
 \name{CheckAlleles}
 \alias{CheckAlleles}
-\title{Allele Legitimacy Check}
+\title{HLA Allele Legitimacy Check for Amino Acid Analysis}
 \usage{
-CheckAlleles(x, y, z1, z2)
+CheckAlleles(x, y)
 }
 \arguments{
 \item{x}{Exon protein list alignment object.}
 
 \item{y}{Genotypes from data file}
-
-\item{z1}{loci in data file}
-
-\item{z2}{Genotype column names}
 }
 \description{
 Checks available alleles against data to ensure complete overlap.

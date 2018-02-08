@@ -4,12 +4,12 @@
 \alias{A}
 \title{Amino Acid Analysis Function}
 \usage{
-A(loci.ColNames, Locus, genos, grp, nGrp0, nGrp1, ExonAlign, Cores)
+A(Locus, loci.ColNames, genos, grp, nGrp0, nGrp1, ExonAlign, Cores)
 }
 \arguments{
-\item{loci.ColNames}{The column names of the loci being analyzed.}
-
 \item{Locus}{Locus being analyzed.}
+
+\item{loci.ColNames}{The column names of the loci being analyzed.}
 
 \item{genos}{Genotype table.}
 

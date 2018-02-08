@@ -1,5 +1,26 @@
+BIGDAWG v2.1 (Release date: 2018-02-07) Derek Pappas <dpappas@chori.org>
+====================================================================================
+* Updated bundled IMGT/HLA amino acid exon alignment to latest release (Release 3.31.0, 2018-01-19).
+
+BIGDAWG v2.0.2 (Release date: 2017-12-03) Derek Pappas <dpappas@chori.org>
+====================================================================================
+* Minor code adjust to CheckRelease() and UpdateRelease() functions.
+
+BIGDAWG v2.0.1 (Release date: 2017-11-07) Derek Pappas <dpappas@chori.org>
+====================================================================================
+* BUG Fix thanks to Rajesh Acharya.
+* Updated bundled IMGT/HLA amino acid exon alignment to latest release (Release 3.30.0, 2017-10-27).
+* Added dependency for httr package.
+
+BIGDAWG v2.0 (Release date: 2017-09-15) Derek Pappas <dpappas@chori.org>
+====================================================================================
+* Code re-structuring.
+* The ability to use Gene List Strings via conversion utility, GLSconvert().
+* Added GLSconvert Vignette.
+
 BIGDAWG v1.16 (Release date: 2017-09-05) Derek Pappas <dpappas@chori.org>
 ====================================================================================
+* Submission to CRAN
 * Some code re-structuring.
 * Added parameter check function.
 * Updated bundled IMGT/HLA amino acid exon alignment to latest release (Release 3.29.0.1, 2017-08-18).
