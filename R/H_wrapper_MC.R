@@ -86,7 +86,7 @@ H.MC.wrapper <- function(SID,Tabsub,loci,loci.ColNames,genos,grp,All.Pairwise,Ou
           H.out[['OR']] <- tmp
         
         #chisq
-          H.out[['OR']] <- tmp.cs
+          H.out[['chisq']] <- tmp.cs
           
         #table
           tmp <- parallel::mclapply(H.list,"[[","table",mc.cores=Cores)

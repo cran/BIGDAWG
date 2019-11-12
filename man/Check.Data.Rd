@@ -4,10 +4,12 @@
 \alias{Check.Data}
 \title{Check Data Structure}
 \usage{
-Check.Data(Data, Convert)
+Check.Data(Data, System, Convert)
 }
 \arguments{
 \item{Data}{String Type of output.}
+
+\item{System}{Character Genetic system HLA or KIR}
 
 \item{Convert}{String Direction for conversion.}
 }

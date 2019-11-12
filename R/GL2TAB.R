@@ -14,6 +14,7 @@ GL2Tab.wrapper <- function(df,System,Strip.Prefix,Abs.Fill,Cores) {
   MiscCol <- seq(1,ncol(df)-1)
 
   # Remove empty data rows
+  df <- na.omit(df)
   rmRows <- which(nchar(df[,LastCol])==0)
   if( length(rmRows)!=0 ) { df <- df[-rmRows,] }
   

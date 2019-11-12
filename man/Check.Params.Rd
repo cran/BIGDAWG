@@ -4,8 +4,8 @@
 \alias{Check.Params}
 \title{Check Input Parameters}
 \usage{
-Check.Params(HLA, All.Pairwise, Trim, Res, EVS.rm, Missing, Cores.Lim, Return,
-  Output, Merge.Output, Verbose)
+Check.Params(HLA, All.Pairwise, Trim, Res, EVS.rm, Missing, Cores.Lim,
+  Return, Output, Merge.Output, Verbose)
 }
 \arguments{
 \item{HLA}{Logical indicating whether data is HLA class I/II genotyping data only.}

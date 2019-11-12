@@ -19,7 +19,7 @@ GetFiles <- function(Loci) {
     download.file(URL,destfile = FileName,method="libcurl")
     
     if (i==1) {
-      tmp <- read.table(FileName,fill=T,sep="\t",stringsAsFactors=F)
+      tmp <- read.table(FileName,fill=T,sep="\t",stringsAsFactors=F,row.names=NULL)
       Release <- tmp[2,]
       write.table(Release,file="Release.txt",sep="\t",col.names=F,row.names=F,quote=F)
     }
@@ -255,3 +255,5 @@ AlignObj.Update <- function(Loci,Release,RefTab) {
   save(UpdatePtnList,file="UpdatePtnAlign.RData")
   
 }
+
+# last update: 06/22/18

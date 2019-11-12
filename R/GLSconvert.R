@@ -36,7 +36,7 @@ GLSconvert <- function(Data,Convert,File.Output="txt",System="HLA",HZY.Red=FALSE
   df[is.na(df)] <- ""
 
   # Check Data Structure/Formatting
-  Check.Data(df,Convert)
+  Check.Data(df,System,Convert)
 
   # Run Data Conversion
   switch(Convert,

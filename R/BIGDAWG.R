@@ -27,9 +27,9 @@
 #' # Significant locus associations with phenotype at all but DQB1
 #' # BIGDAWG(Data="HLA_data", Run.Tests="L", Missing="ignore")
 #' 
-#' # Hardy-Weinberg analysis trimming data to 2-Field resolution
+#' # Hardy-Weinberg analysis trimming data to 2-Field resolution with no output to files (console only)
 #' # Significant locus deviation at DQB1
-#' BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2)
+#' BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2, Output=FALSE)
 BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Trim=FALSE, Res=2, EVS.rm=FALSE, Missing=2, Cores.Lim=1L, Results.Dir, Return=FALSE, Output=TRUE, Merge.Output=FALSE, Verbose=TRUE) {
 
   options(warn=-1)
@@ -63,12 +63,14 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       
       # Using internal synthetic set
       Tab <- BIGDAWG::HLA_data
+      Data.Flag <- "Internal Synthetic Data Set"
       
     } else {
       
       # Read in data file
       if(!file.exists(Data)) { Err.Log(Output,"Bad.Filename", Data) ; stop("Analysis stopped.",call.=F) }
       Tab <- read.table(Data, header = T, sep="\t", stringsAsFactors = F, na.strings=NAstrings, fill=T, comment.char = "#", strip.white=T, blank.lines.skip=T, colClasses="character")
+      Data.Flag <- Data
       
     }
     
@@ -76,8 +78,12 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     
     # Using R object
     Tab <- Data
+    Data.Flag <- "R Data Object"
     
   }
+  
+  # Declare Data Input Parameter
+  cat("Data Input:",Data.Flag,"\n\n\n")
   
   # Convert GLS data 
   if( ncol(Tab)==3 && !HLA ) { Err.Log(Output,"notHLA.GLS") }
@@ -169,7 +175,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     rm(UpdatePtnList)
     UPL.flag=T
   } else {
-    rm(UpdatePtnList)
+    rm(UpdatePtnList,UPL)
     EPL <- BIGDAWG::ExonPtnList
     UPL.flag=F }
   
@@ -271,7 +277,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       test <- CheckAlleles(EPL, Tab[,Data.Col])
       if( test$Flag ) { Err.Log(Output,"Bad.Allele.HLA",test$Alleles) ; stop("Analysis stopped.",call. = F) }
       
-      # Sanity Check for Analysis and HLA Allele Resolution (MUST perform AFTER TRIM)
+      # Sanity Check for Analysis and HLA Allele Resolution (MUST perform THIS STEP AFTER TRIM!!!!)
       if(Res<2 | !CheckHLA(Tab[,Data.Col]))  {
         Err.Log(Output,"Low.Res")
         cat("You have opted to run the amino acid analysis.\n")
@@ -296,7 +302,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
 # ===================================================================================================================================== ####
 # Case-Control Summary ________________________________________________________________________________________________________________ ####
 
-cat(">>>> CASE - CONTROL SUMMARY STATISTICS\n")
+cat("\n>>>> CASE - CONTROL SUMMARY STATISTICS\n")
 #cat(paste(rep("_",50),collapse=""),"\n")
 if (Trim) { rescall <- paste(Res,"-Field",sep="") } else { rescall <- "Not Defined" }
 Check <- PreCheck(Tab,colnames(Tab),rescall,HLA,Verbose,Output)
@@ -308,7 +314,6 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
   
   if(Output) {
     
-    if(Data=="HLA_data") { Data.tmp <- "Synthetic Bundled Data Set" } else { Data.tmp <- Data }
     if(HLA && !is.null(DRBFLAG)) { DRB345.tmp <- DRBFLAG } else { DRB345.tmp <- NULL }
     if(HLA) { Trim.tmp <- Trim } else { Trim.tmp <- NULL }
     if(HLA && Trim) { Res.tmp <- Res } else { Res.tmp <- NULL }
@@ -317,7 +322,7 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
     Params.Run <- list(Time = format(Sys.time(), "%a %b %d %X %Y"),
                        BD.Version = as.character(packageVersion("BIGDAWG")),
                        Cores.Used = Cores,
-                       File = Data.tmp,
+                       File = Data.Flag,
                        Output.Results = Output,
                        Merge = Merge.Output,
                        Return.Object = Return,
@@ -345,7 +350,7 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
     #cat(paste(rep("_",50),collapse=""),"\n")
     if(HLA && Trim) { 
       cat("HWE performed at user defined resolution.\n")
-    } else { 
+    } else if (HLA) { 
       cat("HWE performed at maximum available resolution.\n")
     }
     
@@ -507,4 +512,4 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
   
 }# END FUNCTION
 
-
+# last update: 06/22/18

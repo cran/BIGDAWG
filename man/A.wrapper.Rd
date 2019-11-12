@@ -4,8 +4,8 @@
 \alias{A.wrapper}
 \title{Amino Acid Wrapper}
 \usage{
-A.wrapper(loci, loci.ColNames, genos, grp, nGrp0, nGrp1, EPL, Cores, Output,
-  Verbose)
+A.wrapper(loci, loci.ColNames, genos, grp, nGrp0, nGrp1, EPL, Cores,
+  Output, Verbose)
 }
 \arguments{
 \item{loci}{Loci being analyzed.}

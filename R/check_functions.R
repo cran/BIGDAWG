@@ -150,7 +150,7 @@ CheckAlleles <- function(x,y) {
     
     
     # Check Each Allele against Database at defined resolution
-    Resolution <- c("Full",3,2) ; r = 1
+    Resolution <- c("Full",3,2,1) ; r = 1
     
     repeat{
       
@@ -298,9 +298,10 @@ PreCheck <- function(Tab,All.ColNames,rescall,HLA,Verbose,Output) {
 #'
 #' Check data structure for successfuly conversion.
 #' @param Data String Type of output.
+#' @param System Character Genetic system HLA or KIR
 #' @param Convert String Direction for conversion.
 #' @note This function is for internal use only.
-Check.Data <- function (Data,Convert) {
+Check.Data <- function (Data,System,Convert) {
   
   if(Convert=="Tab2GL") {
     
@@ -323,6 +324,14 @@ Check.Data <- function (Data,Convert) {
     
     LastCol <- ncol(Data)
     
+    #Check for System Name in GL String
+    test <- na.omit(Data[,LastCol])
+    test <- test[-which(sapply(test,nchar)==0)]
+    if(length(grep(System,test))!=length(test)) { 
+      Err.Log(FALSE,"GL.Format") ; stop("Conversion stopped.",call.=F)
+    }
+    
+    
     # Check for GL string field delimiters Absence
     if ( sum(grepl("\\+",Data[,LastCol])) == 0 && sum(grepl("\\^",Data[,LastCol])) == 0 && sum(grepl("\\|",Data[,LastCol])) == 0 ) {
       Err.Log(FALSE,"GL.Format") ; stop("Conversion stopped.",call.=F)
@@ -344,12 +353,19 @@ Check.Data <- function (Data,Convert) {
 #' @note This function is for internal use only.
 CheckString.Locus <- function(x,Loci) {
   
-  test <- sapply(Loci,FUN = function(z) regexpr(z,x) )
-  test[test==-1] <- NA
-  test.CS <- colSums(test, na.rm=TRUE)
-  if( max(test.CS)>1 ) {
+  Calls <- sapply(x,FUN=function(x) strsplit(x,"\\+"))
+  Calls.loci <- lapply(Calls,FUN=function(x) unlist(lapply(strsplit(x,"\\*"),"[",1)))
+  
+  Calls.loci.1 <- unlist(lapply(Calls.loci,"[",1))
+  Calls.loci.1 <- colSums(sapply(Loci, FUN = function(z) Calls.loci.1 %in% z))
+  
+  Calls.loci.2 <- as.character(unlist(lapply(Calls.loci,"[",2)))
+  Calls.loci.2 <- colSums(sapply(Loci, FUN = function(z) Calls.loci.2 %in% z))
+  
+  test.CS <- colSums(rbind(Calls.loci.1,Calls.loci.2))
+  if( max(test.CS)>2 ) {
     
-    Loci.Err <- paste(Loci[which(test.CS>1)],collapse=",")
+    Loci.Err <- paste(Loci[which(test.CS>2)],collapse=",")
     GLS <- paste(x,collapse="^")
     Err.Log(FALSE,"Locus.MultiField",GLS,Loci.Err)
     stop("Conversion Stopped.",call.=FALSE)

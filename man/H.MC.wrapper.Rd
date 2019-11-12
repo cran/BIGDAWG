@@ -4,8 +4,8 @@
 \alias{H.MC.wrapper}
 \title{Haplotype Wrapper for Multicore}
 \usage{
-H.MC.wrapper(SID, Tabsub, loci, loci.ColNames, genos, grp, All.Pairwise, Output,
-  Verbose, Cores)
+H.MC.wrapper(SID, Tabsub, loci, loci.ColNames, genos, grp, All.Pairwise,
+  Output, Verbose, Cores)
 }
 \arguments{
 \item{SID}{Character vector of subject IDs.}
