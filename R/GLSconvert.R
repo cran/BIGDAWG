@@ -10,6 +10,8 @@
 #' @param Strip.Prefix Logical Should System/Locus prefixes be stripped from table data.
 #' @param Abs.Fill Logical Should absent loci special designations be used.
 #' @param Cores.Lim Integer How many cores can be used.
+#' @importFrom utils write.table read.table write.csv
+#' @export
 GLSconvert <- function(Data,Convert,File.Output="txt",System="HLA",HZY.Red=FALSE,DRB345.Check=FALSE,Strip.Prefix=TRUE,Abs.Fill=FALSE,Cores.Lim=1L) {
 
   # Check Parameters

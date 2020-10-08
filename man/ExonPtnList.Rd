@@ -4,7 +4,9 @@
 \name{ExonPtnList}
 \alias{ExonPtnList}
 \title{Exon 2 (class II) or 2/3 (class I) protein alignments.}
-\format{A list wherein each element is an alignment dataframe for a single locus.}
+\format{
+A list wherein each element is an alignment dataframe for a single locus.
+}
 \usage{
 ExonPtnList
 }

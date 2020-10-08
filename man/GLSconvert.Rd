@@ -4,9 +4,17 @@
 \alias{GLSconvert}
 \title{Genotype List String Conversion}
 \usage{
-GLSconvert(Data, Convert, File.Output = "txt", System = "HLA",
-  HZY.Red = FALSE, DRB345.Check = FALSE, Strip.Prefix = TRUE,
-  Abs.Fill = FALSE, Cores.Lim = 1L)
+GLSconvert(
+  Data,
+  Convert,
+  File.Output = "txt",
+  System = "HLA",
+  HZY.Red = FALSE,
+  DRB345.Check = FALSE,
+  Strip.Prefix = TRUE,
+  Abs.Fill = FALSE,
+  Cores.Lim = 1L
+)
 }
 \arguments{
 \item{Data}{String File name or R Data Frame.}

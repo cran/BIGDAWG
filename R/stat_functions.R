@@ -18,11 +18,14 @@
 #' @param exact.ci.or whether confidence limite of the odds ratio should be computed by the exact method
 #' @param decimal number of decimal places displayed
 #' @note This function is for internal BIGDAWG use only.
+#' @importFrom stats chisq.test xtabs fisher.test chisq.test qnorm
+#' @importFrom graphics axis mtext title
+#' @export
 cci <- function (caseexp, controlex, casenonex, controlnonex, cctable = NULL, graph = TRUE, design = "cohort", main, xlab, ylab, xaxis, yaxis, alpha = 0.05, fisher.or = FALSE, exact.ci.or = TRUE, decimal = 2) {
-  
+
   if (is.null(cctable)) {
-    frame <- cbind(Outcome <- c(1, 0, 1, 0), Exposure <- c(1, 
-                                                           1, 0, 0), Freq <- c(caseexp, controlex, casenonex, 
+    frame <- cbind(Outcome <- c(1, 0, 1, 0), Exposure <- c(1,
+                                                           1, 0, 0), Freq <- c(caseexp, controlex, casenonex,
                                                                                controlnonex))
     Exposure <- factor(Exposure)
     expgrouplab <- c("Non-exposed", "Exposed")
@@ -40,7 +43,7 @@ cci <- function (caseexp, controlex, casenonex, controlnonex, cctable = NULL, gr
   controlex <- table1[1, 2]
   casenonex <- table1[2, 1]
   controlnonex <- table1[1, 1]
-  se.ln.or <- sqrt(1/caseexp + 1/controlex + 1/casenonex + 
+  se.ln.or <- sqrt(1/caseexp + 1/controlex + 1/casenonex +
                      1/controlnonex)
   if (!fisher.or) {
     or <- caseexp/controlex/casenonex * controlnonex
@@ -61,48 +64,48 @@ cci <- function (caseexp, controlex, casenonex, controlnonex, cctable = NULL, gr
     controlex <- table1[1, 2]
     casenonex <- table1[2, 1]
     controlnonex <- table1[1, 1]
-    if (!any(c(caseexp, controlex, casenonex, controlnonex) < 
+    if (!any(c(caseexp, controlex, casenonex, controlnonex) <
              5)) {
-      if (design == "prospective" || design == "cohort" || 
+      if (design == "prospective" || design == "cohort" ||
           design == "cross-sectional") {
-        
-        if (missing(main)) 
+
+        if (missing(main))
           main <- "Odds ratio from prospective/X-sectional study"
-        if (missing(xlab)) 
+        if (missing(xlab))
           xlab <- ""
-        if (missing(ylab)) 
-          ylab <- paste("Odds of being", ifelse(missing(yaxis), 
+        if (missing(ylab))
+          ylab <- paste("Odds of being", ifelse(missing(yaxis),
                                                 "a case", yaxis[2]))
-        if (missing(xaxis)) 
+        if (missing(xaxis))
           xaxis <- c("non-exposed", "exposed")
         axis(1, at = c(0, 1), labels = xaxis)
       }
       else {
-        
-        if (missing(main)) 
+
+        if (missing(main))
           main <- "Odds ratio from case control study"
-        if (missing(ylab)) 
+        if (missing(ylab))
           ylab <- "Outcome category"
-        if (missing(xlab)) 
+        if (missing(xlab))
           xlab <- ""
-        if (missing(yaxis)) 
+        if (missing(yaxis))
           yaxis <- c("Control", "Case")
         axis(2, at = c(0, 1), labels = yaxis, las = 2)
-        mtext(paste("Odds of ", ifelse(xlab == "", "being exposed", 
-                                       paste("exposure being", xaxis[2]))), side = 1, 
+        mtext(paste("Odds of ", ifelse(xlab == "", "being exposed",
+                                       paste("exposure being", xaxis[2]))), side = 1,
               line = ifelse(xlab == "", 2.5, 1.8))
       }
       title(main = main, xlab = xlab, ylab = ylab)
     }
   }
   if (!fisher.or) {
-    results <- list(or.method = "Asymptotic", or = or, se.ln.or = se.ln.or, 
-                    alpha = alpha, exact.ci.or = exact.ci.or, ci.or = ci.or, 
+    results <- list(or.method = "Asymptotic", or = or, se.ln.or = se.ln.or,
+                    alpha = alpha, exact.ci.or = exact.ci.or, ci.or = ci.or,
                     table = table1, decimal = decimal)
   }
   else {
-    results <- list(or.method = "Fisher's", or = or, alpha = alpha, 
-                    exact.ci.or = exact.ci.or, ci.or = ci.or, table = table1, 
+    results <- list(or.method = "Fisher's", or = or, alpha = alpha,
+                    exact.ci.or = exact.ci.or, ci.or = ci.or, table = table1,
                     decimal = decimal)
   }
   class(results) <- c("cci", "cc")
@@ -117,15 +120,16 @@ cci <- function (caseexp, controlex, casenonex, controlnonex, cctable = NULL, gr
 #' @param casenonex Number of cases not exosed
 #' @param controlnonex Number of controls not exposed
 #' @note This function is for internal BIGDAWG use only.
+#' @export
 make2x2 <- function (caseexp, controlex, casenonex, controlnonex)  {
-  
+
   table1 <- c(controlnonex, casenonex, controlex, caseexp)
   dim(table1) <- c(2, 2)
   rownames(table1) <- c("Non-diseased", "Diseased")
   colnames(table1) <- c("Non-exposed", "Exposed")
   attr(attr(table1, "dimnames"), "names") <- c("Outcome", "Exposure")
   table1
-  
+
 }
 
 #' Table Maker
@@ -133,6 +137,7 @@ make2x2 <- function (caseexp, controlex, casenonex, controlnonex)  {
 #' Table construction of per haplotype for odds ratio, confidence intervals, and pvalues
 #' @param x Contingency table with binned rare cells.
 #' @note This function is for internal BIGDAWG use only.
+#' @export
 TableMaker <- function(x) {
   grp1_sum <- sum(x[,'Group.1'])
   grp0_sum <- sum(x[,'Group.0'])
@@ -151,6 +156,8 @@ TableMaker <- function(x) {
 #' Calculates odds ratio and pvalues from 2x2 table
 #' @param x List of 2x2 matrices for calculation, output of TableMaker.
 #' @note This function is for internal BIGDAWG use only.
+#' @importFrom stats chisq.test
+#' @export
 cci.pval <- function(x) {
   tmp <- list()
   caseEx <- x[1]
@@ -172,6 +179,7 @@ cci.pval <- function(x) {
 #' Variation of the cci.pvalue function
 #' @param x List of 2x2 matrices to apply the cci.pvalue function. List output of TableMaker.
 #' @note This function is for internal BIGDAWG use only.
+#' @export
 cci.pval.list <- function(x) {
   tmp <- lapply(x, cci.pval)
   tmp <- do.call(rbind,tmp)
@@ -185,11 +193,12 @@ cci.pval.list <- function(x) {
 #' Calculates chi-squared contingency table tests and bins rare cells.
 #' @param x Contingency table.
 #' @note This function is for internal BIGDAWG use only.
+#' @export
 RunChiSq <- function(x) {
-  
+
   ### get expected values for cells
   ExpCnts <- chisq.test(as.matrix(x))$expected
-  
+
   ## pull out cells that don't need binning, bin remaining
   #unbinned
   OK.rows <- as.numeric(which(apply(ExpCnts,min,MARGIN=1)>=5))
@@ -203,7 +212,7 @@ RunChiSq <- function(x) {
   } else {
     unbinned <- NULL
   }
-  
+
   #binned
   Rare.rows <- as.numeric(which(apply(ExpCnts,min,MARGIN=1)<5))
   if(length(Rare.rows)>=2) {
@@ -215,9 +224,9 @@ RunChiSq <- function(x) {
     colnames(binned) <- c("Group.0","Group.1")
     New.df <- x
   }
-  
+
   if(nrow(New.df)>1) {
-    
+
     # flag if final matrix fails Cochran's rule of thumb (more than 20% of exp cells are less than 5)
     # True = OK ; False = Not good for Chi Square
     ExpCnts <- chisq.test(New.df)$expected
@@ -228,28 +237,28 @@ RunChiSq <- function(x) {
     } else {
       flag <- TRUE
     }
-    
+
     ## chi square test on binned data
     df.chisq <- chisq.test(New.df)
     Sig <- if(df.chisq$p.value > 0.05) { "NS" } else { "*" }
-    
-    
+
+
     ## show results of overall chi-square analysis
     tmp.chisq <- data.frame(cbind(round(df.chisq$statistic,digits=4),
                                   df.chisq$parameter,
                                   format.pval(df.chisq$p.value),
                                   Sig))
     colnames(tmp.chisq) <- c("X.square", "df", "p.value", "sig")
-    
+
     chisq.out <- list(Matrix = New.df,
                       Binned = binned,
                       Test = tmp.chisq,
                       Flag = flag)
-    
+
     return(chisq.out)
-    
+
   } else {
-    
+
     flag <- TRUE
     tmp.chisq <- data.frame(rbind(rep("NCalc",4)))
     colnames(tmp.chisq) <- c("X.square", "df", "p.value", "sig")
@@ -257,7 +266,7 @@ RunChiSq <- function(x) {
                       Binned = binned,
                       Test = tmp.chisq,
                       Flag = flag)
-    
+
   }
-  
+
 }

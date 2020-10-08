@@ -4,10 +4,23 @@
 \alias{BIGDAWG}
 \title{BIGDAWG Main Wrapper Function}
 \usage{
-BIGDAWG(Data, HLA = TRUE, Run.Tests, Loci.Set, All.Pairwise = FALSE,
-  Trim = FALSE, Res = 2, EVS.rm = FALSE, Missing = 2,
-  Cores.Lim = 1L, Results.Dir, Return = FALSE, Output = TRUE,
-  Merge.Output = FALSE, Verbose = TRUE)
+BIGDAWG(
+  Data,
+  HLA = TRUE,
+  Run.Tests,
+  Loci.Set,
+  All.Pairwise = FALSE,
+  Trim = FALSE,
+  Res = 2,
+  EVS.rm = FALSE,
+  Missing = 2,
+  Cores.Lim = 1L,
+  Results.Dir,
+  Return = FALSE,
+  Output = TRUE,
+  Merge.Output = FALSE,
+  Verbose = TRUE
+)
 }
 \arguments{
 \item{Data}{Name of the genotype data file.}
@@ -56,5 +69,5 @@ This is the main wrapper function for each analysis.
 
 # Hardy-Weinberg analysis trimming data to 2-Field resolution with no output to files (console only)
 # Significant locus deviation at DQB1
-BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2, Output=FALSE)
+BIGDAWG(Data=HLA_data[602:1401,], Run.Tests="HWE", Trim=TRUE, Res=2, Output=FALSE)
 }

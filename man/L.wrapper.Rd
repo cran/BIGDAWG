@@ -4,8 +4,17 @@
 \alias{L.wrapper}
 \title{Locus Wrapper}
 \usage{
-L.wrapper(nloci, loci, loci.ColNames, genos, grp, nGrp0, nGrp1, Output,
-  Verbose)
+L.wrapper(
+  nloci,
+  loci,
+  loci.ColNames,
+  genos,
+  grp,
+  nGrp0,
+  nGrp1,
+  Output,
+  Verbose
+)
 }
 \arguments{
 \item{nloci}{Number of loci being analyzed.}

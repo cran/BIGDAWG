@@ -6,16 +6,17 @@
 #' @param Output Data return carryover from main BIGDAWG function
 #' @param Verbose Summary display carryover from main BIGDAWG function
 #' @note This function is for internal BIGDAWG use only.
+#' @export
 HWE.wrapper <- function(Tab,All.ColNames,Output,Verbose) {
-  
+
   HWE <- HWE(Tab,All.ColNames)
-  
+
   if(Output) {
     sink("HWE.txt")
     print(HWE,quote=F)
     sink()
   }
-  
+
   cat("\n> HARDY-WEINBERG ANALYSIS COMPLETED\n")
   if(Verbose) {
     cat("\nControls (Group 0):\n")
@@ -26,7 +27,7 @@ HWE.wrapper <- function(Tab,All.ColNames,Output,Verbose) {
     print(HWE.cas,row.names=F,quote=F)
     cat("\n")
   }
-  
+
   return(HWE)
-  
+
 }

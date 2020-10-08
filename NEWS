@@ -1,7 +1,13 @@
+Changes in version 2.3.1 (2020-10-05)
+   o Resubmitted for unarchiving from CRAN.
+   o Contact email addresses updated.
+   o Links updated in vignettes.
+   o Toy example implemented in BIGDAWG to reduce check time.
+
 Changes in version 2.3 (2019-10-17)
    o Changes to NEWS format
-   o Updated bundled IMGT/HLA amino acid exon alignment to latest release (Release 3.38.0, 2019-10-17). 
-   
+   o Updated bundled IMGT/HLA amino acid exon alignment to latest release (Release 3.38.0, 2019-10-17).
+
 Changes in version 2.2.1 (2018-09-27)
    o Fixed bug where passed R object exports to parameter file.
    o Small changes to console output.
@@ -86,7 +92,7 @@ Changes in version 1.9 (2017-01-20)
    o Updated bundled IMGT/HLA amino acid exon alignment to latest release (Release 3.27.0, 2017-01-20)
 
 Changes in version 1.8.4 (2017-01-12)
-   o Naming update to haplotype output files. Haplotype loci will no longer be appended 
+   o Naming update to haplotype output files. Haplotype loci will no longer be appended
   to the filename. When All.Pairwise=T, the filename will be appended with "PairwiseSet"
   and the set number. A file will also be written to indicate which pairwise set
   corresponds to which haplotypes.

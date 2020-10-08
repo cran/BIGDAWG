@@ -4,7 +4,9 @@
 \name{HLA_data}
 \alias{HLA_data}
 \title{Example HLA Dataset}
-\format{A data frame with 2000 rows and 14 variables}
+\format{
+A data frame with 2000 rows and 14 variables
+}
 \usage{
 HLA_data
 }

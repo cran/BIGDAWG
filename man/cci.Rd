@@ -4,9 +4,24 @@
 \alias{cci}
 \title{Case-Control Odds ratio calculation and graphing}
 \usage{
-cci(caseexp, controlex, casenonex, controlnonex, cctable = NULL,
-  graph = TRUE, design = "cohort", main, xlab, ylab, xaxis, yaxis,
-  alpha = 0.05, fisher.or = FALSE, exact.ci.or = TRUE, decimal = 2)
+cci(
+  caseexp,
+  controlex,
+  casenonex,
+  controlnonex,
+  cctable = NULL,
+  graph = TRUE,
+  design = "cohort",
+  main,
+  xlab,
+  ylab,
+  xaxis,
+  yaxis,
+  alpha = 0.05,
+  fisher.or = FALSE,
+  exact.ci.or = TRUE,
+  decimal = 2
+)
 }
 \arguments{
 \item{caseexp}{Number of cases exposed}

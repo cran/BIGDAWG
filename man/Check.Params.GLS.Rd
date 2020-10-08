@@ -4,8 +4,14 @@
 \alias{Check.Params.GLS}
 \title{Check Input Parameters for GLS conversion}
 \usage{
-Check.Params.GLS(Convert, File.Output, System, HZY.Red, DRB345.Check,
-  Cores.Lim)
+Check.Params.GLS(
+  Convert,
+  File.Output,
+  System,
+  HZY.Red,
+  DRB345.Check,
+  Cores.Lim
+)
 }
 \arguments{
 \item{Convert}{String Direction for conversion.}
