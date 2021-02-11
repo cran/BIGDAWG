@@ -5,16 +5,13 @@
 #' @param loci.ColNames The column names of the loci being analyzed.
 #' @param genos Genotype table.
 #' @param grp Case/Control or Phenotype groupings.
-#' @param nGrp0 Number of controls.
-#' @param nGrp1 Number of cases.
 #' @param EPL Exon protein alignment.
 #' @param Cores Number of cores to use for analysis.
+#' @param Strict.Bin Logical specify if strict rare cell binning should be used in ChiSq test
 #' @param Output Data return carryover from main BIGDAWG function
 #' @param Verbose Summary display carryover from main BIGDAWG function
 #' @note This function is for internal BIGDAWG use only.
-#' @importFrom utils write.table
-#' @export
-A.wrapper <- function(loci,loci.ColNames,genos,grp,nGrp0,nGrp1,EPL,Cores,Output,Verbose) {
+A.wrapper <- function(loci,loci.ColNames,genos,grp,EPL,Cores,Strict.Bin,Output,Verbose) {
 
   cat("\n>>>> STARTING AMINO ACID LEVEL ANALYSIS...\n")
 
@@ -29,7 +26,7 @@ A.wrapper <- function(loci,loci.ColNames,genos,grp,nGrp0,nGrp1,EPL,Cores,Output,
   cat("Processing Locus: ")
 
   # Loop Through Loci
-  for(x in loci){
+  for(x in loci) {
 
     # Get Locus
     Locus <- x
@@ -39,7 +36,7 @@ A.wrapper <- function(loci,loci.ColNames,genos,grp,nGrp0,nGrp1,EPL,Cores,Output,
     ExonAlign <- EPL[[Locus]]; rownames(ExonAlign) <- NULL
 
     # Run Amino Acid Analysis
-    A.list <- A(Locus,loci.ColNames,genos,grp,nGrp0,nGrp1,ExonAlign,Cores)
+    A.list <- A(Locus,loci.ColNames,genos,grp,Strict.Bin,ExonAlign,Cores)
 
     # Build Output Lists
     AAlog[[Locus]] <- A.list[['log']]
@@ -77,7 +74,7 @@ A.wrapper <- function(loci,loci.ColNames,genos,grp,nGrp0,nGrp1,EPL,Cores,Output,
     cat("Significant Amino Acid Position(s):","\n")
     tmp <- do.call(rbind,overall.chisq); rownames(tmp) <- NULL
     tmp.sig <- tmp[which(tmp[,'sig']=="*"),]; rownames(tmp.sig) <- NULL
-    if(nrow(tmp.sig)>0) { print(tmp.sig,row.names=F,quote=F) }
+    if(nrow(tmp.sig)>0) { print(as.data.frame(tmp.sig),row.names=F) }
   }
 
 

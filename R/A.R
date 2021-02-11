@@ -6,14 +6,11 @@
 #' @param loci.ColNames The column names of the loci being analyzed.
 #' @param genos Genotype table.
 #' @param grp Case/Control or Phenotype groupings.
-#' @param nGrp0 Number of controls.
-#' @param nGrp1 Number of cases.
+#' @param Strict.Bin Logical specify if strict rare cell binning should be used in ChiSq test.
 #' @param ExonAlign Exon protein alignment filtered for locus.
 #' @param Cores Number of cores to use for analysis.
 #' @note This function is for internal BIGDAWG use only.
-#' @importFrom stats na.omit
-#' @export
-A <- function(Locus,loci.ColNames,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
+A <- function(Locus,loci.ColNames,genos,grp,Strict.Bin,ExonAlign,Cores) {
 
   # pull out locus specific columns
   getCol <- seq(1,length(loci.ColNames),1)[loci.ColNames %in% Locus]
@@ -42,7 +39,12 @@ A <- function(Locus,loci.ColNames,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
 
     # Run ChiSq
     csRange <- which(FlagAA.list==FALSE)
-    ChiSqTabAA.list <- parallel::mclapply(ConTabAA.list[csRange],RunChiSq,mc.cores=Cores)
+    if(Strict.Bin) {
+      ChiSqTabAA.list <- parallel::mclapply(ConTabAA.list[csRange],RunChiSq,mc.cores=Cores)
+    } else {
+      ChiSqTabAA.list <- parallel::mclapply(ConTabAA.list[csRange],RunChiSq_c,mc.cores=Cores)
+    }
+
 
     # build data frame for 2x2 tables
     Final_binned.list <- lapply(ChiSqTabAA.list,"[[",1)
@@ -166,8 +168,8 @@ A <- function(Locus,loci.ColNames,genos,grp,nGrp0,nGrp1,ExonAlign,Cores) {
 
   ## AminoAcid.freq_out
   if( !is.null(Final_binned.out) ) {
-    Final_binned.out[,'Group.0'] <- round(as.numeric(Final_binned.out[,'Group.0']) / nGrp0,digits=5)
-    Final_binned.out[,'Group.1'] <- round(as.numeric(Final_binned.out[,'Group.1']) / nGrp1,digits=5)
+    Final_binned.out[,'Group.0'] <- round(as.numeric(Final_binned.out[,'Group.0']) / sum(as.numeric(Final_binned.out),na.rm=T),digits=5)
+    Final_binned.out[,'Group.1'] <- round(as.numeric(Final_binned.out[,'Group.1']) / sum(as.numeric(Final_binned.out),na.rm=T),digits=5)
     A.tmp[['freq']] <- Final_binned.out
   } else {
     Names <- c("Locus","Position","Residue","Group.0","Group.1")

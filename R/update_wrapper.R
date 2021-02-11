@@ -4,8 +4,6 @@
 #' @param Restore Logical specifying if the original alignment file be restored.
 #' @param Force Logical specifiying if update should be forced.
 #' @param Output Logical indicating if error reporting should be written to file.
-#' @importFrom utils read.table
-#' @export
 UpdateRelease <- function(Force=F,Restore=F,Output=F) {
 
 # @param Add.Loci Character string or vector of loci that should be added to default loci (default = HLA-A,B,C,DRB1/3/4/5,DQA1,DQB1,DPA1,DPB1).
@@ -24,20 +22,37 @@ UpdateRelease <- function(Force=F,Restore=F,Output=F) {
 
       #Check current version against BIGDAWG version
       if(!Force) {
+
         setwd(putDir)
-        URL <- "https://www.ebi.ac.uk/ipd/imgt/hla/docs/release.html"
-        FileTmp <- tempfile(fileext=".html")
-        if( file.exists(FileTmp) ) { file.remove(FileTmp) }
-        invisible(httr::GET(URL,httr::write_disk(FileTmp)))
-        RV <- XML::readHTMLTable(FileTmp)
-        RV.current <- as.character(lapply(RV,"[",1)[[1]][1,])
-        file.remove(FileTmp)
-        RV.BIGDAWG <- unlist(strsplit(as.character(ExonPtnList$Release[[1]]),":"))[2]
+
+        # Get IMGT Release Version
+        invisible(download.file("ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/release_version.txt",destfile="release_version.txt",method="libcurl"))
+        Release <- read.table("release_version.txt",comment.char="",sep="\t")
+        Release <- apply(Release,MARGIN=1,FUN= function(x) gsub(": ",":",x))
+        RV.current <- unlist(strsplit(Release[3],split=":"))[2]
+        file.remove("release_version.txt")
+
+        # Get BIGDAWG
+        UPL <- paste(path.package('BIGDAWG'),"/data/UpdatePtnAlign.RData",sep="")
+        UpdatePtnList <- NULL ; rm(UpdatePtnList)
+        if( file.exists(UPL) ) {
+          load(UPL)
+          EPL <- UpdatePtnList
+          rm(UpdatePtnList,UPL)
+          UPL.flag=T
+        } else {
+          EPL <- ExonPtnList
+          UPL.flag=F }
+
+        RV.BIGDAWG <- EPL$Release.Version
+
         cat("Versions:\n","IMGT/HLA current: ",RV.current,"\n BIGDAWG version: ",RV.BIGDAWG,"\n")
         if(grepl(RV.current,RV.BIGDAWG)) { Flag <- T } else { Flag <- F }
 
       } else {
+
         Flag <- F
+
       }# End if() for setting Flag
 
       #Run Update if Flag = T
@@ -56,7 +71,7 @@ UpdateRelease <- function(Force=F,Restore=F,Output=F) {
         #STEP 1: Define Loci and Read in Reference Exon Map Files
           # Loci
           #if(is.null(Add.Loci)) {
-            Loci <- c("A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5")
+          Loci <- c("A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5")
           #} else {
           #  Loci <- unique(c(Add.Loci,"A","B","C","DPA1","DPB1","DQA1","DQB1","DRB1","DRB3","DRB4","DRB5"))
           #}
@@ -104,7 +119,7 @@ UpdateRelease <- function(Force=F,Restore=F,Output=F) {
   } else {
 
     Err.Log(Output,"No.Internet")
-    stop("Analysis stopped.",call.=F)
+    stop("Update stopped.",call.=F)
 
   }
 

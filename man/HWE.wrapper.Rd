@@ -4,12 +4,10 @@
 \alias{HWE.wrapper}
 \title{Hardy-Weinbery Wrapper}
 \usage{
-HWE.wrapper(Tab, All.ColNames, Output, Verbose)
+HWE.wrapper(Tab, Output, Verbose)
 }
 \arguments{
 \item{Tab}{Data frame of genotype files post processing.}
-
-\item{All.ColNames}{Character vector of Tab object column names.}
 
 \item{Output}{Data return carryover from main BIGDAWG function}
 

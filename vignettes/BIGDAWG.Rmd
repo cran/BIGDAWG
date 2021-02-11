@@ -1,16 +1,13 @@
 ---
 title: "BIGDAWG"
 author: "Derek Pappas, Ph.D. (dpappas@chori.org)"
-date: "2020-10-07"
+date: "2021-02-10"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{BIGDAWG}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-* Package Version: 2.3.1
-* HLA/IMGT Database Release 3.38.0, 2019-10-17
 
 ## Overview
 
@@ -22,7 +19,7 @@ Data for BIGDAWG should be in a tab delimited text format (UTF-8 encoding). The 
 
 Data may also be passed to BIGDAWG as an R object (dataframe) following the same formatting as above for text files. You may also choose to run a synthetic HLA data set (see below) to observe a typical BIGDAWG analysis and experiment with parameter settings.
 
-For HLA alleles, you may choose to format your genotype calls with our without the locus prefix. For example, for HLA-A, a given genotype call maybe 01:01:01:01 or A\*01:01:01:01 or HLA-A\*01:01:01:01. Allele names can include any level of resolution, from a single field up to the full length name. For HLA-DRB3,-DRB4,-DRB5 genotype calls, you may choose to represent these as a single pair of columns or as separate pairs of columns for each locus. However, when submitted as a single pair of columns, all genotypes must be formatted as Locus*Allele (including non-DRB loci). The single pair column names may be  DRB345, DRB3.4.5 or DRB3/4/5. Homozygous or hemizygous status for DRB3, DRB4 and DRB5 genotypes is based on the DRB1 haplotype as defined by Andersson, 1998 (Andersson G. 1998. Evolution of the HLA-DR region. [Front Biosci. 3:d739-45](https://pubmed.ncbi.nlm.nih.gov/9675159/). If you wish to define your own zygosity, it is suggested you split them into separate pairs of columns for each locus manually.
+For HLA alleles, you may choose to format your genotype calls with our without the locus prefix. For example, for HLA-A, a given genotype call maybe 01:01:01:01 or A\*01:01:01:01 or HLA-A\*01:01:01:01. Allele names can include any level of resolution, from a single field up to the full length name. For HLA-DRB3,-DRB4,-DRB5 genotype calls, you may choose to represent these as a single pair of columns or as separate pairs of columns for each locus. However, when submitted as a single pair of columns, all genotypes must be formatted as Locus*Allele (including non-DRB loci). The single pair column names may be  DRB345, DRB3.4.5 or DRB3/4/5. Homozygous or hemizygous status for DRB3, DRB4 and DRB5 genotypes is based on the DRB1 haplotype as defined by Andersson, 1998 (Andersson G. 1998. Evolution of the HLA-DR region. [Front Biosci. 3:d739-45](https://pubmed.ncbi.nlm.nih.gov/9675159/)). If you wish to define your own zygosity, it is suggested you split them into separate pairs of columns for each locus manually.
 
 **Missing Information**  
 When there is missing information, either for lack of genotyping information or absence of genotyped loci, BIGDAWG allows for conventions to differentiate the type of data that is missing.
@@ -98,13 +95,13 @@ BIGDAWG has a few built-in checks to ensure data format consistency and compatib
 
 ## Parameters
 
-`BIGDAWG(Data, HLA=T, Run.Tests, Loci.Set, All.Pairwise=F, Trim=F, Res=2, Missing=0, Cores.Lim=1L, Results.Dir, Return=F, Output=T, Verbose=T)`
+`BIGDAWG(Data, HLA=T, Run.Tests, Loci.Set, All.Pairwise=F, Trim=F, Res=2, Missing=0, Strict.Bin=F, Cores.Lim=1L, Results.Dir, Return=F, Output=T, Verbose=T)`
 
 **Data**
 
 Class: String. Required. No Default.
 
-e.g., `Data="HLA_data"` -or- `Data="foo.txt" `-or- `Data=foo`
+e.g., `Data=HLA_data` -or- `Data="HLA_data"` -or- `Data="foo.txt"` -or- `Data=foo.txt`
 
 Specifies genotype data file name. May use file name within working directory or full file name path to specify file location. See Data Input section for details about file formatting. Use 'Data=HLA_data' to analyze the bundled synthetic dataset.
 
@@ -164,6 +161,12 @@ Sets the desired resolution when trimming HLA alleles. Used only when `Trim = T`
 Class: String/Numeric. Optional. Default = 0.
 
 Sets the allowable per subject threshold for missing alleles. Relevant to running the haplotype analysis. Effects can be disastrous on processing time and memory allocation for large values (>2) of missing. Missing may be set as a number or as "ignore" to skip removal and retain all subjects. If you find BIGDAWG spending a lot time on the "Estimating Haplotypes..." step, reduced you missing to a value less than or equal to 2.
+
+**Strict.Bin**
+
+Class: Logical. Optional. Default = FALSE.
+
+Sets whether strict binning should be used during Chi Square testing. Strict binning (Strict.Bin = T) will bin all rare cells (expected count < 5). Otherwise, BIGDAWG will allow for up to 20% of the cells to have expected counts less than 5. Currently limited to the H, L, and A tests. This may rescue haplotypes/alleles/amino acids from binning and help identify significant loci/alleles.
 
 **Cores.Lim**
 
@@ -232,7 +235,7 @@ BD <- BIGDAWG(Data="data.txt", Output=F, Return=T, Verbose=F)
 
 ## Updating the bundled IMGT/HLA protein alignment
 
-For the amino acid analysis, BIGDAWG is bundled with HLA protein alignment data using theabove  indicated database release. These bundled alignments can be updated to the most recent release [IPD-IMGT/HLA](https://www.ebi.ac.uk/ipd/imgt/hla/). Future database updates do not guarantee compatibility with the updating tool.
+For the amino acid analysis, BIGDAWG is bundled with HLA protein alignment data using theabove  indicated database release. These bundled alignments can be updated to the most recent release [IMGT/HLA](https://www.ebi.ac.uk/ipd/imgt/hla). Future database updates do not guarantee compatability with the updating tool.
 
 ```
 # Identify the installed and current release of the bundled IMGT/HLA database release
@@ -252,7 +255,7 @@ UpdateRelease(Restore=T)
 
 ## Updating BIGDAWG to latest developmental versions
 
-Developmental versions of BIGDAWG can be downloaded through [GitHub](https://github.com/IgDAWG/BIGDAWG/) or using the following code (requires R package 'devtools'). These versions will include the most up-to-date bug fixes as well as access to new features that are still under development. GitHub versions are constantly under development and if you prefer a more stable fixed release, install BIGDAWG from the CRAN respository. You may check BIGDAWG versions using CheckRelease(). Local builing of vignettes requires pandoc and pandoc-citeproc if you do not use RStudio [Pandoc](https://pandoc.org/installing.html). Before installation from GitHub, it is recommended that all other R packages be up to date. May require a R/Rstudio close and restart.
+Developmental versions of BIGDAWG can be downloaded through [GitHub](https://github.com/IgDAWG/BIGDAWG/) or using the following code (requires R package 'devtools'). These versions will include the most up-to-date bug fixes as well as access to new features that are still under development. GitHub versions are constantly under development and if you prefer a more stable fixed release, install BIGDAWG from the CRAN respository. You may check BIGDAWG versions using CheckRelease(). Local builing of vignettes requires pandoc and pandoc-citeproc if you do not use RStudio [Pandoc](https://pandoc.org/installing.html). Before installation from GitHub, it is recommended that all other R packages be up to date.
 
 ```
 # Identify the installed (local), release (CRAN), and developmental (GitHub) versions of BIGDAWG.

@@ -2,13 +2,12 @@
 #'
 #' This is the main function for the HWE analysis.
 #' @param Tab data frame of genotype files post processing.
-#' @param All.ColNames character vector of Tab object column names.
 #' @note This function is for internal BIGDAWG use only.
-#' @export
-HWE <- function(Tab,All.ColNames) {
+HWE <- function(Tab) {
 
   HWE.out <- list()
 
+  All.ColNames <- colnames(Tab)
   loci <- as.list(unique(All.ColNames[3:length(All.ColNames)]))
   nloci <- length(loci)
 

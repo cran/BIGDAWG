@@ -4,7 +4,7 @@
 \alias{L}
 \title{Locus Analysis Function}
 \usage{
-L(loci.ColNames, Locus, genos, grp, nGrp0, nGrp1)
+L(loci.ColNames, Locus, genos, grp, Strict.Bin)
 }
 \arguments{
 \item{loci.ColNames}{The column names of the loci being analyzed.}
@@ -15,9 +15,7 @@ L(loci.ColNames, Locus, genos, grp, nGrp0, nGrp1)
 
 \item{grp}{Case/Control or Phenotype groupings.}
 
-\item{nGrp0}{Number of controls}
-
-\item{nGrp1}{Number of cases}
+\item{Strict.Bin}{Logical specify if strict rare cell binning should be used in ChiSq test}
 }
 \description{
 This is the workhorse function for the locus level analysis.

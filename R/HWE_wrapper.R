@@ -2,14 +2,12 @@
 #'
 #' Wrapper for main HWE function
 #' @param Tab Data frame of genotype files post processing.
-#' @param All.ColNames Character vector of Tab object column names.
 #' @param Output Data return carryover from main BIGDAWG function
 #' @param Verbose Summary display carryover from main BIGDAWG function
 #' @note This function is for internal BIGDAWG use only.
-#' @export
-HWE.wrapper <- function(Tab,All.ColNames,Output,Verbose) {
+HWE.wrapper <- function(Tab,Output,Verbose) {
 
-  HWE <- HWE(Tab,All.ColNames)
+  HWE <- HWE(Tab)
 
   if(Output) {
     sink("HWE.txt")

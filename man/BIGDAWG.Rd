@@ -14,6 +14,7 @@ BIGDAWG(
   Res = 2,
   EVS.rm = FALSE,
   Missing = 2,
+  Strict.Bin = FALSE,
   Cores.Lim = 1L,
   Results.Dir,
   Return = FALSE,
@@ -41,7 +42,9 @@ BIGDAWG(
 
 \item{Missing}{Numeric setting allowable missing data for running analysis (may use "ignore").}
 
-\item{Cores.Lim}{Interger setting the number of cores accessible to BIGDAWG (Windows limit is 1 core).}
+\item{Strict.Bin}{Logical specify if strict rare cell binning should be used in ChiSq test.}
+
+\item{Cores.Lim}{Integer setting the number of cores accessible to BIGDAWG (Windows limit is 1 core).}
 
 \item{Results.Dir}{Optional, string of full path directory name for BIGDAWG output.}
 
@@ -60,7 +63,7 @@ This is the main wrapper function for each analysis.
 ### The following examples use the synthetic data set bundled with BIGDAWG
 
 # Haplotype analysis with no missing genotypes for two loci sets
-# Significant haplotypic association with phenotype
+# Significant haplotype association with phenotype
 # BIGDAWG(Data="HLA_data", Run.Tests="H", Missing=0, Loci.Set=list(c("DRB1","DQB1")))
 
 # Hardy-Weinberg and Locus analysis ignoring missing data
@@ -69,5 +72,5 @@ This is the main wrapper function for each analysis.
 
 # Hardy-Weinberg analysis trimming data to 2-Field resolution with no output to files (console only)
 # Significant locus deviation at DQB1
-BIGDAWG(Data=HLA_data[602:1401,], Run.Tests="HWE", Trim=TRUE, Res=2, Output=FALSE)
+BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2, Output=FALSE)
 }

@@ -7,9 +7,8 @@
 #' @param Abs.Fill Logical Should absent loci special designations be used
 #' @param Cores Integer How many cores can be used.
 #' @note This function is for internal use only.
-#' @export
 Tab2GL.wrapper <- function(df,System,HZY.Red,Abs.Fill,Cores) {
-
+  
   # Define data locus columns assuming Locus columns come in pairs
   colnames(df) <- sapply(colnames(df),FUN=gsub,pattern="\\.1|\\.2|\\_1|\\_2",replacement="")
   DataCol <- which(colnames(df) %in% names(which(table(colnames(df))==2))==TRUE)
@@ -20,11 +19,11 @@ Tab2GL.wrapper <- function(df,System,HZY.Red,Abs.Fill,Cores) {
   if( length(which(table(Misc.tmp)>1))>0 ) {
     Err.Log(FALSE,"Table.Amb") ; stop("Conversion stopped.",call.=F)
   }; rm(Misc.tmp)
-
+  
   # Remove empty data rows
   rmRows <- which(rowSums(apply(df[,DataCol],MARGIN=c(1,2),FUN=nchar))==0)
   if( length(rmRows)!=0 ) { df <- df[-rmRows,] ; rownames(df) <- NULL }
-
+  
   # Pre-format data to SystemLoci*Allele if necessary
   if( sum(grepl(System,colnames(df)[DataCol]))==0 ) { colnames(df)[DataCol] <- paste(System,colnames(df)[DataCol],sep="") }
   for(i in DataCol) {
@@ -64,7 +63,6 @@ Tab2GL.wrapper <- function(df,System,HZY.Red,Abs.Fill,Cores) {
 #' @param System Character Genetic system HLA or KIR
 #' @param HZY.Red Logical Should homozygote genotypes be a single allele for non-DRB345.
 #' @note This function is for internal use only.
-#' @export
 Tab2GL.Sub <- function(x,System,HZY.Red) {
 
   # Identify Loci in data and for HLA-DRB1 expected DRB345 Loci
@@ -102,7 +100,6 @@ Tab2GL.Sub <- function(x,System,HZY.Red) {
 #' @param System Character Genetic system HLA or KIR
 #' @param HZY.Red Logical Should homozygote genotypes be a single allele for non-DRB345.
 #' @note This function is for internal use only.
-#' @export
 Tab2GL.Loci <- function(Locus,Genotype,System,HZY.Red) {
 
   Alleles <- Genotype[grep(Locus,Genotype)]

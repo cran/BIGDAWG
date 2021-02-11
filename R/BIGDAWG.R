@@ -10,20 +10,18 @@
 #' @param Res Numeric setting what desired resolution to trim HLA alleles.
 #' @param EVS.rm Logical indicating if expression variant suffixes should be removed.
 #' @param Missing Numeric setting allowable missing data for running analysis (may use "ignore").
-#' @param Cores.Lim Interger setting the number of cores accessible to BIGDAWG (Windows limit is 1 core).
+#' @param Strict.Bin Logical specify if strict rare cell binning should be used in ChiSq test.
+#' @param Cores.Lim Integer setting the number of cores accessible to BIGDAWG (Windows limit is 1 core).
 #' @param Results.Dir Optional, string of full path directory name for BIGDAWG output.
 #' @param Return Logical Should analysis results be returned as list.
 #' @param Output Logical Should analysis results be written to output directory.
 #' @param Merge.Output Logical Should analysis results be merged into a single file for easy access.
 #' @param Verbose Logical Should a summary of each analysis be displayed in console.
-#' @importFrom utils write.table read.table packageVersion
-#' @importFrom parallel mclapply
-#' @export
 #' @examples
 #' ### The following examples use the synthetic data set bundled with BIGDAWG
 #'
 #' # Haplotype analysis with no missing genotypes for two loci sets
-#' # Significant haplotypic association with phenotype
+#' # Significant haplotype association with phenotype
 #' # BIGDAWG(Data="HLA_data", Run.Tests="H", Missing=0, Loci.Set=list(c("DRB1","DQB1")))
 #'
 #' # Hardy-Weinberg and Locus analysis ignoring missing data
@@ -32,8 +30,8 @@
 #'
 #' # Hardy-Weinberg analysis trimming data to 2-Field resolution with no output to files (console only)
 #' # Significant locus deviation at DQB1
-#' BIGDAWG(Data=HLA_data[602:1401,], Run.Tests="HWE", Trim=TRUE, Res=2, Output=FALSE)
-BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Trim=FALSE, Res=2, EVS.rm=FALSE, Missing=2, Cores.Lim=1L, Results.Dir, Return=FALSE, Output=TRUE, Merge.Output=FALSE, Verbose=TRUE) {
+#' BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2, Output=FALSE)
+BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Trim=FALSE, Res=2, EVS.rm=FALSE, Missing=2, Strict.Bin=FALSE, Cores.Lim=1L, Results.Dir, Return=FALSE, Output=TRUE, Merge.Output=FALSE, Verbose=TRUE) {
 
   options(warn=-1)
 
@@ -41,7 +39,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   on.exit(setwd(MainDir), add = TRUE)
 
   # CHECK PARAMETERS
-  if( missing(Data) ) { Err.Log("P.Missing","Data") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( missing(Data) ) { Err.Log("P.Missing","Data") ; stop("Analysis Stopped.",call.=FALSE) }
   Check.Params(HLA,All.Pairwise,Trim,Res,EVS.rm,Missing,Cores.Lim,Return,Output,Merge.Output,Verbose)
 
   # MULTICORE LIMITATIONS
@@ -152,8 +150,9 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       ID.rm <- Tab[rows.rm,1]
       Tab <- Tab[-rows.rm,]
       if(Output) { write.table(ID.rm, file="Removed_SampleIDs.txt", sep="\t", row.names=F, col.names=F, quote=F) }
+      rm(ID.rm)
     }
-    rm(geno.desc,test,ID.rm)
+    rm(geno.desc,test)
     if(nrow(Tab)==0) { Err.Log(Output,"TooMany.Missing") ; stop("Analysis Stopped.",call. = F) }
   }
 
@@ -294,7 +293,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
 
   # LOCI SET COLUMN DEFINITIONS
   # This MUST follow DRB345 processing on the chance that DRB345 is formatted as single column
-  #   and DRB3, DRB4, or DRB5 is defined in Loci.Set.
+  # and DRB3, DRB4, or DRB5 is defined in Loci.Set.
   if(missing(Loci.Set)) {
     Set <- list(Data.Col)
   } else {
@@ -338,6 +337,7 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
                        Resolution = Res.tmp,
                        Suffix.Stripping = EVS.rm.tmp,
                        Missing.Allowed = Missing,
+                       Strict.Binning = Strict.Bin,
                        Samples.Removed = length(rows.rm))
 
     Params.Run <- do.call(rbind,Params.Run)
@@ -357,7 +357,7 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
       cat("HWE performed at maximum available resolution.\n")
     }
 
-    HWE <- HWE.wrapper(Tab,colnames(Tab),Output,Verbose)
+    HWE <- HWE.wrapper(Tab,Output,Verbose)
     BD.out[['HWE']] <- HWE
     rm(HWE)
 
@@ -387,8 +387,8 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
       genos <- Tabsub[,3:ncol(Tabsub)] # genotypes
       genos[genos==""] <- NA
       grp <- Tabsub[, 2] # phenotype
-      nGrp0 <- length(which(grp==0))*2 #nalleles
-      nGrp1 <- length(which(grp==1))*2 #nalleles
+      #nGrp0 <- length(which(grp==0))*2 #nalleles
+      #nGrp1 <- length(which(grp==1))*2 #nalleles
       loci <- unique(gsub(".1","",colnames(genos),fixed=T)) # name of loci
       loci.ColNames <- gsub(".1","",colnames(genos),fixed=T) # column names
       nloci <- as.numeric(length(loci)) # number of loci
@@ -403,7 +403,8 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
         setwd(OutSetDir)
 
         Params.set <- list(Set = paste("Set",k),
-                       Loci.Run = paste(loci,collapse=","))
+                           Loci.Run = paste(loci,collapse=",")
+                           )
 
         Params.set <- do.call(rbind,Params.set)
         write.table(Params.set,file="Set_Parameters.txt",sep=": ", row.names=T, col.names=F, quote=F)
@@ -426,7 +427,7 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
           Err.Log(Output,"Loci.No.AP")
           stop("Analysis Stopped.", call. = F) }
 
-        Haps.list <- H.MC.wrapper(SID,Tabsub,loci,loci.ColNames,genos,grp,All.Pairwise,Output,Verbose,Cores)
+        Haps.list <- H.MC.wrapper(SID,Tabsub,loci,loci.ColNames,genos,grp,All.Pairwise,Strict.Bin,Output,Verbose,Cores)
 
         if(All.Pairwise) {
           if(length(BD.out[['H']])>0) { BD.out[['H']] <- c(BD.out[['H']],Haps.list) } else { BD.out[['H']] <- Haps.list }
@@ -445,7 +446,7 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
 
         #cat(paste(rep("_",50),collapse=""))
 
-        L.list <- L.wrapper(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,Output,Verbose)
+        L.list <- L.wrapper(nloci,loci,loci.ColNames,genos,grp,Strict.Bin,Output,Verbose)
         BD.out[['L']][[SetName]] <- list(binned=L.list[['AB']],
                                          freq=L.list[['AF']],
                                          OR=L.list[['OR']],
@@ -466,7 +467,7 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
 
           if(UPL.flag) { cat("Using updated protein exon alignments for amino acid analysis.\n") }
 
-          A.list <- A.wrapper(loci,loci.ColNames,genos,grp,nGrp0,nGrp1,EPL,Cores,Output,Verbose)
+          A.list <- A.wrapper(loci,loci.ColNames,genos,grp,EPL,Cores,Strict.Bin,Output,Verbose)
 
           if(Output) {
             ## write to file
@@ -514,5 +515,3 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
   if(Return) { return(BD.out) }
 
 }# END FUNCTION
-
-# last update: 06/22/18

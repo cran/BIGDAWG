@@ -4,17 +4,7 @@
 \alias{L.wrapper}
 \title{Locus Wrapper}
 \usage{
-L.wrapper(
-  nloci,
-  loci,
-  loci.ColNames,
-  genos,
-  grp,
-  nGrp0,
-  nGrp1,
-  Output,
-  Verbose
-)
+L.wrapper(nloci, loci, loci.ColNames, genos, grp, Strict.Bin, Output, Verbose)
 }
 \arguments{
 \item{nloci}{Number of loci being analyzed.}
@@ -27,9 +17,7 @@ L.wrapper(
 
 \item{grp}{Case/Control or Phenotype groupings.}
 
-\item{nGrp0}{Number of controls}
-
-\item{nGrp1}{Number of cases}
+\item{Strict.Bin}{Logical specify if strict rare cell binning should be used in ChiSq test}
 
 \item{Output}{Data return carryover from main BIGDAWG function}
 

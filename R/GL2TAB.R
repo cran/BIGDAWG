@@ -7,7 +7,6 @@
 #' @param Abs.Fill Logical Should absent loci special designations be used.
 #' @param Cores Integer How many cores can be used
 #' @note This function is for internal use only
-#' @export
 GL2Tab.wrapper <- function(df,System,Strip.Prefix,Abs.Fill,Cores) {
 
   # Data column
@@ -18,7 +17,7 @@ GL2Tab.wrapper <- function(df,System,Strip.Prefix,Abs.Fill,Cores) {
   df <- na.omit(df)
   rmRows <- which(nchar(df[,LastCol])==0)
   if( length(rmRows)!=0 ) { df <- df[-rmRows,] }
-
+  
   # Run Conversion
   df.list <- strsplit(df[,LastCol],"\\^")
   Tab <- parallel::mclapply(df.list,FUN=GL2Tab.Sub,System=System,mc.cores=Cores)
@@ -59,7 +58,6 @@ GL2Tab.wrapper <- function(df,System,Strip.Prefix,Abs.Fill,Cores) {
 #' @param x Character GL string to expand
 #' @param System Character Genetic system HLA or KIR
 #' @note This function is for internal use only.
-#' @export
 GL2Tab.Sub <- function(x,System) {
 
   # Break GL String and Remove Any Absent Call Type Strings (00:00)
@@ -105,7 +103,6 @@ GL2Tab.Sub <- function(x,System) {
 #' @param Genotype Row of loci to condense
 #' @param System Character Genetic system HLA or KIR
 #' @note This function is for internal use only.
-#' @export
 GL2Tab.Loci <- function(Locus,Genotype,System) {
 
   Alleles <- Genotype[grep(Locus,Genotype)]

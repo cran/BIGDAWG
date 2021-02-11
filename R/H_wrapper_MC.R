@@ -8,13 +8,12 @@
 #' @param genos The genotype columns of the loci set being analyzed.
 #' @param grp Case/Control or Phenotype groupings.
 #' @param All.Pairwise Haplotype argument carryover from main BIGDAWG function
+#' @param Strict.Bin Logical specify if strict rare cell binning should be used in ChiSq test
 #' @param Output Data return carryover from main BIGDAWG function
 #' @param Verbose Summary display carryover from main BIGDAWG function
 #' @param Cores Cores carryover from main BIGDAWG function
 #' @note This function is for internal BIGDAWG use only.
-#' @importFrom utils write.table combn
-#' @export
-H.MC.wrapper <- function(SID,Tabsub,loci,loci.ColNames,genos,grp,All.Pairwise,Output,Verbose,Cores) {
+H.MC.wrapper <- function(SID,Tabsub,loci,loci.ColNames,genos,grp,All.Pairwise,Strict.Bin,Output,Verbose,Cores) {
 
   cat(">>>> STARTING HAPLOTYPE ANALYSIS...","\n")
 
@@ -42,7 +41,7 @@ H.MC.wrapper <- function(SID,Tabsub,loci,loci.ColNames,genos,grp,All.Pairwise,Ou
 
   # Run H
   #Start <- Sys.time()
-  H.list <- parallel::mclapply(HAPsets,H.MC,grp=grp,Verbose=Verbose,mc.cores=Cores)
+  H.list <- parallel::mclapply(HAPsets,H.MC,grp=grp,Strict.Bin=Strict.Bin,Verbose=Verbose,mc.cores=Cores)
   #Sys.time() - Start
 
   if(All.Pairwise) {
@@ -152,9 +151,7 @@ H.MC.wrapper <- function(SID,Tabsub,loci,loci.ColNames,genos,grp,All.Pairwise,Ou
   cat("> HAPLOTYPE ANALYSIS COMPLETED","\n")
     if(Verbose) {
       if(All.Pairwise) { overall.chisq <- tmp.cs } else { overall.chisq <- H.list[['chisq']] }
-      CS.value <- as.numeric(levels(overall.chisq[,'X.square']))[as.numeric(overall.chisq[,'X.square'])]
-      overall.chisq[,'X.square'] <- round(CS.value,digits=3)
-      print(overall.chisq, row.names=F)
+      print(as.data.frame(overall.chisq), row.names=F)
       cat("\n")
     }
 

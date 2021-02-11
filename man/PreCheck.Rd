@@ -13,7 +13,7 @@ PreCheck(Tab, All.ColNames, rescall, HLA, Verbose, Output)
 
 \item{rescall}{HLA resolution set for analysis.}
 
-\item{HLA}{HLA bigdawg argument passed to function}
+\item{HLA}{HLA BIGDAWG argument passed to function}
 
 \item{Verbose}{Summary display carryover from BIGDAWG function.}
 

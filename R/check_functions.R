@@ -13,25 +13,24 @@
 #' @param Merge.Output Logical Should analysis results be merged into a single file for easy access.
 #' @param Verbose Logical Should a summary of each analysis be displayed in console.
 #' @note This function is for internal use only.
-#' @export
 Check.Params <- function (HLA,All.Pairwise,Trim,Res,EVS.rm,Missing,Cores.Lim,Return,Output,Merge.Output,Verbose) {
 
   # Logicals: HLA=TRUE, All.Pairwise=FALSE, EVS.rm=FALSE, Trim=FALSE, Return=FALSE, Merge.FALSE, Verbose=TRUE, TRUE,
   # Numerics: Res=2, Missing=2, Cores.Lim=1L
   # Untested: Data, Results.Dir, Run.Tests, Loci.Set
 
-  if( !is.logical(HLA) ) { Err.Log(FALSE,"P.Error","HLA") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.logical(All.Pairwise) ) { Err.Log(FALSE,"P.Error","All.Pairwise") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.logical(EVS.rm) ) { Err.Log(FALSE,"P.Error","EVS.rm") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.logical(Trim) ) { Err.Log(FALSE,"P.Error","Trim") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.logical(Return) ) { Err.Log(FALSE,"P.Error","Return") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.logical(Merge.Output) ) { Err.Log(FALSE,"P.Error","Merge.Output") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.logical(Verbose) ) { Err.Log(FALSE,"P.Error","Verbose") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.logical(Output) ) { Err.Log(FALSE,"P.Error","Output") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.numeric(Res) ) { Err.Log(FALSE,"P.Error","Res") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.numeric(Cores.Lim) && !is.integer(Cores.Lim) ) { Err.Log(FALSE,"P.Error","Cores.Lim") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( !is.logical(HLA) ) { Err.Log(FALSE,"P.Error","HLA") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.logical(All.Pairwise) ) { Err.Log(FALSE,"P.Error","All.Pairwise") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.logical(EVS.rm) ) { Err.Log(FALSE,"P.Error","EVS.rm") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.logical(Trim) ) { Err.Log(FALSE,"P.Error","Trim") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.logical(Return) ) { Err.Log(FALSE,"P.Error","Return") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.logical(Merge.Output) ) { Err.Log(FALSE,"P.Error","Merge.Output") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.logical(Verbose) ) { Err.Log(FALSE,"P.Error","Verbose") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.logical(Output) ) { Err.Log(FALSE,"P.Error","Output") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.numeric(Res) ) { Err.Log(FALSE,"P.Error","Res") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.numeric(Cores.Lim) && !is.integer(Cores.Lim) ) { Err.Log(FALSE,"P.Error","Cores.Lim") ; stop("Analysis Stopped.",call.=FALSE) }
 
-  if( !is.numeric(Missing) ) { if(Missing!="ignore") { Err.Log(FALSE,"P.Error","Missing") ; stop("Conversion Stopped.",call.=FALSE) } }
+  if( !is.numeric(Missing) ) { if(Missing!="ignore") { Err.Log(FALSE,"P.Error","Missing") ; stop("Analysis Stopped.",call.=FALSE) } }
 
 }
 
@@ -45,15 +44,14 @@ Check.Params <- function (HLA,All.Pairwise,Trim,Res,EVS.rm,Missing,Cores.Lim,Ret
 #' @param DRB345.Check Logical Check DR haplotypes for consistency and flag unusual haplotypes.
 #' @param Cores.Lim Integer How many cores can be used.
 #' @note This function is for internal use only.
-#' @export
 Check.Params.GLS <- function (Convert,File.Output,System,HZY.Red,DRB345.Check,Cores.Lim) {
 
-  if( is.na(match(Convert,c("GL2Tab","Tab2GL"))) ) { Err.Log(FALSE,"P.Error","Convert") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( is.na(match(File.Output,c("R","txt","csv","pypop"))) ) { Err.Log(FALSE,"P.Error","File.Output") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( is.na(match(System,c("HLA","KIR"))) ) { Err.Log(FALSE,"P.Error","System") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.logical(HZY.Red) ) { Err.Log(FALSE,"P.Error","HZY.Red") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.logical(DRB345.Check) ) { Err.Log(FALSE,"P.Error","DRB345.Check") ; stop("Conversion Stopped.",call.=FALSE) }
-  if( !is.numeric(Cores.Lim) || !is.integer(Cores.Lim) ) { Err.Log(FALSE,"P.Error","Cores.Lim") ; stop("Conversion Stopped.",call.=FALSE) }
+  if( is.na(match(Convert,c("GL2Tab","Tab2GL"))) ) { Err.Log(FALSE,"P.Error","Convert") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( is.na(match(File.Output,c("R","txt","csv","pypop"))) ) { Err.Log(FALSE,"P.Error","File.Output") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( is.na(match(System,c("HLA","KIR"))) ) { Err.Log(FALSE,"P.Error","System") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.logical(HZY.Red) ) { Err.Log(FALSE,"P.Error","HZY.Red") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.logical(DRB345.Check) ) { Err.Log(FALSE,"P.Error","DRB345.Check") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !is.numeric(Cores.Lim) || !is.integer(Cores.Lim) ) { Err.Log(FALSE,"P.Error","Cores.Lim") ; stop("Analysis Stopped.",call.=FALSE) }
 
 }
 
@@ -62,12 +60,11 @@ Check.Params.GLS <- function (Convert,File.Output,System,HZY.Red,DRB345.Check,Co
 #' Check cores limitation for OS compatibility
 #' @param Cores.Lim Integer How many cores can be used.
 #' @param Output Logical Should analysis results be written to output directory.
-#' @export
 Check.Cores <- function(Cores.Lim,Output) {
   if ( Cores.Lim!=1L ) {
     Cores.Max <- as.integer( floor( parallel::detectCores() * 0.9) )
     if(Sys.info()['sysname']=="Windows" && as.numeric(Cores.Lim)>1) {
-      Err.Log(Output,"Windows.Cores") ; stop("Conversion stopped.",call. = F)
+      Err.Log(Output,"Windows.Cores") ; stop("Analysis Stopped.",call. = F)
     } else if( Cores.Lim > Cores.Max ) { Cores <- Cores.Max
     } else { Cores <- Cores.Lim }
   } else { Cores <- Cores.Lim }
@@ -79,7 +76,6 @@ Check.Cores <- function(Cores.Lim,Output) {
 #' Checks data to see if HLA data is properly formatted .
 #' @param x All columns of HLA genotyping data.
 #' @note This function is for internal BIGDAWG use only.
-#' @export
 CheckHLA <- function(x) {
   #Return TRUE if properly formatted HLA
 
@@ -102,7 +98,6 @@ CheckHLA <- function(x) {
 #' @param x Loci available in exon protein list alignment object.
 #' @param y Unique column names
 #' @note This function is for internal BIGDAWG use only.
-#' @export
 CheckLoci <- function(x,y) {
   #Returns TRUE if absent locus(loci) encountered
   #x=Loci available in ExonPtnList
@@ -130,7 +125,6 @@ CheckLoci <- function(x,y) {
 #' @param x Exon protein list alignment object.
 #' @param y Genotypes from data file
 #' @note This function is for internal BIGDAWG use only.
-#' @export
 CheckAlleles <- function(x,y) {
 
   # Returns TRUE if unknown allele(s) encountered
@@ -207,11 +201,10 @@ CheckAlleles <- function(x,y) {
 #' @param Tab Loci available in exon protein list alignment object.
 #' @param All.ColNames Column names from genotype data.
 #' @param rescall HLA resolution set for analysis.
-#' @param HLA HLA bigdawg argument passed to function
+#' @param HLA HLA BIGDAWG argument passed to function
 #' @param Verbose Summary display carryover from BIGDAWG function.
 #' @param Output Data output carryover form BIGDAWG function
 #' @note This function is for internal BIGDAWG use only.
-#' @export
 PreCheck <- function(Tab,All.ColNames,rescall,HLA,Verbose,Output) {
 
   Grp0 <- which(Tab[,2]==0)
@@ -303,28 +296,27 @@ PreCheck <- function(Tab,All.ColNames,rescall,HLA,Verbose,Output) {
 
 #' Check Data Structure
 #'
-#' Check data structure for successfuly conversion.
+#' Check data structure for successful conversion.
 #' @param Data String Type of output.
 #' @param System Character Genetic system HLA or KIR
 #' @param Convert String Direction for conversion.
 #' @note This function is for internal use only.
-#' @export
 Check.Data <- function (Data,System,Convert) {
 
   if(Convert=="Tab2GL") {
 
     # Check for column formatting consistency
-    if( ncol(Data) < 3 ) { Err.Log(FALSE,"Table.Col") ; stop("Conversion stopped.",call.=F) }
+    if( ncol(Data) < 3 ) { Err.Log(FALSE,"Table.Col") ; stop("Analysis Stopped.",call.=F) }
 
     # Check for GL string field delimiters Presence
     if ( sum(grepl("\\+",Data[,ncol(Data)])) > 0 || sum(grepl("\\^",Data[,ncol(Data)])) > 0 || sum(grepl("\\|",Data[,ncol(Data)])) > 0 ) {
-      Err.Log(FALSE,"Tab.Format") ; stop("Conversion stopped.",call.=F)
+      Err.Log(FALSE,"Tab.Format") ; stop("Analysis Stopped.",call.=F)
     }
 
     # Check for repeating column names
     colnames(Data) <- sapply(colnames(Data),FUN=gsub,pattern="\\.1|\\.2|\\_1|\\_2",replacement="")
     DataCol <- which(table(colnames(Data))==2)
-    if( length(DataCol)==0 ) { Err.Log(FALSE,"Table.Pairs") ; stop("Conversion stopped.",call.=F) }
+    if( length(DataCol)==0 ) { Err.Log(FALSE,"Table.Pairs") ; stop("Analysis Stopped.",call.=F) }
 
   }
 
@@ -336,19 +328,19 @@ Check.Data <- function (Data,System,Convert) {
     test <- na.omit(Data[,LastCol])
     test <- test[-which(sapply(test,nchar)==0)]
     if(length(grep(System,test))!=length(test)) {
-      Err.Log(FALSE,"GL.Format") ; stop("Conversion stopped.",call.=F)
+      Err.Log(FALSE,"GL.Format") ; stop("Analysis Stopped.",call.=F)
     }
 
 
     # Check for GL string field delimiters Absence
     if ( sum(grepl("\\+",Data[,LastCol])) == 0 && sum(grepl("\\^",Data[,LastCol])) == 0 && sum(grepl("\\|",Data[,LastCol])) == 0 ) {
-      Err.Log(FALSE,"GL.Format") ; stop("Conversion stopped.",call.=F)
+      Err.Log(FALSE,"GL.Format") ; stop("Analysis Stopped.",call.=F)
     }
 
     # Check for ambiguous data at genotype "|"
     if( sum(grepl("\\|",Data[,LastCol]))>0 ) {
       Check.Rows <- paste(grep("\\|",Data[,LastCol]),collapse=",")
-      Err.Log(FALSE,"GTYPE.Amb",Check.Rows) ; stop("Conversion stopped.",call.=F) }
+      Err.Log(FALSE,"GTYPE.Amb",Check.Rows) ; stop("Analysis Stopped.",call.=F) }
   }
 
 }
@@ -359,7 +351,6 @@ Check.Data <- function (Data,System,Convert) {
 #' @param x GL String to check against
 #' @param Loci Loci to check
 #' @note This function is for internal use only.
-#' @export
 CheckString.Locus <- function(x,Loci) {
 
   Calls <- sapply(x,FUN=function(x) strsplit(x,"\\+"))
@@ -377,7 +368,7 @@ CheckString.Locus <- function(x,Loci) {
     Loci.Err <- paste(Loci[which(test.CS>2)],collapse=",")
     GLS <- paste(x,collapse="^")
     Err.Log(FALSE,"Locus.MultiField",GLS,Loci.Err)
-    stop("Conversion Stopped.",call.=FALSE)
+    stop("Analysis Stopped.",call.=FALSE)
 
   }
 
@@ -390,7 +381,6 @@ CheckString.Locus <- function(x,Loci) {
 #' GL String check for allele ambiguity formatting
 #' @param x  GL String to check against
 #' @note This function is for internal use only.
-#' @export
 CheckString.Allele <- function(x) {
 
   x <- as.character(x)
@@ -400,7 +390,7 @@ CheckString.Allele <- function(x) {
     tmp.len <- length(unique(lapply(tmp,length)))
     if( tmp.len > 1 ) {
       Err.Log(FALSE,"Allele.Amb.Format",x)
-      stop("Conversion Stopped.",call.=FALSE)
+      stop("Analysis Stopped.",call.=FALSE)
     }
   }
 
@@ -415,8 +405,6 @@ CheckString.Allele <- function(x) {
 #' @param Alignment Logical to check the IMGT/HLA database version for the alignment bundled with BIGDAWG.
 #' @param Output Should any error be written to a file
 #' @note Requires active internet connection.
-#' @importFrom utils packageVersion
-#' @export
 CheckRelease <- function(Package=T,Alignment=T,Output=F) {
 
   if( !inherits(try(XML::readHTMLTable("http://cran.r-project.org/web/packages/BIGDAWG/index.html",header=F),silent=T),"try-error") ) {
@@ -424,22 +412,21 @@ CheckRelease <- function(Package=T,Alignment=T,Output=F) {
     if(Package) {
 
       CranR <- as.character(XML::readHTMLTable("http://cran.r-project.org/web/packages/BIGDAWG/index.html",header=F)[[1]][1,2])
-      GitHubR <- read.table("https://raw.githubusercontent.com/IgDAWG/BIGDAWG/master/NEWS",sep="\t",stringsAsFactors=F,nrows=1)
-      GitHubR <- gsub("v","",unlist(strsplit(as.character(GitHubR),split=" "))[2])
+      GitHubR <- read.table("https://raw.githubusercontent.com/IgDAWG/BIGDAWG/master/DESCRIPTION",sep="\t",stringsAsFactors=F,nrows=4)
+      GitHubR <- unlist(strsplit(GitHubR[4,],split=" "))[2]
       CurrR <- as.character(packageVersion('BIGDAWG') )
 
     }
 
     if(Alignment) {
 
-      URL <- "https://www.ebi.ac.uk/ipd/imgt/hla/docs/release.html"
-      FileTmp <- tempfile(fileext=".html")
-      if( file.exists(FileTmp) ) { file.remove(FileTmp) }
-      invisible(httr::GET(URL,httr::write_disk(FileTmp)))
-      RV <- XML::readHTMLTable(FileTmp)
-      RV.current <- as.character(lapply(RV,"[",1)[[1]][1,])
-      file.remove(FileTmp)
+      # Get IMGT Release Version
+      download.file("ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/release_version.txt",destfile="release_version.txt",method="libcurl")
+      Release <- read.table("release_version.txt",comment.char="",sep="\t")
+      Release <- apply(Release,MARGIN=1,FUN= function(x) gsub(": ",":",x))
+      RV.current <- unlist(strsplit(Release[3],split=":"))[2]
 
+      # Get BIGDAWG
       UPL <- paste(path.package('BIGDAWG'),"/data/UpdatePtnAlign.RData",sep="")
       UpdatePtnList <- NULL ; rm(UpdatePtnList)
       if( file.exists(UPL) ) {
@@ -451,7 +438,7 @@ CheckRelease <- function(Package=T,Alignment=T,Output=F) {
         EPL <- ExonPtnList
         UPL.flag=F }
 
-      RV.BIGDAWG <- gsub(" ","",unlist(strsplit(as.character(EPL$Release[[1]]),":"))[2])
+      RV.BIGDAWG <- EPL$Release.Version
 
     }
 

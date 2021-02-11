@@ -4,12 +4,14 @@
 \alias{H.MC}
 \title{Haplotype Analysis Function for Multicore}
 \usage{
-H.MC(genos.sub, grp, Verbose)
+H.MC(genos.sub, grp, Strict.Bin, Verbose)
 }
 \arguments{
 \item{genos.sub}{The genotype columns of the loci(locus) set being analyzed.}
 
 \item{grp}{Case/Control or Phenotype groupings.}
+
+\item{Strict.Bin}{Logical specify if strict rare cell binning should be used in ChiSq test}
 
 \item{Verbose}{Summary display carryover from main BIGDAWG function}
 }

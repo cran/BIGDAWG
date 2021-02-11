@@ -12,39 +12,11 @@
 
 <meta name="author" content="Derek Pappas, Ph.D. (dpappas@chori.org)" />
 
-<meta name="date" content="2020-10-07" />
+<meta name="date" content="2021-02-10" />
 
 <title>BIGDAWG</title>
 
-<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
-// be compatible with the behavior of Pandoc < 2.8).
-document.addEventListener('DOMContentLoaded', function(e) {
-  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
-  var i, h, a;
-  for (i = 0; i < hs.length; i++) {
-    h = hs[i];
-    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
-    a = h.attributes;
-    while (a.length > 0) h.removeAttribute(a[0].name);
-  }
-});
-</script>
-<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
-// v0.0.1
-// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
-
-document.addEventListener('DOMContentLoaded', function() {
-  const codeList = document.getElementsByClassName("sourceCode");
-  for (var i = 0; i < codeList.length; i++) {
-    var linkList = codeList[i].getElementsByTagName('a');
-    for (var j = 0; j < linkList.length; j++) {
-      if (linkList[j].innerHTML === "") {
-        linkList[j].setAttribute('aria-hidden', 'true');
-      }
-    }
-  }
-});
-</script>
+<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -53,193 +25,14 @@ document.addEventListener('DOMContentLoaded', function() {
   div.column{display: inline-block; vertical-align: top; width: 50%;}
   div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   ul.task-list{list-style: none;}
-      </style>
+    </style>
 
 
 
 
 
-<style type="text/css">body {
-background-color: #fff;
-margin: 1em auto;
-max-width: 700px;
-overflow: visible;
-padding-left: 2em;
-padding-right: 2em;
-font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-font-size: 14px;
-line-height: 1.35;
-}
-#TOC {
-clear: both;
-margin: 0 0 10px 10px;
-padding: 4px;
-width: 400px;
-border: 1px solid #CCCCCC;
-border-radius: 5px;
-background-color: #f6f6f6;
-font-size: 13px;
-line-height: 1.3;
-}
-#TOC .toctitle {
-font-weight: bold;
-font-size: 15px;
-margin-left: 5px;
-}
-#TOC ul {
-padding-left: 40px;
-margin-left: -1.5em;
-margin-top: 5px;
-margin-bottom: 5px;
-}
-#TOC ul ul {
-margin-left: -2em;
-}
-#TOC li {
-line-height: 16px;
-}
-table {
-margin: 1em auto;
-border-width: 1px;
-border-color: #DDDDDD;
-border-style: outset;
-border-collapse: collapse;
-}
-table th {
-border-width: 2px;
-padding: 5px;
-border-style: inset;
-}
-table td {
-border-width: 1px;
-border-style: inset;
-line-height: 18px;
-padding: 5px 5px;
-}
-table, table th, table td {
-border-left-style: none;
-border-right-style: none;
-}
-table thead, table tr.even {
-background-color: #f7f7f7;
-}
-p {
-margin: 0.5em 0;
-}
-blockquote {
-background-color: #f6f6f6;
-padding: 0.25em 0.75em;
-}
-hr {
-border-style: solid;
-border: none;
-border-top: 1px solid #777;
-margin: 28px 0;
-}
-dl {
-margin-left: 0;
-}
-dl dd {
-margin-bottom: 13px;
-margin-left: 13px;
-}
-dl dt {
-font-weight: bold;
-}
-ul {
-margin-top: 0;
-}
-ul li {
-list-style: circle outside;
-}
-ul ul {
-margin-bottom: 0;
-}
-pre, code {
-background-color: #f7f7f7;
-border-radius: 3px;
-color: #333;
-white-space: pre-wrap; 
-}
-pre {
-border-radius: 3px;
-margin: 5px 0px 10px 0px;
-padding: 10px;
-}
-pre:not([class]) {
-background-color: #f7f7f7;
-}
-code {
-font-family: Consolas, Monaco, 'Courier New', monospace;
-font-size: 85%;
-}
-p > code, li > code {
-padding: 2px 0px;
-}
-div.figure {
-text-align: center;
-}
-img {
-background-color: #FFFFFF;
-padding: 2px;
-border: 1px solid #DDDDDD;
-border-radius: 3px;
-border: 1px solid #CCCCCC;
-margin: 0 5px;
-}
-h1 {
-margin-top: 0;
-font-size: 35px;
-line-height: 40px;
-}
-h2 {
-border-bottom: 4px solid #f7f7f7;
-padding-top: 10px;
-padding-bottom: 2px;
-font-size: 145%;
-}
-h3 {
-border-bottom: 2px solid #f7f7f7;
-padding-top: 10px;
-font-size: 120%;
-}
-h4 {
-border-bottom: 1px solid #f7f7f7;
-margin-left: 8px;
-font-size: 105%;
-}
-h5, h6 {
-border-bottom: 1px solid #ccc;
-font-size: 105%;
-}
-a {
-color: #0033dd;
-text-decoration: none;
-}
-a:hover {
-color: #6666ff; }
-a:visited {
-color: #800080; }
-a:visited:hover {
-color: #BB00BB; }
-a[href^="http:"] {
-text-decoration: underline; }
-a[href^="https:"] {
-text-decoration: underline; }
 
-code > span.kw { color: #555; font-weight: bold; } 
-code > span.dt { color: #902000; } 
-code > span.dv { color: #40a070; } 
-code > span.bn { color: #d14; } 
-code > span.fl { color: #d14; } 
-code > span.ch { color: #d14; } 
-code > span.st { color: #d14; } 
-code > span.co { color: #888888; font-style: italic; } 
-code > span.ot { color: #007020; } 
-code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; } 
-code > span.er { color: #a61717; background-color: #e3d2d2; } 
-</style>
+<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
 
 
 
@@ -253,14 +46,10 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">BIGDAWG</h1>
 <h4 class="author">Derek Pappas, Ph.D. (<a href="mailto:dpappas@chori.org" class="email">dpappas@chori.org</a>)</h4>
-<h4 class="date">2020-10-07</h4>
+<h4 class="date">2021-02-10</h4>
 
 
 
-<ul>
-<li>Package Version: 2.3.1</li>
-<li>HLA/IMGT Database Release 3.38.0, 2019-10-17</li>
-</ul>
 <div id="overview" class="section level2">
 <h2>Overview</h2>
 <p>‘Bridging ImmunoGenomic Data-Analysis Workflow Gaps’ (‘BIGDAWG’) is an integrated analysis system that automates the manual data-manipulation and trafficking steps (the gaps in an analysis workflow) normally required for analyses of highly polymorphic genetic systems (e.g., the immunological human leukocyte antigen (HLA) and killer-cell Immunoglobulin-like receptor (KIR) genes) and their respective genomic data (immunogenomic) (Pappas DJ, Marin W, Hollenbach JA, Mack SJ. 2016. ‘Bridging ImmunoGenomic Data Analysis Workflow Gaps (BIGDAWG): An integrated case-control analysis pipeline.’ <a href="https://pubmed.ncbi.nlm.nih.gov/26708359/">Human Immunology. 77:283-287</a>). Starting with unambiguous genotype data for case-control groups, ‘BIGDAWG’ performs tests of Hardy-Weinberg equilibrium, and carries out case-control association analyses for haplotypes, individual loci, and HLA amino acid positions.</p>
@@ -269,7 +58,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h2>Input Data</h2>
 <p>Data for BIGDAWG should be in a tab delimited text format (UTF-8 encoding). The first row must be a header line and must include column names for genotype data. The first two columns must contain subject IDs and phenotypes (0 = control, 1 = case), respectively. A phenotype is not limited to disease status and may include other phenotypes such as onset, severity, ancestry, etc. However, phenotype designatons in the dataset are restricted to the use of 0s and 1s. Genotype pairs must be located in adjacent columns. Column names for a given locus may use ’_1’, ‘.1’,’_2’,‘.2’ to distinguish each locus pair. Genotype calls may include any text (numeric or character) except the numbers 1 and 0.</p>
 <p>Data may also be passed to BIGDAWG as an R object (dataframe) following the same formatting as above for text files. You may also choose to run a synthetic HLA data set (see below) to observe a typical BIGDAWG analysis and experiment with parameter settings.</p>
-<p>For HLA alleles, you may choose to format your genotype calls with our without the locus prefix. For example, for HLA-A, a given genotype call maybe 01:01:01:01 or A*01:01:01:01 or HLA-A*01:01:01:01. Allele names can include any level of resolution, from a single field up to the full length name. For HLA-DRB3,-DRB4,-DRB5 genotype calls, you may choose to represent these as a single pair of columns or as separate pairs of columns for each locus. However, when submitted as a single pair of columns, all genotypes must be formatted as Locus*Allele (including non-DRB loci). The single pair column names may be DRB345, DRB3.4.5 or DRB3/4/5. Homozygous or hemizygous status for DRB3, DRB4 and DRB5 genotypes is based on the DRB1 haplotype as defined by Andersson, 1998 (Andersson G. 1998. Evolution of the HLA-DR region. <a href="https://pubmed.ncbi.nlm.nih.gov/9675159/">Front Biosci. 3:d739-45</a>. If you wish to define your own zygosity, it is suggested you split them into separate pairs of columns for each locus manually.</p>
+<p>For HLA alleles, you may choose to format your genotype calls with our without the locus prefix. For example, for HLA-A, a given genotype call maybe 01:01:01:01 or A*01:01:01:01 or HLA-A*01:01:01:01. Allele names can include any level of resolution, from a single field up to the full length name. For HLA-DRB3,-DRB4,-DRB5 genotype calls, you may choose to represent these as a single pair of columns or as separate pairs of columns for each locus. However, when submitted as a single pair of columns, all genotypes must be formatted as Locus*Allele (including non-DRB loci). The single pair column names may be DRB345, DRB3.4.5 or DRB3/4/5. Homozygous or hemizygous status for DRB3, DRB4 and DRB5 genotypes is based on the DRB1 haplotype as defined by Andersson, 1998 (Andersson G. 1998. Evolution of the HLA-DR region. <a href="https://pubmed.ncbi.nlm.nih.gov/9675159/">Front Biosci. 3:d739-45</a>). If you wish to define your own zygosity, it is suggested you split them into separate pairs of columns for each locus manually.</p>
 <p><strong>Missing Information</strong><br />
 When there is missing information, either for lack of genotyping information or absence of genotyped loci, BIGDAWG allows for conventions to differentiate the type of data that is missing.</p>
 <p>Data missing due to lack of a molecular genotyping result is considered not available (NA). Acceptable NA strings include: NA, ****, -, na and Na. Empty data cells will be considered NA.</p>
@@ -339,9 +128,9 @@ BIGDAWG will accept novel allele names. However, it is suggested you follow the 
 <p><em>Genotype List String</em></p>
 <table>
 <colgroup>
-<col width="12%"></col>
-<col width="9%"></col>
-<col width="77%"></col>
+<col width="12%" />
+<col width="9%" />
+<col width="77%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -398,10 +187,10 @@ With the pararmeter “Return=T”, the result is returned as a list with indice
 </div>
 <div id="parameters" class="section level2">
 <h2>Parameters</h2>
-<p><code>BIGDAWG(Data, HLA=T, Run.Tests, Loci.Set, All.Pairwise=F, Trim=F, Res=2, Missing=0, Cores.Lim=1L, Results.Dir, Return=F, Output=T, Verbose=T)</code></p>
+<p><code>BIGDAWG(Data, HLA=T, Run.Tests, Loci.Set, All.Pairwise=F, Trim=F, Res=2, Missing=0, Strict.Bin=F, Cores.Lim=1L, Results.Dir, Return=F, Output=T, Verbose=T)</code></p>
 <p><strong>Data</strong></p>
 <p>Class: String. Required. No Default.</p>
-<p>e.g., <code>Data=&quot;HLA_data&quot;</code> -or- <code>Data=&quot;foo.txt&quot;</code>-or- <code>Data=foo</code></p>
+<p>e.g., <code>Data=HLA_data</code> -or- <code>Data=&quot;HLA_data&quot;</code> -or- <code>Data=&quot;foo.txt&quot;</code> -or- <code>Data=foo.txt</code></p>
 <p>Specifies genotype data file name. May use file name within working directory or full file name path to specify file location. See Data Input section for details about file formatting. Use ‘Data=HLA_data’ to analyze the bundled synthetic dataset.</p>
 <p><strong>HLA</strong></p>
 <p>Class: logical. Optional. Default = T.</p>
@@ -431,6 +220,9 @@ With the pararmeter “Return=T”, the result is returned as a list with indice
 <p><strong>Missing</strong></p>
 <p>Class: String/Numeric. Optional. Default = 0.</p>
 <p>Sets the allowable per subject threshold for missing alleles. Relevant to running the haplotype analysis. Effects can be disastrous on processing time and memory allocation for large values (&gt;2) of missing. Missing may be set as a number or as “ignore” to skip removal and retain all subjects. If you find BIGDAWG spending a lot time on the “Estimating Haplotypes…” step, reduced you missing to a value less than or equal to 2.</p>
+<p><strong>Strict.Bin</strong></p>
+<p>Class: Logical. Optional. Default = FALSE.</p>
+<p>Sets whether strict binning should be used during Chi Square testing. Strict binning (Strict.Bin = T) will bin all rare cells (expected count &lt; 5). Otherwise, BIGDAWG will allow for up to 20% of the cells to have expected counts less than 5. Currently limited to the H, L, and A tests. This may rescue haplotypes/alleles/amino acids from binning and help identify significant loci/alleles.</p>
 <p><strong>Cores.Lim</strong></p>
 <p>Class: Integer. Optional. Default = 1 Core.</p>
 <p>Specifies the number of cores accessible by BIGDAWG in amino acid analysis. Not relevant to Windows operating systems which will use only a single core. More than 1 core is best when optioned in command line R and is not recommend when used in combination with a GUI, e.g. RStudio.</p>
@@ -478,7 +270,7 @@ BD &lt;- BIGDAWG(Data=&quot;data.txt&quot;, Output=F, Return=T, Verbose=F)
 </div>
 <div id="updating-the-bundled-imgthla-protein-alignment" class="section level2">
 <h2>Updating the bundled IMGT/HLA protein alignment</h2>
-<p>For the amino acid analysis, BIGDAWG is bundled with HLA protein alignment data using theabove indicated database release. These bundled alignments can be updated to the most recent release <a href="https://www.ebi.ac.uk/ipd/imgt/hla/">IPD-IMGT/HLA</a>. Future database updates do not guarantee compatibility with the updating tool.</p>
+<p>For the amino acid analysis, BIGDAWG is bundled with HLA protein alignment data using theabove indicated database release. These bundled alignments can be updated to the most recent release <a href="https://www.ebi.ac.uk/ipd/imgt/hla">IMGT/HLA</a>. Future database updates do not guarantee compatability with the updating tool.</p>
 <pre><code># Identify the installed and current release of the bundled IMGT/HLA database release
 # Requires active internet connection.
 CheckRelease()
@@ -495,7 +287,7 @@ UpdateRelease(Restore=T)</code></pre>
 </div>
 <div id="updating-bigdawg-to-latest-developmental-versions" class="section level2">
 <h2>Updating BIGDAWG to latest developmental versions</h2>
-<p>Developmental versions of BIGDAWG can be downloaded through <a href="https://github.com/IgDAWG/BIGDAWG/">GitHub</a> or using the following code (requires R package ‘devtools’). These versions will include the most up-to-date bug fixes as well as access to new features that are still under development. GitHub versions are constantly under development and if you prefer a more stable fixed release, install BIGDAWG from the CRAN respository. You may check BIGDAWG versions using CheckRelease(). Local builing of vignettes requires pandoc and pandoc-citeproc if you do not use RStudio <a href="https://pandoc.org/installing.html">Pandoc</a>. Before installation from GitHub, it is recommended that all other R packages be up to date. May require a R/Rstudio close and restart.</p>
+<p>Developmental versions of BIGDAWG can be downloaded through <a href="https://github.com/IgDAWG/BIGDAWG/">GitHub</a> or using the following code (requires R package ‘devtools’). These versions will include the most up-to-date bug fixes as well as access to new features that are still under development. GitHub versions are constantly under development and if you prefer a more stable fixed release, install BIGDAWG from the CRAN respository. You may check BIGDAWG versions using CheckRelease(). Local builing of vignettes requires pandoc and pandoc-citeproc if you do not use RStudio <a href="https://pandoc.org/installing.html">Pandoc</a>. Before installation from GitHub, it is recommended that all other R packages be up to date.</p>
 <pre><code># Identify the installed (local), release (CRAN), and developmental (GitHub) versions of BIGDAWG.
 # Requires active internet connection.
 CheckRelease()

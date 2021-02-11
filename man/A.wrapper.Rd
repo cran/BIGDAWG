@@ -9,10 +9,9 @@ A.wrapper(
   loci.ColNames,
   genos,
   grp,
-  nGrp0,
-  nGrp1,
   EPL,
   Cores,
+  Strict.Bin,
   Output,
   Verbose
 )
@@ -26,13 +25,11 @@ A.wrapper(
 
 \item{grp}{Case/Control or Phenotype groupings.}
 
-\item{nGrp0}{Number of controls.}
-
-\item{nGrp1}{Number of cases.}
-
 \item{EPL}{Exon protein alignment.}
 
 \item{Cores}{Number of cores to use for analysis.}
+
+\item{Strict.Bin}{Logical specify if strict rare cell binning should be used in ChiSq test}
 
 \item{Output}{Data return carryover from main BIGDAWG function}
 

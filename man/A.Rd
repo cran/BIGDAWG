@@ -4,7 +4,7 @@
 \alias{A}
 \title{Amino Acid Analysis Function}
 \usage{
-A(Locus, loci.ColNames, genos, grp, nGrp0, nGrp1, ExonAlign, Cores)
+A(Locus, loci.ColNames, genos, grp, Strict.Bin, ExonAlign, Cores)
 }
 \arguments{
 \item{Locus}{Locus being analyzed.}
@@ -15,9 +15,7 @@ A(Locus, loci.ColNames, genos, grp, nGrp0, nGrp1, ExonAlign, Cores)
 
 \item{grp}{Case/Control or Phenotype groupings.}
 
-\item{nGrp0}{Number of controls.}
-
-\item{nGrp1}{Number of cases.}
+\item{Strict.Bin}{Logical specify if strict rare cell binning should be used in ChiSq test.}
 
 \item{ExonAlign}{Exon protein alignment filtered for locus.}
 

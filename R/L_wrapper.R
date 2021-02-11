@@ -6,14 +6,11 @@
 #' @param loci.ColNames The column names of the loci being analyzed.
 #' @param genos Genotype table
 #' @param grp Case/Control or Phenotype groupings.
-#' @param nGrp0 Number of controls
-#' @param nGrp1 Number of cases
+#' @param Strict.Bin Logical specify if strict rare cell binning should be used in ChiSq test
 #' @param Output Data return carryover from main BIGDAWG function
 #' @param Verbose Summary display carryover from main BIGDAWG function
 #' @note This function is for internal BIGDAWG use only.
-#' @importFrom utils write.table
-#' @export
-L.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,Output,Verbose) {
+L.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,Strict.Bin,Output,Verbose) {
 
   cat("\n>>>> STARTING LOCUS LEVEL ANALYSIS...\n")
 
@@ -29,7 +26,7 @@ L.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,Output,Verb
     Locus <- loci[j]
 
     # Run Locus Level Analysis
-    L.list <- L(loci.ColNames,Locus,genos,grp,nGrp0,nGrp1)
+    L.list <- L(loci.ColNames,Locus,genos,grp,Strict.Bin)
 
     # Build Output Lists
     Allele.binned[[Locus]] <- L.list[['binned']]
@@ -58,7 +55,7 @@ L.wrapper <- function(nloci,loci,loci.ColNames,genos,grp,nGrp0,nGrp1,Output,Verb
 
     cat("> LOCUS LEVEL ANALYSIS COMPLETED","\n")
   if(Verbose) {
-    print(Out[['CS']],row.names=F)
+    print(as.data.frame(Out[['CS']]),row.names=F)
     cat("\n")
   }
 

@@ -4,12 +4,10 @@
 \alias{HWE}
 \title{Hardy Weinbergy Equilibrium Function}
 \usage{
-HWE(Tab, All.ColNames)
+HWE(Tab)
 }
 \arguments{
 \item{Tab}{data frame of genotype files post processing.}
-
-\item{All.ColNames}{character vector of Tab object column names.}
 }
 \description{
 This is the main function for the HWE analysis.

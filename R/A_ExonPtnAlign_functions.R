@@ -3,29 +3,28 @@
 #' Download Protein Alignment and Accessory Files
 #' @param Loci HLA Loci to be fetched. Limited Loci available.
 #' @note This function is for internal BIGDAWG use only.
-#' @importFrom utils write.table read.table download.file
-#' @export
 GetFiles <- function(Loci) {
   #downloads *_prot.txt alignment files
   #downloads hla_nom_p.txt file
-  #downloads hla.xml file
 
   # Get P-Groups Files
-  download.file("https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/wmda/hla_nom_p.txt",destfile="hla_nom_p.txt",method="libcurl")
+  download.file("ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/wmda/hla_nom_p.txt",destfile="hla_nom_p.txt",method="libcurl")
+
+  # Get Release Version
+  download.file("ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/release_version.txt",destfile="release_version.txt",method="libcurl")
+  Release <- read.table("release_version.txt",comment.char="",sep="\t")
+  Release <- apply(Release,MARGIN=1,FUN= function(x) gsub(": ",":",x))
+  RD <- unlist(strsplit(Release[2],split=":"))[2]
+  RV <- unlist(strsplit(Release[3],split=":"))[2]
+  write.table(c(RD,RV),file="Release.txt",quote=F,col.names=F,row.names=F)
+  file.remove("release_version.txt")
 
   # Get Locus Based Alignments
   for(i in 1:length(Loci)) {
     Locus <- Loci[i]
     FileName <- paste(Locus,"_prot.txt",sep="")
-    URL <- paste("https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/alignments/",FileName,sep="")
+    URL <- paste("ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/alignments/",FileName,sep="")
     download.file(URL,destfile = FileName,method="libcurl")
-
-    if (i==1) {
-      tmp <- read.table(FileName,fill=T,sep="\t",stringsAsFactors=F,row.names=NULL)
-      Release <- tmp[2,]
-      write.table(Release,file="Release.txt",sep="\t",col.names=F,row.names=F,quote=F)
-    }
-
   }
 
 }
@@ -36,7 +35,6 @@ GetFiles <- function(Loci) {
 #' @param x P group object from read.table command.
 #' @param Locus Locus to be filtered on.
 #' @note This function is for internal BIGDAWG use only.
-#' @export
 PgrpFormat <- function(x,Locus) {
 
   # Identify for Locus ... change necessary if DRB
@@ -70,7 +68,6 @@ PgrpFormat <- function(x,Locus) {
 #' @param x Allele of interest.
 #' @param y Formatted P groups.
 #' @note This function is for internal BIGDAWG use only.
-#' @export
 PgrpExtract <- function(x,y) {
   getRow <- grep(x,y[,'Allele'],fixed=T)
   if(length(getRow)>=1) {
@@ -85,7 +82,6 @@ PgrpExtract <- function(x,y) {
 #' @param Locus Locus alignment to be formatted.
 #' @param RefTab Reference exon protein information for alignment formatting.
 #' @note This function is for internal BIGDAWG use only.
-#' @export
 ExonPtnAlign.Create <- function(Locus,RefTab) {
 
   #########################################################################
@@ -105,37 +101,45 @@ ExonPtnAlign.Create <- function(Locus,RefTab) {
   Align <- read.table(Name,fill=T,header=F,sep="\t",stringsAsFactors=F,strip.white=T,colClasses="character")
 
   #Trim
-  Align <- as.matrix(Align[-c(1:5),]) #Remove Header
   Align <- as.matrix(Align[-nrow(Align),]) #Remove Footer
-  Align <- as.matrix(Align[-grep("\\|",Align[,1]),1]) #Remove Pipes
 
   #Begin Formatting
+  Align <- as.matrix(Align[-grep("\\|",Align[,1]),1]) #Remove Pipes
   Align[,1] <- sapply(Align[,1],FUN=sub,pattern=" ",replacement="~")
   Align[,1] <- sapply(Align[,1],FUN=gsub,pattern=" ",replacement="")
   Align <- strsplit(Align[,1],"~")
   Align <- as.matrix(do.call(rbind,Align))
 
-  #Adjust rows where Sequence column == Allele Name
+  #Adjust rows to blank where Sequence column == Allele Name
   Align[which(Align[,1]==Align[,2]),2] <- ""
 
   #Find start of repeating blocks
-  Start <- which(Align[,1]=="Prot")
+  Start <- which(Align[,1]=="Prot") + 1
   End <- c(Start[2:length(Start)] - 1,nrow(Align))
 
-  #Rearrange Imported Alignment, build Alignment Block file
-  Block <- Align[Start[1]:End[1],]
-  i=2
-  Block.size <- End[1]-Start[1]
-  while (i <= length(Start) ) {
-    if(End[i]-Start[i]==Block.size) { Block <- cbind(Block,Align[Start[i]:End[i],2]) }
-    i <- i + 1
+  #Rearrange Alignment, build Alignment Block file
+  Block.size <- End[1]-Start[1] + 1
+  Block <- mat.or.vec(nr=Block.size,nc=length(Start)+1)
+  for(i in 1:length(Start) ) {
+    if(i==1) {
+      Block[,1:2] <- Align[Start[i]:End[i],1:2]
+    } else {
+      putOrder <- match(Align[Start[i]:End[i],1],Block[,1])
+      Block[putOrder,i+1] <- Align[Start[i]:End[i],2]
+    }
+  }; rm(i)
+  Block[,2:ncol(Block)] <- apply(Block[,2:ncol(Block)],MARGIN=c(1,2),FUN=gsub,pattern=0,replacement="")
+
+  #Paste Sequence into Single Column -- Fill in gaps with * to make char lengths even
+  Block <- cbind(Block[,1],apply(Block[,2:ncol(Block)],MARGIN=1,paste,collapse=""))
+  Block.len <- max(as.numeric(sapply(Block[,2],FUN=nchar)))
+  for( i in 1:nrow(Block) ) {
+    Block.miss <- Block.len - nchar(Block[i,2])
+    if( Block.miss > 0 ) {
+      Block[i,2] <- paste(Block[i,2], paste(rep("*",Block.miss-1), collapse=""))
+    }
   }; rm(i)
 
-  #Remove first line with AA and Position Designations
-  Block <- Block[-1,]
-
-  #Paste Sequence into Single Column
-  Block <- cbind(Block[,1],apply(Block[,2:ncol(Block)],MARGIN=1,paste,collapse=""))
 
   #Split Allele name into separate Locus and Allele, Send Back to Align object
   AlignAlleles <- do.call(rbind,strsplit(Block[,1],"[*]"))
@@ -154,24 +158,32 @@ ExonPtnAlign.Create <- function(Locus,RefTab) {
   Align[1,1:4]  <- "RefSeq"
   rownames(Align) <- NULL
 
-  #Get Refence Exon Map
+  #Get Reference Exon Map
   RefExon <- RefTab[which(RefTab[,'Locus']==Locus),'Reference.Peptide']
   RefStart <- as.numeric(RefTab[which(RefTab[,'Locus']==Locus),'Reference.Start'])
   RefAllele <- RefTab[which(RefTab[,'Locus']==Locus),'Reference.Allele']
 
-  #Extract Exon Specific Location Based on RefExon
-  Estart <- as.numeric(regexpr(RefExon,Align[1,'Sequence']))
-  Eend <- (Estart + nchar(RefExon))-1
-  Align[,'Sequence'] <- substr(Align[,'Sequence'],Estart,Eend)
+  #Find Exon Specific Overlap Based on RefExon
+  Align.seq <- Align[1,'Sequence'] # map character positions
+  Align.map <- 1:nchar(Align.seq)
+  Align.map.rm <- unlist(gregexpr("\\.",Align.seq))
+  Align.map.sub <- setdiff(Align.map,Align.map.rm) # remap based on removed characters
+  Align.seq.sub <- gsub("\\.","",Align.seq)
 
-  #Split Sub Alignment into composite elements
-  Align.split <- sapply(Align[,'Sequence'],strsplit,split="*")
-  Align.split <- lapply(Align.split,function(x) c(x,rep("-",nchar(RefExon)-length(x))))
+  Start.sub <- unlist(gregexpr(RefExon,Align.seq.sub))
+  End.sub <- Start.sub + nchar(RefExon) - 1
+  getMap <- Align.map.sub[Start.sub:End.sub]
+  Exon.start <- min(getMap)
+  Exon.end <- max(getMap)
+
+  #Split Sub Alignment into composite elements and Extract relavent positions
+  Align.split <- strsplit(Align[,'Sequence'],"")
   Align.split <- do.call(rbind,Align.split)
-  rownames(Align.split) <- NULL
+  Align.split <- Align.split[,Exon.start:Exon.end]
 
   AlignMatrix <- cbind(Align[,1:4],Align.split)
-  colnames(AlignMatrix) <- c("Locus","Allele","Trimmed","FullName",paste("Position",seq(RefStart,ncol(AlignMatrix[,5:ncol(AlignMatrix)])+RefStart-1),sep="."))
+  colnames(AlignMatrix) <- c("Locus","Allele","Trimmed","FullName",paste("Position",seq(RefStart,ncol(AlignMatrix[,5:ncol(AlignMatrix)]) + RefStart - 1),sep="."))
+  rownames(AlignMatrix) <- NULL
 
   #Propagate Consensus Positions
   for(i in 5:ncol(AlignMatrix)) {
@@ -220,7 +232,6 @@ ExonPtnAlign.Create <- function(Locus,RefTab) {
 #' @param Release IMGT/HLA database release version.
 #' @param RefTab Data of reference exons used for protein alignment creation.
 #' @note This function is for internal BIGDAWG use only.
-#' @export
 AlignObj.Create <- function(Loci,Release,RefTab) {
 
   AlignMatrix <- NULL; rm(AlignMatrix)
@@ -232,7 +243,9 @@ AlignObj.Create <- function(Loci,Release,RefTab) {
     load(FileName) #Loads AlignMatrix
     ExonPtnList[[Locus]] <- AlignMatrix
   }
-  ExonPtnList[['Release']] <- Release
+
+  ExonPtnList[['Release.Version']] <- as.character(Release[2,])
+  ExonPtnList[['Release.Date']] <- as.character(Release[1,])
   ExonPtnList[['RefExons']] <- RefTab
   save(ExonPtnList,file="ExonPtnAlign.obj")
 
@@ -245,7 +258,6 @@ AlignObj.Create <- function(Loci,Release,RefTab) {
 #' @param Release IMGT/HLA database release version.
 #' @param RefTab Data of reference exons used for protein alignment creation.
 #' @note This function is for internal BIGDAWG use only.
-#' @export
 AlignObj.Update <- function(Loci,Release,RefTab) {
 
   AlignMatrix <- NULL; rm(AlignMatrix)
@@ -262,5 +274,3 @@ AlignObj.Update <- function(Loci,Release,RefTab) {
   save(UpdatePtnList,file="UpdatePtnAlign.RData")
 
 }
-
-# last update: 06/22/18

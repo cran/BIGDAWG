@@ -14,7 +14,7 @@ Check.Data(Data, System, Convert)
 \item{Convert}{String Direction for conversion.}
 }
 \description{
-Check data structure for successfuly conversion.
+Check data structure for successful conversion.
 }
 \note{
 This function is for internal use only.

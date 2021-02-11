@@ -12,6 +12,7 @@ H.MC.wrapper(
   genos,
   grp,
   All.Pairwise,
+  Strict.Bin,
   Output,
   Verbose,
   Cores
@@ -31,6 +32,8 @@ H.MC.wrapper(
 \item{grp}{Case/Control or Phenotype groupings.}
 
 \item{All.Pairwise}{Haplotype argument carryover from main BIGDAWG function}
+
+\item{Strict.Bin}{Logical specify if strict rare cell binning should be used in ChiSq test}
 
 \item{Output}{Data return carryover from main BIGDAWG function}
 
