@@ -9,6 +9,7 @@ BIGDAWG(
   HLA = TRUE,
   Run.Tests,
   Loci.Set,
+  Exon,
   All.Pairwise = FALSE,
   Trim = FALSE,
   Res = 2,
@@ -31,6 +32,8 @@ BIGDAWG(
 \item{Run.Tests}{Specifics which tests to run.}
 
 \item{Loci.Set}{Input list defining which loci to use for analyses (combinations permitted).}
+
+\item{Exon}{Numeric Exon(s) for targeted amino acid analysis.}
 
 \item{All.Pairwise}{Logical indicating whether all pairwise loci should be analyzed in haplotype analysis.}
 
@@ -60,6 +63,7 @@ BIGDAWG(
 This is the main wrapper function for each analysis.
 }
 \examples{
+\dontrun{
 ### The following examples use the synthetic data set bundled with BIGDAWG
 
 # Haplotype analysis with no missing genotypes for two loci sets
@@ -73,4 +77,5 @@ This is the main wrapper function for each analysis.
 # Hardy-Weinberg analysis trimming data to 2-Field resolution with no output to files (console only)
 # Significant locus deviation at DQB1
 BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2, Output=FALSE)
+}
 }

@@ -199,7 +199,7 @@ RunChiSq <- function(x) {
     chisq.out <- list(Matrix = NA,
                       Binned = NA,
                       Test = tmp.chisq,
-                      Flag = NA)
+                      Flag = FALSE)
 
   } else {
 
@@ -228,11 +228,16 @@ RunChiSq <- function(x) {
       # True = OK ; False = Not good for Chi Square
       ExpCnts <- chisq.test(New.df)$expected
       if(sum(ExpCnts<5)==0){
-        flag <- FALSE
-      } else if( sum(ExpCnts<5)/sum(ExpCnts>=0)<=0.2 && sum(ExpCnts>=1)>length(ExpCnts) ){
-        flag <- FALSE
-      } else {
+        # all expected are greater than 5
         flag <- TRUE
+      } else if( sum(ExpCnts<5)/sum(ExpCnts>=0)<=0.2 && sum(ExpCnts>=1)==length(ExpCnts) ){
+        # expected counts < 5 are greater than or equal to 20% of cells
+        # all individual counts are >= 1
+        flag <- TRUE
+      } else {
+        # else flag contingency table
+        # invalid
+        flag <- FALSE
       }
 
       ## chi square test on binned data
@@ -255,13 +260,12 @@ RunChiSq <- function(x) {
 
     } else {
 
-      flag <- TRUE
       tmp.chisq <- data.frame(rbind(rep("NCalc",4)))
       colnames(tmp.chisq) <- c("X.square", "df", "p.value", "sig")
       chisq.out <- list(Matrix = New.df,
                         Binned = binned,
                         Test = tmp.chisq,
-                        Flag = flag)
+                        Flag = FALSE)
 
     }
 
@@ -302,7 +306,7 @@ RunChiSq_c <- function(x) {
     chisq.out <- list(Matrix = NA,
                       Binned = NA,
                       Test = tmp.chisq,
-                      Flag = NA)
+                      Flag = FALSE)
 
   } else {
 
@@ -353,7 +357,7 @@ RunChiSq_c <- function(x) {
         putBinned <- Rare.cells.rows[seq(i,length(Rare.cells.rows))]
 
         # binning must be more than 1 row
-        if(length(putBinned)==1) {
+        if( length(putBinned)==1 ) {
           putBinned <- c(getRescued[length(getRescued)],putBinned)
           getResuced <- getRescued[-length(getRescued)]
         }
@@ -413,7 +417,7 @@ RunChiSq_c <- function(x) {
     # Check if rescued cell expected counts overlap binned expected counts
     if(Check.Rebinned) {
 
-      # Exist if check.rebinned = T
+      # If check.rebinned = T
       # getRescued = rescued rows ... can be 1 row
       # putBinned = binned rows ... must be greater than 1 row
 
@@ -434,26 +438,10 @@ RunChiSq_c <- function(x) {
 
       if ( length(rebin.hits)>0 ) {
 
-        putBinned <- sort(c(putBinned, getRescued[rebin.hits]))
-        getRescued <- getRescued[-rebin.hits]
-
-        if ( length(getRescued)==0 ) {
-
-          # No rescuing possible, bin all rare cell containing rows
-          binned <- x.sub[Rare.cells.rows,]
-          rownames(binned) <- rownames(x.sub)[Rare.cells.rows]
-
-          #Reset unbinned
-          unbinned <- unbinned.tmp
-
-        } else {
-
-          # Overlap in expected counts identified
-          # Rebin rows based on playing no favorites
-          binned <- x.sub[putBinned,]
-          rownames(binned) <- rownames(x.sub)[putBinned]
-
-        }
+        rebin.names <- names(rescue.expcnts[rebin.hits])
+        rebin.rows <- which((row.names(unbinned) %in% rebin.names)==T)
+        binned <- rbind(binned,unbinned[rebin.rows,,drop=F])
+        unbinned <- unbinned[-rebin.rows,]
 
       }
 
@@ -482,17 +470,22 @@ RunChiSq_c <- function(x) {
     putOrder <- order(row.names(New.df))
     New.df <- New.df[putOrder,]
 
+
     if(nrow(New.df)>1) {
 
+      ExpCnts <- chisq.test(New.df)$expected
       # flag if final matrix fails Cochran's rule of thumb (more than 20% of exp cells are less than 5)
       # True = OK ; False = Not good for Chi Square
-      ExpCnts <- chisq.test(New.df)$expected
       if(sum(ExpCnts<5)==0){
-        flag <- FALSE
-      } else if( sum(ExpCnts<5)/length(ExpCnts)<=0.2 && sum(ExpCnts>=1)==length(ExpCnts) ){
-        flag <- FALSE
-      } else {
+        # all expected are greater than 5
         flag <- TRUE
+      } else if( sum(ExpCnts<5)/sum(ExpCnts>=0)<=0.2 && sum(ExpCnts>=1)==length(ExpCnts) ){
+        # expected counts < 5 are greater than or equal to 20%
+        # all individual counts are >= 1
+        flag <- TRUE
+      } else {
+        # else flag contingency table
+        flag <- FALSE
       }
 
       ## chi square test on binned data
@@ -515,13 +508,13 @@ RunChiSq_c <- function(x) {
 
     } else {
 
-      flag <- TRUE
+      flag <- FALSE
       tmp.chisq <- data.frame(rbind(rep("NCalc",4)))
       colnames(tmp.chisq) <- c("X.square", "df", "p.value", "sig")
       chisq.out <- list(Matrix = New.df,
                         Binned = binned,
                         Test = tmp.chisq,
-                        Flag = flag)
+                        Flag = FALSE)
     }
 
 

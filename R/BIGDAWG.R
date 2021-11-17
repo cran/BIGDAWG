@@ -5,6 +5,7 @@
 #' @param HLA Logical Indicating whether data is HLA class I/II genotyping data only.
 #' @param Run.Tests Specifics which tests to run.
 #' @param Loci.Set Input list defining which loci to use for analyses (combinations permitted).
+#' @param Exon Numeric Exon(s) for targeted amino acid analysis.
 #' @param All.Pairwise Logical indicating whether all pairwise loci should be analyzed in haplotype analysis.
 #' @param Trim Logical indicating if HLA alleles should be trimmed to a set resolution.
 #' @param Res Numeric setting what desired resolution to trim HLA alleles.
@@ -18,6 +19,7 @@
 #' @param Merge.Output Logical Should analysis results be merged into a single file for easy access.
 #' @param Verbose Logical Should a summary of each analysis be displayed in console.
 #' @examples
+#' \dontrun{
 #' ### The following examples use the synthetic data set bundled with BIGDAWG
 #'
 #' # Haplotype analysis with no missing genotypes for two loci sets
@@ -31,7 +33,8 @@
 #' # Hardy-Weinberg analysis trimming data to 2-Field resolution with no output to files (console only)
 #' # Significant locus deviation at DQB1
 #' BIGDAWG(Data="HLA_data", Run.Tests="HWE", Trim=TRUE, Res=2, Output=FALSE)
-BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Trim=FALSE, Res=2, EVS.rm=FALSE, Missing=2, Strict.Bin=FALSE, Cores.Lim=1L, Results.Dir, Return=FALSE, Output=TRUE, Merge.Output=FALSE, Verbose=TRUE) {
+#' }
+BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, Exon, All.Pairwise=FALSE, Trim=FALSE, Res=2, EVS.rm=FALSE, Missing=2, Strict.Bin=FALSE, Cores.Lim=1L, Results.Dir, Return=FALSE, Output=TRUE, Merge.Output=FALSE, Verbose=TRUE) {
 
   options(warn=-1)
 
@@ -40,7 +43,8 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
 
   # CHECK PARAMETERS
   if( missing(Data) ) { Err.Log("P.Missing","Data") ; stop("Analysis Stopped.",call.=FALSE) }
-  Check.Params(HLA,All.Pairwise,Trim,Res,EVS.rm,Missing,Cores.Lim,Return,Output,Merge.Output,Verbose)
+  HLA <- as.logical(HLA)
+  Check.Params(HLA, Loci.Set, Exon, All.Pairwise, Trim, Res, EVS.rm, Missing, Cores.Lim, Return, Output, Merge.Output, Verbose)
 
   # MULTICORE LIMITATIONS
   Cores <- Check.Cores(Cores.Lim,Output)
@@ -68,7 +72,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
 
     } else {
 
-      # Read in data file
+      # Read in data file entered as string
       if(!file.exists(Data)) { Err.Log(Output,"Bad.Filename", Data) ; stop("Analysis stopped.",call.=F) }
       Tab <- read.table(Data, header = T, sep="\t", stringsAsFactors = F, na.strings=NAstrings, fill=T, comment.char = "#", strip.white=T, blank.lines.skip=T, colClasses="character")
       Data.Flag <- Data
@@ -79,7 +83,13 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
 
     # Using R object
     Tab <- Data
-    Data.Flag <- "R Data Object"
+    Data.Flag <- deparse(substitute(Data))
+
+    # Convert Empty Cells to NA
+    for ( i in 3:ncol(Tab) ) {
+      putCell <- which( sapply( Tab[,i], nchar )==0 )
+      if( length(putCell) > 0 ) { Tab[putCell,i] <- NA }
+    }
 
   }
 
@@ -118,7 +128,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
   Data.Col <- seq(3,ncol(Tab))
 
   # RUN TESTS DEFINITIONS
-  if (missing(Run.Tests)) { Run <- c("HWE","H","L","A") } else { Run <- Run.Tests }
+  if ( missing(Run.Tests) ) { Run <- c("HWE","H","L","A") } else { Run <- Run.Tests }
   if(!HLA) {
     if("A" %in% Run) {
       cat("Not HLA data. Skipping Amino Acid Analysis.\n")
@@ -191,7 +201,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
 
     # Check Locus*Allele Formatting across all loci
     CheckCol <- sum( unlist( apply(Tab[,Data.Col], MARGIN=c(1,2), FUN = function(x) grepl("\\*",na.omit(x))) ) )
-    TotalCol <-  ( dim(Tab[,Data.Col])[1] * dim(Tab[,Data.Col])[2] ) - length(which(Tab[,Data.Col]=="^")) - sum(is.na(Tab[,Data.Col]))
+    TotalCol <-  ( dim(Tab[,Data.Col])[1] * dim(Tab[,Data.Col])[2] ) - ( length(which(Tab[,Data.Col]=="^")) + sum(is.na(Tab[,Data.Col])) )
 
     if( CheckCol>0 && CheckCol!=TotalCol ) {
       Err.Log(Output,"Bad.Format.HLA")
@@ -239,7 +249,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     # Separate locus and allele names if data is formatted as Loci*Allele
     Tab[,Data.Col] <- apply(Tab[,Data.Col],MARGIN=c(1,2),FUN=Stripper)
 
-    # Sanity Check for Resoltion if Trim="T" and Trim Data
+    # Sanity Check for Resolution if Trim="T" and Trim Data
     if(Trim & CheckHLA(Tab[,Data.Col])) {
       cat("--Trimming Data.\n")
       #Tab.untrim <- Tab
@@ -250,7 +260,7 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
       stop("Analysis Stopped.",call. = F)
     }
 
-    # Sanity Check for Expresion Variant Suffix Stripping
+    # Sanity Check for Expression Variant Suffix Stripping
     if(EVS.rm & CheckHLA(Tab[,Data.Col])) {
       cat("--Stripping Expression Variants Suffixes.\n")
       Tab[,Data.Col] <- apply(Tab[,Data.Col],MARGIN=c(1,2),gsub,pattern="[[:alpha:]]",replacement="")
@@ -267,15 +277,15 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
 
       cat("Running Amino Acid Analysis specific checks functions...\n")
 
-      Release <- as.character(unlist(EPL[['Release']]))
+      Release <- EPL$Release.Version
 
       # Sanity Check for Known HLA loci in Bundled Database Release
-      cat(paste("--Checking loci against ",Release,".\n",sep=""))
+      cat(paste("--Checking loci against database version",Release,".\n",sep=""))
       test <- CheckLoci(names(EPL),unique(colnames(Tab)[Data.Col]))
       if( test$Flag  ) { Err.Log(Output,"Bad.Locus.HLA",test$Loci) ; stop("Analysis stopped.",call. = F) }
 
       # Sanity Check for Known HLA alleles in Bundled Database Release
-      cat(paste("--Checking alleles against ",Release,".\n",sep=""))
+      cat(paste("--Checking alleles against database version",Release,".\n",sep=""))
       test <- CheckAlleles(EPL, Tab[,Data.Col])
       if( test$Flag ) { Err.Log(Output,"Bad.Allele.HLA",test$Alleles) ; stop("Analysis stopped.",call. = F) }
 
@@ -290,9 +300,8 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
 
   } # End HLA if statement and HLA specific functionalities
 
-
   # LOCI SET COLUMN DEFINITIONS
-  # This MUST follow DRB345 processing on the chance that DRB345 is formatted as single column
+  # This section MUST follow DRB345 processing (above) on the chance that DRB345 is formatted as single column
   # and DRB3, DRB4, or DRB5 is defined in Loci.Set.
   if(missing(Loci.Set)) {
     Set <- list(Data.Col)
@@ -300,6 +309,14 @@ BIGDAWG <- function(Data, HLA=TRUE, Run.Tests, Loci.Set, All.Pairwise=FALSE, Tri
     Loci.Set <- lapply(Loci.Set,FUN=function(x) sapply(x,toupper))
     Set <- lapply(Loci.Set,FUN=function(x) seq(1,ncol(Tab))[colnames(Tab) %in% x])
   }
+
+  # LOCUS SET DEFINED DOES NOT EXIST IN DATA
+  if(!missing(Loci.Set)) {
+    Loci.Set <- unique(unlist(Loci.Set))
+    Loci.Data <- colnames(Tab)[Data.Col]
+    if ( sum(Loci.Set %in% Loci.Data) != length(Loci.Set) ) { Err.Log(Output,"PhantomSets") ; stop("Analysis Stopped.",call. = F) }
+  }
+
 
 # ===================================================================================================================================== ####
 # Case-Control Summary ________________________________________________________________________________________________________________ ####
@@ -320,6 +337,7 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
     if(HLA) { Trim.tmp <- Trim } else { Trim.tmp <- NULL }
     if(HLA && Trim) { Res.tmp <- Res } else { Res.tmp <- NULL }
     if(HLA) { EVS.rm.tmp <- EVS.rm } else { EVS.rm.tmp <- NULL }
+    if( !missing(Exon) ) { Exon.tmp <- paste(unique(unlist(Exon)),collapse=",") } else { Exon.tmp <- NULL }
 
     Params.Run <- list(Time = format(Sys.time(), "%a %b %d %X %Y"),
                        BD.Version = as.character(packageVersion("BIGDAWG")),
@@ -330,6 +348,7 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
                        Return.Object = Return,
                        Display.Results = Verbose,
                        HLA.Data = HLA,
+                       Exon = Exon.tmp,
                        DRB345.Parsed = DRB345.tmp,
                        Tests = paste(Run,collapse=","),
                        All.Pairwise = All.Pairwise,
@@ -370,7 +389,7 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
 
     cat("\n>>>>>>>>>>>>>>>>>>>>>>>>> Begin Locus Sets <<<<<<<<<<<<<<<<<<<<<<<<<\n\n")
     if(length(Set)==1) {
-      cat("Your analysis has a 1 set to analyze.\n")
+      cat("Your analysis has 1 set to analyze.\n")
     } else {
       cat(paste("Your analysis has ", length(Set), " sets to analyze.", sep=""),"\n")
     }
@@ -467,7 +486,7 @@ if(Output) { write.table(Check,file="Data_Summary.txt",sep=": ",col.names=F,row.
 
           if(UPL.flag) { cat("Using updated protein exon alignments for amino acid analysis.\n") }
 
-          A.list <- A.wrapper(loci,loci.ColNames,genos,grp,EPL,Cores,Strict.Bin,Output,Verbose)
+          A.list <- A.wrapper(loci,loci.ColNames,genos,grp,Exon,EPL,Cores,Strict.Bin,Output,Verbose)
 
           if(Output) {
             ## write to file

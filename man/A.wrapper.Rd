@@ -9,6 +9,7 @@ A.wrapper(
   loci.ColNames,
   genos,
   grp,
+  Exon,
   EPL,
   Cores,
   Strict.Bin,
@@ -25,7 +26,9 @@ A.wrapper(
 
 \item{grp}{Case/Control or Phenotype groupings.}
 
-\item{EPL}{Exon protein alignment.}
+\item{Exon}{Exon(s)for targeted analysis.}
+
+\item{EPL}{Protein Alignment List.}
 
 \item{Cores}{Number of cores to use for analysis.}
 

@@ -2,24 +2,28 @@
 #'
 #' Check input parameters for invalid entries.
 #' @param HLA Logical indicating whether data is HLA class I/II genotyping data only.
+#' @param Loci.Set Input list defining which loci to use for analyses (combinations permitted).
+#' @param Exon Numeric Exon(s) for targeted amino acid analysis.
 #' @param All.Pairwise Logical indicating whether all pairwise loci should be analyzed in haplotype analysis.
 #' @param Trim Logical indicating if HLA alleles should be trimmed to a set resolution.
 #' @param Res Numeric setting what desired resolution to trim HLA alleles.
 #' @param EVS.rm Logical indicating if expression variant suffixes should be removed.
 #' @param Missing Numeric setting allowable missing data for running analysis (may use "ignore").
-#' @param Cores.Lim Interger setting the number of cores accessible to BIGDAWG (Windows limit is 1 core).
+#' @param Cores.Lim Integer setting the number of cores accessible to BIGDAWG (Windows limit is 1 core).
 #' @param Return Logical Should analysis results be returned as list.
 #' @param Output Logical Should analysis results be written to output directory.
 #' @param Merge.Output Logical Should analysis results be merged into a single file for easy access.
 #' @param Verbose Logical Should a summary of each analysis be displayed in console.
 #' @note This function is for internal use only.
-Check.Params <- function (HLA,All.Pairwise,Trim,Res,EVS.rm,Missing,Cores.Lim,Return,Output,Merge.Output,Verbose) {
+Check.Params <- function (HLA,Loci.Set,Exon,All.Pairwise,Trim,Res,EVS.rm,Missing,Cores.Lim,Return,Output,Merge.Output,Verbose) {
 
   # Logicals: HLA=TRUE, All.Pairwise=FALSE, EVS.rm=FALSE, Trim=FALSE, Return=FALSE, Merge.FALSE, Verbose=TRUE, TRUE,
   # Numerics: Res=2, Missing=2, Cores.Lim=1L
   # Untested: Data, Results.Dir, Run.Tests, Loci.Set
 
-  if( !is.logical(HLA) ) { Err.Log(FALSE,"P.Error","HLA") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( is.na(as.logical(HLA)) ) { Err.Log(FALSE,"P.Error","HLA") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !missing(Loci.Set) && !is.list(Loci.Set) ) { Err.Log(FALSE,"P.Error","Loci.Set") ; stop("Analysis Stopped.",call.=FALSE) }
+  if( !missing(Exon) && !is.numeric(Exon) ) { Err.Log(FALSE,"P.Error","Exon") ; stop("Analysis Stopped.",call.=FALSE) }
   if( !is.logical(All.Pairwise) ) { Err.Log(FALSE,"P.Error","All.Pairwise") ; stop("Analysis Stopped.",call.=FALSE) }
   if( !is.logical(EVS.rm) ) { Err.Log(FALSE,"P.Error","EVS.rm") ; stop("Analysis Stopped.",call.=FALSE) }
   if( !is.logical(Trim) ) { Err.Log(FALSE,"P.Error","Trim") ; stop("Analysis Stopped.",call.=FALSE) }
@@ -29,7 +33,6 @@ Check.Params <- function (HLA,All.Pairwise,Trim,Res,EVS.rm,Missing,Cores.Lim,Ret
   if( !is.logical(Output) ) { Err.Log(FALSE,"P.Error","Output") ; stop("Analysis Stopped.",call.=FALSE) }
   if( !is.numeric(Res) ) { Err.Log(FALSE,"P.Error","Res") ; stop("Analysis Stopped.",call.=FALSE) }
   if( !is.numeric(Cores.Lim) && !is.integer(Cores.Lim) ) { Err.Log(FALSE,"P.Error","Cores.Lim") ; stop("Analysis Stopped.",call.=FALSE) }
-
   if( !is.numeric(Missing) ) { if(Missing!="ignore") { Err.Log(FALSE,"P.Error","Missing") ; stop("Analysis Stopped.",call.=FALSE) } }
 
 }
@@ -79,7 +82,7 @@ Check.Cores <- function(Cores.Lim,Output) {
 CheckHLA <- function(x) {
   #Return TRUE if properly formatted HLA
 
-  # temporary reassignment
+  # temporary reassignment for test
   x[is.na(x)] <- "00:00" # NA cells
   x[x=="^"] <- "00:00" # absent cells
   x[x==""] <- "00:00" # empty cells
@@ -266,24 +269,24 @@ PreCheck <- function(Tab,All.ColNames,rescall,HLA,Verbose,Output) {
   }
 
   if(HLA) {
-    Out <- list(SampleSize=nrow(Tab),
+    Out <- list(Sample.Size=nrow(Tab),
                    No.Controls=nGrp0,
                    No.Cases=nGrp1,
-                   AlleleCount=nrow(Tab)*2,
-                   TotalLoci=nLoci,
+                   Allele.Count=nrow(Tab)*2,
+                   Total.Loci=nLoci,
                    Loci=paste(Loci,collapse=", "),
                    AllelePerLocus=paste(nGTYPE,collapse=", "),
                    MissingPerLocus=paste(nMissing,collapse=", "),
                    MaxResGrp0=paste(Grp0res,"-Field",sep=""),
                    MaxResGrp1=paste(Grp1res,"-Field",sep=""),
-                   SuggestedRes=paste(min(Grp0res,Grp1res),"-Field",sep=""),
+                   Suggested.Res=paste(min(Grp0res,Grp1res),"-Field",sep=""),
                    SetRes=rescall)
   } else {
-    Out <- list(SampleSize=nrow(Tab),
+    Out <- list(Sample.Size=nrow(Tab),
                    No.Controls=nGrp0,
                    No.Cases=nGrp1,
-                   AlleleCount=nrow(Tab)*2,
-                   TotalLoci=nLoci,
+                   Allele.Count=nrow(Tab)*2,
+                   Total.Loci=nLoci,
                    Loci=paste(Loci,collapse=", "),
                    AllelePerLocus=paste(nGTYPE,collapse=", "),
                    MissingPerLocus=paste(nMissing,collapse=", "),
@@ -421,10 +424,17 @@ CheckRelease <- function(Package=T,Alignment=T,Output=F) {
     if(Alignment) {
 
       # Get IMGT Release Version
-      download.file("ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/release_version.txt",destfile="release_version.txt",method="libcurl")
-      Release <- read.table("release_version.txt",comment.char="",sep="\t")
-      Release <- apply(Release,MARGIN=1,FUN= function(x) gsub(": ",":",x))
-      RV.current <- unlist(strsplit(Release[3],split=":"))[2]
+
+      # release_version not updated consistently
+      #download.file("ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/release_version.txt",destfile="release_version.txt",method="libcurl")
+      #Release <- read.table("release_version.txt",comment.char="",sep="\t")
+      #Release <- apply(Release,MARGIN=1,FUN= function(x) gsub(": ",":",x))
+      #RV.current <- unlist(strsplit(Release[3],split=":"))[2]
+
+      URL=file("ftp://ftp.ebi.ac.uk/pub/databases/ipd/imgt/hla/Allele_status.txt",method=getOption("url.method", "libcurl"))
+      df <- read.table(URL,sep="\t",nrows=3,comment.char="")
+      df.v <- unlist(strsplit(df[3,],split=" "))
+      RV.current <- paste(df.v[3:4],collapse=" ")
 
       # Get BIGDAWG
       UPL <- paste(path.package('BIGDAWG'),"/data/UpdatePtnAlign.RData",sep="")
@@ -443,13 +453,13 @@ CheckRelease <- function(Package=T,Alignment=T,Output=F) {
     }
 
     cat("\n")
-    if(Package) { cat("BIGDAWG Versions:\n","Installed Version: ",CurrR,"\n CRAN Release Version: ",CranR,"\n Developmental version: ",GitHubR,"\n") }
+    if(Package) { cat("BIGDAWG Package Versions:\n","Installed Version: ",CurrR,"\n CRAN Release Version: ",CranR,"\n Developmental version: ",GitHubR,"\n") }
     if(Package & Alignment) { cat("\n") }
     if(Alignment) {
       if(UPL.flag) {
-        cat("IMGT/HLA Versions:\n","IMGT/HLA Version: ",RV.current,"\n Installed version (from update): ",RV.BIGDAWG,"\n")
+        cat("IMGT/HLA Versions:\n","IMGT/HLA Version: ",RV.current,"\n BIGDAWG version (from update): ",RV.BIGDAWG,"\n")
       } else {
-        cat("IMGT/HLA Versions:\n","IMGT/HLA Version: ",RV.current,"\n Installed version: ",RV.BIGDAWG,"\n")
+        cat("IMGT/HLA Versions:\n","IMGT/HLA Version: ",RV.current,"\n BIGDAWG version: ",RV.BIGDAWG,"\n")
       }
     }
     cat("\n")

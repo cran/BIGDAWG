@@ -40,7 +40,7 @@ L <- function(loci.ColNames,Locus,genos,grp,Strict.Bin) {
     ### get expected values for cells, bin small cells, and run chi square
     if(Strict.Bin) { Result <- RunChiSq(Allele.con) } else { Result <- RunChiSq_c(Allele.con) }
 
-    if( is.na(Result$Flag) ) {
+    if( !Result$Flag ) {
 
       alleles_binned <- NA
       Final_binned <- NA
@@ -58,6 +58,8 @@ L <- function(loci.ColNames,Locus,genos,grp,Strict.Bin) {
       ORout <- lapply(ccdat, cci.pval) #OR
       ORout <- do.call(rbind,ORout)
       colnames(ORout) <- c("OR","CI.lower","CI.upper","p.value","sig")
+      rmRows <- which(ORout[,'sig']=="NA")
+      if( length(rmRows > 0) ) {  ORout <- ORout[-rmRows,,drop=F] }
 
     }
 

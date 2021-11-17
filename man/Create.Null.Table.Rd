@@ -11,7 +11,7 @@ Create.Null.Table(Locus, Names, nr)
 
 \item{Names}{Column names for final matrix.}
 
-\item{nr}{Numebr of rows.}
+\item{nr}{Number of rows.}
 }
 \description{
 Creates matrix of NA for no result tables.

@@ -14,7 +14,7 @@ AlignObj.Create(Loci, Release, RefTab)
 \item{RefTab}{Data of reference exons used for protein alignment creation.}
 }
 \description{
-Synthesize Object for Exon Protein Alignments.
+Create Object for Exon Protein Alignments.
 }
 \note{
 This function is for internal BIGDAWG use only.

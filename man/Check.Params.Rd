@@ -6,6 +6,8 @@
 \usage{
 Check.Params(
   HLA,
+  Loci.Set,
+  Exon,
   All.Pairwise,
   Trim,
   Res,
@@ -21,6 +23,10 @@ Check.Params(
 \arguments{
 \item{HLA}{Logical indicating whether data is HLA class I/II genotyping data only.}
 
+\item{Loci.Set}{Input list defining which loci to use for analyses (combinations permitted).}
+
+\item{Exon}{Numeric Exon(s) for targeted amino acid analysis.}
+
 \item{All.Pairwise}{Logical indicating whether all pairwise loci should be analyzed in haplotype analysis.}
 
 \item{Trim}{Logical indicating if HLA alleles should be trimmed to a set resolution.}
@@ -31,7 +37,7 @@ Check.Params(
 
 \item{Missing}{Numeric setting allowable missing data for running analysis (may use "ignore").}
 
-\item{Cores.Lim}{Interger setting the number of cores accessible to BIGDAWG (Windows limit is 1 core).}
+\item{Cores.Lim}{Integer setting the number of cores accessible to BIGDAWG (Windows limit is 1 core).}
 
 \item{Return}{Logical Should analysis results be returned as list.}
 
